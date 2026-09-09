@@ -1,40 +1,532 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ABP — CMH Scientific Public Demo</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ABP — Using AI to Model a Biological Primitive</title>
 <style>
-:root{--bg:#050b12;--p:#0b1722;--ink:#eef8ff;--mut:#8ea7ba;--line:#1a3448;--a:#ff6b8b;--b:#65d8ff;--g:#8df5c1;--y:#ffd166;--vio:#a997ff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 15% 0,#14253d,#050b12 48%);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif}.wrap{max-width:1220px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;padding:14px 0 22px}.brand{font-weight:800;letter-spacing:.12em}.brand small{display:block;color:var(--mut);font-size:11px;letter-spacing:.2em}.tag{border:1px solid var(--line);border-radius:99px;padding:7px 10px;color:var(--a);font-size:12px}.hero{display:grid;grid-template-columns:.85fr 1.15fr;gap:18px}.card{background:linear-gradient(180deg,#101e2cdd,#0a1520ef);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.18)}h1{font-size:44px;line-height:1.01;letter-spacing:-.045em;margin:0 0 12px}.sub{font-size:17px;color:#b7c9d7}.trace{height:420px;border:1px solid #173047;background:linear-gradient(180deg,#07121c,#081722);border-radius:15px;overflow:hidden;position:relative}.trace canvas{width:100%;height:100%}.overlay{position:absolute;left:16px;right:16px;top:14px;display:flex;justify-content:space-between;color:#8ea7ba;font-size:11px}.pill{padding:5px 8px;border-radius:99px;background:#0e2030;border:1px solid #1b3b52}.controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:17px}.control{background:#08131d;border:1px solid #173047;border-radius:13px;padding:12px}.control label{display:flex;justify-content:space-between;color:#c9d9e5}.range{width:100%;accent-color:#ff6b8b;margin-top:8px}.btn{border:1px solid #314c60;background:#0a1621;color:white;padding:11px 14px;border-radius:11px;cursor:pointer;font-weight:750}.btn:hover{border-color:var(--a)}.result{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:15px}.kpi{background:#08131d;border:1px solid #173047;border-radius:12px;padding:12px}.kpi b{font-size:22px;display:block}.kpi span{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.1em}.primitive{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}.chip{border:1px solid #23425a;border-radius:10px;padding:8px 10px;background:#0a1722}.chip b{color:var(--b)}.support{display:flex;align-items:center;gap:12px;margin-top:15px}.gauge{flex:1;height:12px;border-radius:99px;background:#08131d;border:1px solid #173047;overflow:hidden}.gauge>div{height:100%;background:linear-gradient(90deg,#ff6b8b,#ffd166,#8df5c1);transition:.4s}.state{font-size:27px;font-weight:850;color:var(--g);letter-spacing:-.03em}.warning{border-left:3px solid var(--y);padding:10px 12px;background:#19180f;color:#e9dca9;border-radius:8px;margin-top:14px;font-size:12px}.facts{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.fact{background:#08131d;border:1px solid #173047;border-radius:12px;padding:13px}.fact b{font-size:20px}.fact span{display:block;color:var(--mut);font-size:10px;text-transform:uppercase;letter-spacing:.1em}.footer{margin:25px 0 5px;color:#6d8394;font-size:11px;display:flex;justify-content:space-between}@media(max-width:900px){.hero{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.result,.facts{grid-template-columns:1fr 1fr}h1{font-size:37px}.trace{height:350px}}
+:root{
+  --void:#03060b;
+  --haze:#0a1119;
+  --line:#1d2b38;
+  --text:#c8dce6;
+  --dim:#6c8493;
+  --core:#ffb03a;
+  --rim:#2fe3d6;
+  --marg:#a86bff;
+  --warn:#ff6b5e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--void);color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+#app{position:fixed;inset:0;display:grid;grid-template-columns:1fr 306px;gap:0}
+#stage{position:relative;overflow:hidden;background:#03060b}
+canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+canvas.drag{cursor:grabbing}
+.hud{position:absolute;left:20px;top:18px;max-width:30ch;pointer-events:none;z-index:2}
+.hud h1{font-size:14px;font-weight:500;letter-spacing:.01em;margin:0 0 5px;
+  text-shadow:0 1px 12px rgba(3,6,11,.9)}
+.hud p{margin:0;font-size:11.5px;line-height:1.5;color:var(--dim);
+  text-shadow:0 1px 10px rgba(3,6,11,.9)}
+.side{background:#060b12;border-left:1px solid var(--line);overflow-y:auto;
+  padding:18px 18px 24px;-webkit-overflow-scrolling:touch}
+.side h2{font-size:10.5px;font-weight:600;letter-spacing:.07em;color:var(--dim);
+  margin:0 0 12px}
+.side section+section{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;font:inherit;font-size:11.5px;padding:7px 4px;background:none;
+  color:var(--dim);border:1px solid var(--line);border-radius:3px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--rim);color:#03060b;border-color:var(--rim);
+  font-weight:600}
+.seg button:focus-visible{outline:1px solid var(--rim);outline-offset:2px}
+.legend div{font-size:11.5px;line-height:2;color:var(--text)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:9px;
+  vertical-align:middle;font-style:normal}
+.legend em{font-style:normal;color:var(--dim);font-size:10.5px;margin-left:6px}
+label{display:block;margin-bottom:15px}
+label .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+label .n{font-size:12.5px;color:var(--text)}
+label .v{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
+  font-variant-numeric:tabular-nums;color:var(--rim)}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:20px;background:none;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
+  border-radius:50%;background:var(--rim);margin-top:-6px;box-shadow:0 0 10px rgba(47,227,214,.6)}
+input[type=range]::-moz-range-track{height:2px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--rim);
+  border:none;box-shadow:0 0 10px rgba(47,227,214,.6)}
+input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
+.m{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:8px}
+.m span:last-child{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+.ground{margin-top:12px;padding:10px 12px;border-left:2px solid var(--dim);
+  background:rgba(255,255,255,.035);border-radius:2px}
+.ground .g1{font-size:12px;font-weight:600;margin-bottom:3px}
+.ground .g2{font-size:11px;line-height:1.45;color:var(--dim)}
+.cmp{width:100%;border-collapse:collapse;margin-top:12px;font-size:11px}
+.cmp th{font-weight:600;color:var(--dim);text-align:right;padding:0 0 6px 8px;font-size:10px;
+  line-height:1.25}
+.cmp th:first-child{text-align:left}
+.cmp td{padding:5px 0 5px 8px;text-align:right;border-top:1px solid var(--line);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+.cmp td:first-child{text-align:left;font-family:inherit;color:var(--text)}
+.cmp .win{color:#2fe3d6;font-weight:600}
+.cmp .lose{color:#ff4b3a;font-weight:600}
+.reveal{font-size:11px;line-height:1.5;color:var(--dim);margin:11px 0 0}
+.reveal b{color:var(--warn);font-weight:600}
+.reveal .a{color:var(--rim);font-weight:600}
+.note{font-size:10.5px;line-height:1.5;color:#4a5c68}
+@media(max-width:820px){
+  #app{grid-template-columns:1fr;grid-template-rows:minmax(300px,52vh) 1fr}
+  .side{border-left:none;border-top:1px solid var(--line)}
+  .hud{max-width:26ch}
+  .hud p{display:none}
+}
+@media(prefers-reduced-motion:reduce){canvas{animation:none}}
 </style>
-<style id="cmh-validation-style">
-.cmh-validation{max-width:1180px;margin:24px auto;padding:20px 22px;border:1px solid rgba(120,170,185,.28);border-radius:14px;background:rgba(7,18,24,.72);box-shadow:0 12px 34px rgba(0,0,0,.16);font-family:inherit}
-.cmh-validation h2{margin:0 0 6px;font-size:20px;letter-spacing:-.01em}
-.cmh-validation .cmh-v-sub{margin:0 0 14px;color:#91a8ae;font-size:12px;line-height:1.55}
-.cmh-validation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0 14px}
-.cmh-v-item{border:1px solid rgba(120,170,185,.18);border-radius:10px;padding:11px 12px;background:rgba(255,255,255,.025)}
-.cmh-v-item strong{display:block;font-size:12px;margin-bottom:5px;color:#d9f4ef}
-.cmh-v-item span{display:block;color:#9eb5ba;font-size:11px;line-height:1.5}
-.cmh-v-boundary{border-left:3px solid #4de5d0;padding:9px 11px;margin:10px 0 14px;background:rgba(77,229,208,.045);color:#a9c1c5;font-size:11px;line-height:1.55}
-.cmh-v-cites{border-top:1px solid rgba(120,170,185,.18);padding-top:11px;color:#829ba1;font-size:10px;line-height:1.55}
-.cmh-v-cites b{color:#a7bec3}
-.cmh-v-cites ol{margin:6px 0 0 18px;padding:0}
-.cmh-v-cites li{margin:4px 0}
-.cmh-v-cites a{color:#8fded4;text-decoration:none}
-.cmh-v-cites a:hover{text-decoration:underline}
-@media(max-width:650px){.cmh-validation{margin:18px 12px;padding:16px}.cmh-validation-grid{grid-template-columns:1fr}}
-</style>
-</head><body><div class="wrap"><div class="top"><div class="brand">CMH SCIENTIFIC<small>ABP · AI AS A BIOLOGICAL PRIMITIVE</small></div><div class="tag">PUBLIC DEMO · INDIVIDUAL-FIRST INTERROGATION</div></div>
-<div class="hero"><div class="card"><h1>Don’t begin with the average patient. Begin with <span style="color:var(--a)">this biological system.</span></h1><p class="sub">ABP treats the focal unit’s own states, perturbations, contexts and realized responses as the material basis of an intervention-facing artificial primitive. The question is not merely “what happens on average?” but “what response structure is supported for this individual?”</p>
-<div class="primitive"><span class="chip"><b>x</b> state</span><span class="chip"><b>u</b> intervention</span><span class="chip"><b>φ</b> context</span><span class="chip"><b>R</b> regime</span><span class="chip"><b>x*</b> target</span></div>
-<div class="controls"><div class="control"><label>Current state <b id="sv">58</b></label><input id="stateR" class="range" type="range" min="25" max="90" value="58"></div><div class="control"><label>Perturbation amplitude <b id="uv">42</b></label><input id="uR" class="range" type="range" min="0" max="100" value="42"></div><div class="control"><label>Context load <b id="cvv">35</b></label><input id="ctxR" class="range" type="range" min="0" max="100" value="35"></div><div class="control"><label>Target horizon <b id="hv">60 min</b></label><input id="hR" class="range" type="range" min="15" max="120" value="60" step="15"></div></div>
-<button id="go" class="btn" style="margin-top:14px;width:100%">Interrogate this supported state</button><div class="support"><span>same-person support</span><div class="gauge"><div id="supportBar" style="width:78%"></div></div><b id="supportV">78%</b></div><div id="supportState" class="state">SUPPORTED · QUALIFIED</div><div class="warning">Illustrative research interface only. The browser animation does not create a treatment recommendation, dosing instruction, causal estimate, or new ABP primitive.</div></div>
-<div class="card"><div class="trace"><canvas id="canvas"></canvas><div class="overlay"><span class="pill">population-conditioned path</span><span class="pill">individual-referenced path</span></div></div><div class="result"><div class="kpi"><b id="gap">18.4</b><span>trajectory separation</span></div><div class="kpi"><b id="target">72%</b><span>illustrative target proximity</span></div><div class="kpi"><b id="resp">0.41</b><span>individual response slope</span></div><div class="kpi"><b id="pop">0.18</b><span>population response slope</span></div></div></div></div>
-<div class="card" style="margin-top:18px"><h3 style="margin-top:0">Frozen public evidence behind the demo</h3><div class="facts"><div class="fact"><b>194,010</b><span>five-minute observations</span></div><div class="fact"><b>12</b><span>individuals in T1D validation</span></div><div class="fact"><b>0.078</b><span>mean individual/population cosine</span></div><div class="fact"><b>24.49%</b><span>identical inverse solutions</span></div><div class="fact"><b>3,739</b><span>observed therapeutic perturbations</span></div><div class="fact"><b>78.0%</b><span>nonzero changes with same-person support</span></div><div class="fact"><b>65.5%</b><span>solutions changed across adjacent states</span></div><div class="fact"><b>74.4%</b><span>solutions changed across horizons</span></div></div><p style="color:var(--mut);font-size:12px;margin-bottom:0">These are frozen released evaluation results. The sliders above use illustrative trajectories to make the architectural idea visible; they do not recompute those results.</p></div><div class="footer"><span>CMH Scientific · ABP public demonstration</span><span>Individual-first biological interrogation · research use only</span></div></div>
-<script>
-const c=document.getElementById('canvas'),g=c.getContext('2d');let phase=0;function size(){const r=c.getBoundingClientRect();c.width=r.width*devicePixelRatio;c.height=r.height*devicePixelRatio;g.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)}function params(){return {s:+stateR.value,u:+uR.value,ctx:+ctxR.value,h:+hR.value}}function curves(){const p=params(),N=120,pop=[],ind=[];for(let i=0;i<N;i++){const t=i/(N-1),wave=Math.sin(t*8+phase)*2.3;const base=190-p.s*1.2;const popY=base + p.ctx*.16*t*3 - p.u*.20*(1-Math.exp(-3*t)) + wave*.55;const individualGain=.22+.0035*(p.s-50)+.0018*(100-p.ctx);const indY=base + p.ctx*.11*t*2.4 - p.u*individualGain*(1-Math.exp(-(2.2+p.h/80)*t)) + wave;pop.push(popY);ind.push(indY)}return {pop,ind,p}}function draw(){const w=c.clientWidth,h=c.clientHeight;g.clearRect(0,0,w,h);g.strokeStyle='#173047';g.lineWidth=1;for(let i=1;i<5;i++){g.beginPath();g.moveTo(0,i*h/5);g.lineTo(w,i*h/5);g.stroke()}const d=curves();function line(arr,col,lw){g.strokeStyle=col;g.lineWidth=lw;g.beginPath();arr.forEach((v,i)=>{const x=22+i*(w-44)/(arr.length-1),y=35+(v/230)*(h-70);i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke()}line(d.pop,'#65d8ff',4);line(d.ind,'#ff6b8b',5);const lastP=d.pop.at(-1),lastI=d.ind.at(-1);gap.textContent=Math.abs(lastP-lastI).toFixed(1);const prox=Math.max(0,Math.min(99,100-Math.abs(lastI-105)*.9));target.textContent=prox.toFixed(0)+'%';const is=.22+.0035*(d.p.s-50)+.0018*(100-d.p.ctx);resp.textContent=is.toFixed(2);pop.textContent='0.20';const sup=Math.max(18,Math.min(96,82-Math.abs(d.p.u-45)*.4-Math.abs(d.p.ctx-40)*.18));supportBar.style.width=sup+'%';supportV.textContent=sup.toFixed(0)+'%';supportState.textContent=sup>=65?'SUPPORTED · QUALIFIED':sup>=40?'SUPPORTED · MIXED':'UNSUPPORTED / UNRESOLVED';supportState.style.color=sup>=65?'#8df5c1':sup>=40?'#ffd166':'#ff7189'}function sync(){sv.textContent=stateR.value;uv.textContent=uR.value;cvv.textContent=ctxR.value;hv.textContent=hR.value+' min';draw()}[stateR,uR,ctxR,hR].forEach(el=>el.oninput=sync);go.onclick=()=>{phase+=.7;draw()};size();draw();window.onresize=()=>{size();draw()};
-</script>
-<section class="cmh-validation" aria-label="Validation and data provenance">
-  <h2>Validation & data provenance</h2>
-  <p class="cmh-v-sub">Retrospective validation on real longitudinal and experimental data; counts below are the analysis-specific units used in the frozen program.</p>
-  <div class="cmh-validation-grid"><div class="cmh-v-item"><strong>OhioT1DM — primary individual physiology</strong><span>12 people · 194,010 five-minute observations · 400 high-glucose inversion states · 3,739 observed therapeutic perturbations</span></div><div class="cmh-v-item"><strong>Oxford COVID-19 Government Response Tracker</strong><span>56,487 population-day observations in the cross-scale population experiment</span></div><div class="cmh-v-item"><strong>Allen Brain Observatory</strong><span>~1.2 million stimulus-response observations · 400 cells in the analyzed ABP subset</span></div></div>
-  <div class="cmh-v-boundary"><strong>Boundary:</strong> the browser controls are an explanatory interface. The validation data are real; virtual inversion is model-based and does not establish a treatment effect, dosing recommendation, or prospective drug efficacy.</div>
-  <div class="cmh-v-cites"><b>Dataset / validation references</b><ol><li>Marling C, Bunescu R. <i>The OhioT1DM Dataset for Blood Glucose Level Prediction: Update 2020.</i> CEUR Workshop Proc. 2020;2675:71–74. PMID 33584164.</li><li>Hale T, Angrist N, Goldszmidt R, et al. <i>A global panel database of pandemic policies (Oxford COVID-19 Government Response Tracker).</i> Nat Hum Behav. 2021;5:529–538. <a href="https://doi.org/10.1038/s41562-021-01079-8">doi:10.1038/s41562-021-01079-8</a>.</li><li>de Vries SEJ, Lecoq JA, Buice MA, et al. <i>A large-scale standardized physiological survey reveals functional organization of the mouse visual cortex.</i> Nat Neurosci. 2020;23:138–151. <a href="https://doi.org/10.1038/s41593-019-0550-9">doi:10.1038/s41593-019-0550-9</a>.</li><li>Ewing MA. <i>AI as a Biological Primitive: Individual Biological Simulation Without Population-Scale Reference Cohorts for Personalized Care and Drug Development.</i> Research Square. 2026. <a href="https://doi.org/10.21203/rs.3.rs-10898489/v1">doi:10.21203/rs.3.rs-10898489/v1</a>.</li><li>Ewing MA. <i>AI as a Biological Primitive Enables Targeted Inversion Across Disease, Population, and Neuronal Systems.</i> Research Square. 2026. <a href="https://doi.org/10.21203/rs.3.rs-10910512/v1">doi:10.21203/rs.3.rs-10910512/v1</a>.</li><li>Ewing MA. <i>AI as a Biological Primitive: Optimal Intervention Inversion in Paediatric Glioma Using a Simulated Tumour Primitive.</i> Research Square. 2026. <a href="https://doi.org/10.21203/rs.3.rs-10910573/v1">doi:10.21203/rs.3.rs-10910573/v1</a>.</li></ol></div>
-</section>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <div class="hud">
+      <h1>Using AI to Model a Biological Primitive</h1><p style='margin-top:7px;color:#9ab0bc'>Glioblastoma example: interrogate the primitive, identify intervention directions that improve it, compare intervention designs, and examine which biological factors alter response.</p>
+      <p>Drag to rotate. The three compartments do not respond alike, which is why total
+      volume is a poor guide to what has changed.</p>
+    </div>
+    <canvas id="c"></canvas>
+  </div>
 
-</body></html>
+  <aside class="side"><section><h2>ABP workflow</h2><div class="seg" id="abpMode"><button data-m="discovery" aria-pressed="true">Discovery</button><button data-m="design" aria-pressed="false">Design</button><button data-m="development" aria-pressed="false">Development</button></div><div class="ground" style="margin-top:10px"><div class="g1" id="abpModeTitle">Discovery</div><div class="g2" id="abpModeText">Interrogate the primitive to identify intervention directions or combinations associated with movement toward the declared target state.</div></div></section>
+    <section>
+      <h2>Compartments</h2>
+      <div class="legend">
+        <div><i style="background:#ffb03a;box-shadow:0 0 8px #ffb03a"></i>necrotic core
+          <em>contoured</em></div>
+        <div><i style="background:#2fe3d6;box-shadow:0 0 8px #2fe3d6"></i>enhancing rim
+          <em>contoured</em></div>
+        <div><i style="background:#a86bff;box-shadow:0 0 8px #a86bff"></i>infiltrative margin
+          <em>diffuse, no boundary</em></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>This tumour</h2>
+      <div class="seg" id="mgmt">
+        <button data-v="1" aria-pressed="true">MGMT methylated</button>
+        <button data-v="0" aria-pressed="false">Unmethylated</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Intervention</h2>
+      <label>
+        <span class="row"><span class="n">Radiation</span><span class="v" id="vRt">0.0 Gy-eq</span></span>
+        <input type="range" id="rt" min="0" max="84" step="1" value="0">
+        <span style="display:block;margin-top:2px;font-size:10px;color:var(--dim)">~60 Gy conventional-course reference; higher values illustrate escalation beyond the conventional course.</span>
+      </label>
+      <label>
+        <span class="row"><span class="n">Alkylating agent</span><span class="v" id="vTz">0.00</span></span>
+        <input type="range" id="tz" min="0" max="1" step="0.02" value="0">
+      </label>
+      <label style="margin-bottom:2px">
+        <span class="row"><span class="n">Weeks since start</span><span class="v" id="vWk">12</span></span>
+        <input type="range" id="wk" min="0" max="24" step="1" value="12">
+      </label>
+    </section>
+
+    <section>
+      <h2>Optimise for</h2>
+      <div class="seg" id="opt">
+        <button data-o="rano">Enhancing disease</button>
+        <button data-o="inf">Least infiltration</button>
+      </div>
+      <p class="reveal" id="reveal">Same primitive, same week, two objectives. Press both.</p>
+      <table class="cmp" id="cmp" hidden>
+        <tr><th></th><th>Enhancing<br>disease</th><th>Least<br>infiltration</th></tr>
+        <tr><td>Dose</td><td id="c1a">—</td><td id="c1b">—</td></tr>
+        <tr><td>Enhancing</td><td id="c2a">—</td><td id="c2b">—</td></tr>
+        <tr><td>Margin</td><td id="c3a">—</td><td id="c3b">—</td></tr>
+        <tr><td>Necrosis</td><td id="c4a">—</td><td id="c4b">—</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2>Response</h2>
+      <div class="m"><span>Radiation kill</span><span id="mKr">\u2014</span></div>
+      <div class="m"><span>Agent kill</span><span id="mKt">\u2014</span></div>
+      <div class="m"><span>Combined</span><span id="mKc">\u2014</span></div>
+      <div class="m"><span>Enhancing volume</span><span id="mEnh">—</span></div>
+      <div class="m"><span>Infiltrative extent</span><span id="mInf">—</span></div>
+      <div class="m"><span>Total volume</span><span id="mTot">—</span></div>
+      <div class="m"><span>Enhancing-volume response</span><span id="mRano">—</span></div>
+      <div class="m"><span>Clinical course</span><span id="mCourse">—</span></div>
+      <div class="m"><span>Radiation necrosis</span><span id="mNec">—</span></div>
+      <div class="m"><span>Induced invasion</span><span id="mInv">—</span></div>
+      <div class="ground" id="ground">
+        <div class="g1" id="gT">Untreated baseline</div>
+        <div class="g2" id="gE">Move a control to perturb the primitive.</div>
+      </div>
+    </section>
+
+    <section>
+      <p class="note"><b style="color:#8fa6b3">Why radiation can worsen the margin.</b>
+      Sublethal irradiation has been shown repeatedly to increase glioma cell migration and
+      invasiveness, through &alpha;v&beta;3 integrin and MMP-2/9 (Wild-Bode, <i>Cancer Res</i>
+      2001), p53&ndash;MMP-2 (2015), HIF1&alpha;/JMY in glioma stem-like cells at doses as low
+      as 0.5&nbsp;Gy (2020), and CXCL12/KCa3.1 (2019). Irradiated glioma produces more tumour
+      satellites in vivo, and most relapses arise adjacent to the irradiated field. The effect
+      is consistently reported across cell lines, stem-like cells and in vivo models, with at
+      least one co-culture study reporting the opposite.</p>
+
+      <p class="note"><b style="color:#8fa6b3">Literature-grounded ABP demonstrator.</b>
+      The primitive encodes published qualitative relationships among glioblastoma growth, radiation
+      exposure, alkylating therapy, MGMT status, treatment-associated necrosis, pseudoprogression,
+      and infiltrative response. Numerical parameterization is illustrative and is not fitted to an
+      individual patient. The demonstrator illustrates biological-primitive perturbation, target-directed inverse interrogation, intervention design, and response-modifier exploration; it does not provide treatment recommendations.
+      These are not patient images and no restricted data are distributed here.</p>
+    </section>
+  </aside>
+</div>
+
+<script>
+(function(){
+"use strict";
+const cv=document.getElementById("c"), ctx=cv.getContext("2d",{alpha:false});
+let W=0,H=0,DPR=1;
+function size(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  const r=cv.parentElement.getBoundingClientRect();
+  W=Math.max(200,r.width); H=Math.max(200,r.height);
+  cv.width=W*DPR; cv.height=H*DPR;
+  cv.style.width=W+"px"; cv.style.height=H+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener("resize",()=>{size();draw();});
+if(window.ResizeObserver){new ResizeObserver(()=>{size();draw();}).observe(cv.parentElement);}
+
+// ---- deterministic lumpy radial shape ----
+const HARM=[[1,0.16,0.9],[2,0.13,2.3],[3,0.09,4.1],[5,0.055,1.2],[7,0.035,5.4]];
+function rad(th,z,seed,rough){
+  let m=1;
+  for(let i=0;i<HARM.length;i++){
+    const[k,a,p]=HARM[i];
+    m+=rough*a*Math.sin(k*th+p+seed*1.7+z*0.9)*Math.cos(0.6*k*z+p*0.5);
+  }
+  return m;
+}
+
+// ---- pharmacology: each component responds differently ----
+const hill=(d,ec,h)=>Math.pow(d,h)/(Math.pow(ec,h)+Math.pow(d,h));
+function state(rt,tz,wk,mg){
+  // --- Radiation: linear-quadratic kill, 2 Gy fractions, alpha/beta = 10 ---
+  const alpha=0.012, beta=0.0012, dfx=2.0;
+  const kR = 1-Math.exp(-(alpha*rt + beta*rt*dfx));
+
+  // Radiation reaches only what is inside the treatment volume. Disease beyond the
+  // margin is untouched at any dose, which is why the dose-response plateaus.
+  const inField = 0.62;
+
+  // --- Alkylating agent: Hill, gated by MGMT promoter methylation ---
+  const mgSens = mg ? 1.00 : 0.28;
+  const kT = mgSens*0.55*hill(tz,0.45,2.0);
+
+  // --- Combination: Bliss independence plus radiosensitisation ---
+  const kappa = mg ? 0.85 : 0.12;
+  const kC = 1-(1-kR)*(1-kT)*Math.exp(-kappa*kR*kT);
+
+  // --- Harms that rise with dose ---
+  // Radiation necrosis: steep threshold near conventional tolerance, delayed onset.
+  const necRisk = hill(rt,62,7.0);
+  const necOn   = 1-Math.exp(-Math.max(0,wk-8)/9.0);
+  const necrosis= necRisk*necOn;
+
+  // Sublethal irradiation is reported to increase glioma cell migration, so the
+  // infiltrative compartment can be driven outward by the same dose that shrinks the rim.
+  const invasion = 0.55*hill(rt,54,4.0);
+
+  // --- Natural history ---
+  const Td = mg?17.5:15.0;                     // methylation is weakly prognostic
+  const grow=Math.pow(2, wk/(3*Td));
+  const growI=Math.pow(2, wk*(1+invasion)/(3*Td));
+
+  const oE=0.10+0.90*(1-Math.exp(-wk/4.0));
+  const oI=0.06+0.94*(1-Math.exp(-wk/7.0));
+  const oN=0.04+0.96*(1-Math.exp(-wk/9.0));
+
+  const eEff=0.80*kC*oE;
+  const iEff=0.46*inField*(kR*0.62+kT*0.38)*oI;
+  const nFrac=Math.min(0.90, 0.56+0.26*kC*oN+0.22*necrosis);
+
+  const pseudo=(mg?0.34:0.16)*Math.max(0,Math.sin(Math.PI*Math.min(wk,14)/14))*kC;
+
+  const re=0.78*grow*(1-eEff)*(1+pseudo)*(1+0.30*necrosis);
+  const rn=re*nFrac;
+  const ri=Math.max(re*1.06, 1.00*growI*(1-iEff)*(1+pseudo*0.4));
+  const harm=Math.max(necrosis, invasion*Math.min(1,wk/12));
+  return {rn,re,ri,kR,kT,kC,pseudo,eEff,iEff,grow,necrosis,invasion,harm};
+}
+function vol(r){return (4/3)*Math.PI*Math.pow(r,3);}
+
+// ---- grounding: what this person's record actually supports ----
+function ground(rt,tz,mg){
+  const d=rt/60, t=tz;
+  if(d<0.02&&t<0.02) return {k:"base",t:"Untreated baseline",
+    e:"Move a control to perturb the primitive."};
+  if(d>0.85||t>0.88) return {k:"abs",t:"Insufficient support \u2014 abstain",
+    e:"This person's record contains no exposure at this intensity. The primitive declines rather than extrapolating."};
+  if(!mg && t>0.45) return {k:"unf",t:"Supported, historically unfavourable",
+    e:"Unmethylated MGMT. Alkylating exposure at this level appears in the record with toxicity and little response."};
+  if(d>0.55&&t>0.55) return {k:"mix",t:"Supported, mixed response",
+    e:"Combined exposure at this intensity appears in the record with inconsistent trajectory."};
+  if(t>0.30&&d<0.20) return {k:"mix",t:"Supported, mixed response",
+    e:"Agent-dominant regimens appear in the record with inconsistent response."};
+  return {k:"fav",t:"Supported, historically favourable",
+    e:"This person has received exposure in this region and the response was favourable."};
+}
+const GC={base:"#6c8493",fav:"#2fe3d6",mix:"#ffb03a",unf:"#ff6b5e",abs:"#6c8493"};
+function supported(rt,tz,mg){ return ground(rt,tz,mg).k !== "abs"; }
+
+let rotY=0.6, rotX=0.22, drag=null, spin=true;
+let P={rt:0,tz:0,wk:12,mg:true};
+
+function cloud(cx,cy,scale,r0,z,alpha){
+  const yy=cy - z*scale*Math.sin(rotX)*1.05;
+  const rx=r0*scale, ry=r0*scale*Math.cos(rotX);
+  if(rx<2||ry<2) return;
+  const g=ctx.createRadialGradient(cx,yy,rx*0.35,cx,yy,rx);
+  g.addColorStop(0,"rgba(168,107,255,"+(alpha*1.5).toFixed(4)+")");
+  g.addColorStop(0.55,"rgba(143,92,224,"+(alpha*0.8).toFixed(4)+")");
+  g.addColorStop(1,"rgba(120,70,200,0)");
+  ctx.save(); ctx.translate(cx,yy); ctx.scale(1,ry/rx); ctx.translate(-cx,-yy);
+  ctx.beginPath(); ctx.arc(cx,yy,rx,0,Math.PI*2);
+  ctx.fillStyle=g; ctx.globalAlpha=1; ctx.fill(); ctx.restore();
+}
+function shell(cx,cy,scale,r0,z,col,alpha,seed,rough,glow){
+  const N=54;
+  ctx.beginPath();
+  for(let i=0;i<=N;i++){
+    const th=i/N*Math.PI*2;
+    const rr=r0*rad(th+rotY*0.35,z,seed,rough);
+    // rotate in 3D-ish: squash y by cos(rotX), shift by z-depth
+    const x=Math.cos(th)*rr, y=Math.sin(th)*rr*Math.cos(rotX);
+    const px=cx+x*scale, py=cy+y*scale - z*scale*Math.sin(rotX)*1.05;
+    if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+  }
+  ctx.closePath();
+  ctx.strokeStyle=col; ctx.globalAlpha=alpha; ctx.lineWidth=glow?1.35:0.85;
+  if(glow){ctx.shadowColor=col;ctx.shadowBlur=14;}else{ctx.shadowBlur=0;}
+  ctx.stroke();
+  ctx.shadowBlur=0;
+}
+
+function draw(){
+  const s=state(P.rt,P.tz,P.wk,P.mg);
+  ctx.globalCompositeOperation="source-over";
+  ctx.globalAlpha=1;
+  ctx.fillStyle="#03060b"; ctx.fillRect(0,0,W,H);
+
+  // harm halo — the field reddens as treatment damage accumulates
+  if(state(P.rt,P.tz,P.wk,P.mg).harm>0.12){
+    const hh=Math.min(1,state(P.rt,P.tz,P.wk,P.mg).harm);
+    const hg=ctx.createRadialGradient(W/2,H*0.52,10,W/2,H*0.52,Math.max(W,H)*0.55);
+    hg.addColorStop(0,"rgba(255,60,40,"+(0.16*hh).toFixed(3)+")");
+    hg.addColorStop(1,"rgba(255,60,40,0)");
+    ctx.fillStyle=hg; ctx.fillRect(0,0,W,H);
+  }
+  // faint depth haze
+  const g=ctx.createRadialGradient(W/2,H/2,10,W/2,H/2,Math.max(W,H)*0.6);
+  g.addColorStop(0,"rgba(20,44,60,.35)"); g.addColorStop(1,"rgba(3,6,11,0)");
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+  ctx.globalCompositeOperation="lighter";
+  const cx=W/2, cy=H*0.52;
+  const scale=Math.min(W*0.42, H*0.40)/1.65;
+  const NS=44;
+  const baseShow=(P.rt>0.5||P.tz>0.01||P.wk>0.5);
+  const mix=(a,b,t)=>{const p=x=>parseInt(x,16);
+    const r=Math.round(p(a.slice(1,3))*(1-t)+p(b.slice(1,3))*t),
+          g=Math.round(p(a.slice(3,5))*(1-t)+p(b.slice(3,5))*t),
+          bl=Math.round(p(a.slice(5,7))*(1-t)+p(b.slice(5,7))*t);
+    return "#"+[r,g,bl].map(v=>v.toString(16).padStart(2,"0")).join("");};
+  const hw=Math.min(1,Math.pow(s.harm,0.7)*1.6);
+  const rimCol =mix("#2fe3d6","#ff4b3a",hw);
+  const rimCol2=mix("#1fbfd0","#d63a2c",hw);
+
+  // back-to-front so nearer slices overlay
+  for(let i=0;i<NS;i++){
+    const t=i/(NS-1);
+    const z=-1+2*t;                       // -1 .. 1
+    const env=Math.sqrt(Math.max(0,1-z*z));
+    if(env<0.02) continue;
+    const depth=0.35+0.65*(z+1)/2;        // nearer slices brighter
+
+    // infiltrative margin — diffuse, no boundary (glioma has no contourable edge here)
+    cloud(cx,cy,scale,s.ri*env,z,0.030*depth);
+
+    // enhancing rim — shifts toward red as treatment harm accumulates
+    if(s.re*env>0.02){
+      shell(cx,cy,scale,s.re*env,z,rimCol,0.16*depth,1.4,0.85,true);
+      shell(cx,cy,scale,s.re*env*0.93,z,rimCol2,0.09*depth,1.4,0.85,false);
+    }
+    // necrotic core — warm, takes a larger share of the rim under treatment
+    if(s.rn*env>0.02){
+      shell(cx,cy,scale,s.rn*env,z,"#ffb03a",0.13*depth,0.6,0.55,true);
+    }
+    // untreated reference outline, every 6th slice
+    if(baseShow && i%6===0){
+      shell(cx,cy,scale,0.78*env,z,"#5d7280",0.11*depth,1.4,0.85,false);
+    }
+  }
+  ctx.globalCompositeOperation="source-over";
+  ctx.globalAlpha=1;
+
+  // ---- metrics ----
+  const vE=vol(s.re)-vol(s.rn), vI=vol(s.ri)-vol(s.re), vT=vol(s.ri);
+  const vE0=vol(0.78)-vol(0.44), vT0=vol(1.00);
+  const dE=(vE/vE0-1)*100, dT=(vT/vT0-1)*100;
+  document.getElementById("mEnh").textContent=(dE>=0?"+":"")+dE.toFixed(0)+"%";
+  document.getElementById("mInf").textContent=
+    ((s.ri/1.00-1)>=0?"+":"")+((s.ri/1.00-1)*100).toFixed(0)+"%";
+  document.getElementById("mTot").textContent=(dT>=0?"+":"")+dT.toFixed(0)+"%";
+  let rano = dE<=-65?"partial response" : dE<=-25?"minor response" :
+             dE< 25?"stable disease" : "progression";
+  if(s.pseudo>0.10&&dE>0) rano="pseudoprogression";
+  document.getElementById("mRano").textContent=rano;
+  document.getElementById("mRano").style.color=
+    rano==="progression"?"#ff6b5e":rano==="pseudoprogression"?"#ffb03a":"#2fe3d6";
+
+  document.getElementById("mKr").textContent=(s.kR*100).toFixed(0)+"%";
+  document.getElementById("mKt").textContent=(s.kT*100).toFixed(0)+"%";
+  document.getElementById("mKc").textContent=(s.kC*100).toFixed(0)+"%";
+  // clinical course: where on the response-nadir-regrowth curve are we?
+  let nadirW=0, nadirR=Infinity;
+  for(let w=0;w<=24;w+=0.5){
+    const r=state(P.rt,P.tz,w,P.mg).re;
+    if(r<nadirR){nadirR=r;nadirW=w;}
+  }
+  const treated=(P.rt>0.5||P.tz>0.01);
+  const cEl=document.getElementById("mCourse");
+  if(!treated){
+    cEl.textContent = P.wk<1 ? "baseline" : "untreated growth";
+    cEl.style.color = P.wk<1 ? "#c8dce6" : "#ff6b5e";
+  }else if(s.pseudo>0.06 && P.wk<12){
+    cEl.textContent="early, pseudoprogression possible"; cEl.style.color="#ffb03a";
+  }else if(P.wk < nadirW-0.5){
+    cEl.textContent="responding"; cEl.style.color="#2fe3d6";
+  }else if(P.wk <= nadirW+1.5){
+    cEl.textContent="at nadir, week "+nadirW.toFixed(0); cEl.style.color="#2fe3d6";
+  }else{
+    cEl.textContent="regrowth from nadir"; cEl.style.color="#ff6b5e";
+  }
+
+  const nEl=document.getElementById("mNec"), iEl=document.getElementById("mInv");
+  nEl.textContent=(s.necrosis*100).toFixed(0)+"%";
+  nEl.style.color=s.necrosis>0.30?"#ff4b3a":s.necrosis>0.10?"#ffb03a":"#c8dce6";
+  iEl.textContent=(s.invasion*100).toFixed(0)+"%";
+  iEl.style.color=s.invasion>0.30?"#ff4b3a":s.invasion>0.12?"#ffb03a":"#c8dce6";
+
+  const gr=ground(P.rt,P.tz,P.mg);
+  document.getElementById("gT").textContent=gr.t;
+  document.getElementById("gE").textContent=gr.e;
+  document.getElementById("gT").style.color=GC[gr.k];
+  document.getElementById("ground").style.borderLeftColor=GC[gr.k];
+}
+
+function loop(){
+  if(spin&&!drag&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+    rotY+=0.0022; draw();
+  }
+  requestAnimationFrame(loop);
+}
+
+// ---- interaction ----
+function pt(e){return{x:e.touches?e.touches[0].clientX:e.clientX,
+                      y:e.touches?e.touches[0].clientY:e.clientY};}
+cv.addEventListener("pointerdown",e=>{drag=pt(e);spin=false;cv.classList.add("drag");cv.setPointerCapture(e.pointerId);});
+cv.addEventListener("pointermove",e=>{
+  if(!drag)return; const p=pt(e);
+  rotY+=(p.x-drag.x)*0.006;
+  rotX=Math.max(0.04,Math.min(1.15,rotX+(p.y-drag.y)*0.004));
+  drag=p; draw();
+});
+cv.addEventListener("pointerup",()=>{drag=null;spin=true;cv.classList.remove("drag");});
+cv.addEventListener("pointercancel",()=>{drag=null;spin=true;cv.classList.remove("drag");});
+
+const bind=(id,key,fmt,el)=>{
+  const s=document.getElementById(id), o=document.getElementById(el);
+  s.addEventListener("input",()=>{P[key]=parseFloat(s.value);o.textContent=fmt(P[key]);draw();});
+  o.textContent=fmt(P[key]);
+};
+bind("rt","rt",v=>v.toFixed(1)+" Gy-eq","vRt");
+bind("tz","tz",v=>v.toFixed(2),"vTz");
+bind("wk","wk",v=>String(v),"vWk");
+
+
+function optimise(obj){
+  let best=null;
+  for(let rt=0;rt<=84;rt+=1) for(let tz=0;tz<=1.0001;tz+=0.02){
+    if(!supported(rt,tz,P.mg)) continue;
+    const st=state(rt,tz,P.wk,P.mg);
+    const ev=vol(st.re)-vol(st.rn);
+    const score = obj==="rano" ? ev : st.ri;
+    if(!best||score<best.score) best={rt,tz,score,st,ev};
+  }
+  return best;
+}
+const optSeg=document.getElementById("opt");
+optSeg.addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  const obj=b.dataset.o, a=optimise(obj), other=optimise(obj==="rano"?"inf":"rano");
+  P.rt=a.rt; P.tz=a.tz;
+  document.getElementById("rt").value=a.rt;
+  document.getElementById("tz").value=a.tz;
+  document.getElementById("vRt").textContent=a.rt.toFixed(1)+" Gy-eq";
+  document.getElementById("vTz").textContent=a.tz.toFixed(2);
+  [...optSeg.children].forEach(c=>c.setAttribute("aria-pressed", c===b));
+  draw();
+  const E0=vol(0.78)-vol(0.44);
+  const rano=obj==="rano"?a:other, inf=obj==="rano"?other:a;
+  const put=(id,txt,cls)=>{const e=document.getElementById(id);e.textContent=txt;
+    e.className=cls||"";};
+  const eR=(rano.ev/E0-1)*100, eI=(inf.ev/E0-1)*100;
+  const xR=(rano.st.ri-1)*100,  xI=(inf.st.ri-1)*100;
+  const nR=rano.st.necrosis*100, nI=inf.st.necrosis*100;
+  document.getElementById("cmp").hidden=false;
+  put("c1a",rano.rt+" Gy"); put("c1b",inf.rt+" Gy");
+  put("c2a",eR.toFixed(0)+"%","win");  put("c2b",eI.toFixed(0)+"%","lose");
+  put("c3a","+"+xR.toFixed(0)+"%","lose"); put("c3b","+"+xI.toFixed(0)+"%","win");
+  put("c4a",nR.toFixed(0)+"%",nR>25?"lose":"");  put("c4b",nI.toFixed(0)+"%","win");
+  const rv=document.getElementById("reveal");
+  const dEa=((a.ev/E0-1)*100).toFixed(0), exA=((a.st.ri-1)*100).toFixed(0);
+  const dEb=((other.ev/E0-1)*100).toFixed(0), exB=((other.st.ri-1)*100).toFixed(0);
+  if(obj==="rano"){
+    rv.innerHTML="Minimising enhancing disease selects <span class='a'>"+a.rt+" Gy</span>: "+
+      "enhancing volume "+dEa+"%, but the margin has moved <b>+"+exA+"%</b> with "+
+      (a.st.necrosis*100).toFixed(0)+"% necrosis. Optimising for infiltration instead would give "+
+      other.rt+" Gy, margin +"+exB+"%, at the cost of "+dEb+"% enhancing response \u2014 which is "+
+      "the number a response-based endpoint would penalise.";
+  }else{
+    rv.innerHTML="Protecting the margin selects <span class='a'>"+a.rt+" Gy</span>: margin +"+exA+
+      "%, necrosis "+(a.st.necrosis*100).toFixed(0)+"%, enhancing "+dEa+"%. The response-optimal "+
+      "regimen is "+other.rt+" Gy, which reports "+dEb+"% enhancing but <b>+"+exB+"%</b> margin. "+
+      "Neither is a dosing recommendation; the point is that the objective decides the answer.";
+  }
+});
+
+const seg=document.getElementById("mgmt");
+seg.addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  P.mg = b.dataset.v==="1";
+  [...seg.children].forEach(c=>c.setAttribute("aria-pressed", c===b));
+  draw();
+});
+
+
+const abpMode=document.getElementById("abpMode");
+if(abpMode){abpMode.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;[...abpMode.children].forEach(c=>c.setAttribute("aria-pressed",c===b));const m=b.dataset.m,t=document.getElementById("abpModeTitle"),x=document.getElementById("abpModeText");if(m==="discovery"){t.textContent="Discovery";x.textContent="Interrogate the primitive to identify intervention directions or combinations associated with movement toward the declared target state."}else if(m==="design"){t.textContent="Design";x.textContent="Compare chemistry, combination, sequence, intensity, or other intervention constructions against the same primitive and declared objective."}else{t.textContent="Development";x.textContent="Vary biomarkers, state variables, context and response modifiers to identify which factors alter effectiveness, support, toxicity, or failure of the intervention."}})}
+
+size(); draw(); loop();
+})();
+</script>
+<div style="position:fixed;left:16px;bottom:14px;z-index:5"><a href="../Access/" style="color:#2fe3d6;text-decoration:none;font-size:11px">Request software access</a></div></body>
+</html>
