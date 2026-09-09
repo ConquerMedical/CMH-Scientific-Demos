@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ABP — Using AI to Model a Biological Primitive</title>
+<title>ABP — individual biological primitive interrogation</title>
 <style>
 :root{
   --void:#03060b;
@@ -23,11 +23,22 @@ html,body{margin:0;padding:0;height:100%;background:var(--void);color:var(--text
 #stage{position:relative;overflow:hidden;background:#03060b}
 canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
 canvas.drag{cursor:grabbing}
-.hud{position:absolute;left:20px;top:18px;max-width:30ch;pointer-events:none;z-index:2}
-.hud h1{font-size:14px;font-weight:500;letter-spacing:.01em;margin:0 0 5px;
-  text-shadow:0 1px 12px rgba(3,6,11,.9)}
-.hud p{margin:0;font-size:11.5px;line-height:1.5;color:var(--dim);
-  text-shadow:0 1px 10px rgba(3,6,11,.9)}
+.hud{position:absolute;left:28px;top:24px;max-width:min(760px,74%);pointer-events:none;z-index:3}
+.hud h1{font-size:30px;line-height:1.08;font-weight:760;letter-spacing:-.035em;margin:0 0 8px;color:#eef8fb;
+  text-shadow:0 2px 18px rgba(3,6,11,.95)}
+.hud p{margin:0;max-width:68ch;font-size:12px;line-height:1.5;color:#8ca3b0;
+  text-shadow:0 1px 10px rgba(3,6,11,.95)}
+.resultPanel{position:absolute;left:28px;right:28px;bottom:22px;z-index:4;max-width:760px;
+  border:1px solid #274354;border-radius:12px;background:rgba(5,15,22,.92);box-shadow:0 14px 40px rgba(0,0,0,.38);
+  padding:13px 14px;backdrop-filter:blur(8px);pointer-events:none}
+.resultPanel .rEye{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--rim);font-weight:700}
+.resultPanel .rTitle{font-size:18px;font-weight:720;margin:3px 0 7px;color:#eef8fb}
+.resultGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.resultMetric{border:1px solid #193442;border-radius:8px;padding:7px 8px;background:#07131a}
+.resultMetric span{display:block;color:#6f8997;font-size:9px;text-transform:uppercase;letter-spacing:.06em}
+.resultMetric b{display:block;margin-top:2px;font-size:14px;color:#d9edf3}
+.contrastLine{margin-top:8px;padding-top:8px;border-top:1px solid #17303d;font-size:11px;color:#b8ccd5}
+.modeLine{margin-top:5px;font-size:10px;color:#728b98}
 .side{background:#060b12;border-left:1px solid var(--line);overflow-y:auto;
   padding:18px 18px 24px;-webkit-overflow-scrolling:touch}
 .side h2{font-size:10.5px;font-weight:600;letter-spacing:.07em;color:var(--dim);
@@ -79,8 +90,14 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
 @media(max-width:820px){
   #app{grid-template-columns:1fr;grid-template-rows:minmax(300px,52vh) 1fr}
   .side{border-left:none;border-top:1px solid var(--line)}
-  .hud{max-width:26ch}
+  .hud{left:14px;top:14px;max-width:88%}
+  .hud h1{font-size:22px}
   .hud p{display:none}
+  .resultPanel{left:12px;right:12px;bottom:10px;max-width:none;padding:9px}
+  .resultPanel .rTitle{font-size:14px}
+  .resultGrid{gap:4px}
+  .resultMetric{padding:5px}
+  .contrastLine,.modeLine{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){canvas{animation:none}}
 </style>
@@ -89,14 +106,33 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
 <div id="app">
   <div id="stage">
     <div class="hud">
-      <h1>Using AI to Model a Biological Primitive</h1><p style='margin-top:7px;color:#9ab0bc'>Glioblastoma example: interrogate the primitive, identify intervention directions that improve it, compare intervention designs, and examine which biological factors alter response.</p>
-      <p>Drag to rotate. The three compartments do not respond alike, which is why total
-      volume is a poor guide to what has changed.</p>
+      <h1>ABP · AI as a Biological Primitive</h1><p>Builds a model of an individual biological system from that system's own longitudinal states, perturbations and realized responses, then interrogates it in reverse to identify intervention directions the record supports. No population reference cohort supplies the individual's identity.</p>
     </div>
     <canvas id="c"></canvas>
+    <div class="resultPanel" id="resultPanel">
+      <div class="rEye" id="modeResultEye">Discovery · target-directed interrogation</div>
+      <div class="rTitle" id="modeResultTitle">Interrogate the primitive, then show what moved.</div>
+      <div class="resultGrid">
+        <div class="resultMetric"><span id="r1l">Support</span><b id="r1v">Untreated baseline</b></div>
+        <div class="resultMetric"><span id="r2l">Enhancing volume</span><b id="r2v">—</b></div>
+        <div class="resultMetric"><span id="r3l">Infiltrative margin</span><b id="r3v">—</b></div>
+      </div>
+      <div class="contrastLine" id="contrastLine">Move an intervention control. ABP will report the compartment-specific response instead of collapsing it to one number.</div>
+      <div class="modeLine" id="modeResultText">Discovery searches admissible intervention directions against the declared target while preserving unsupported regions as unresolved.</div>
+    </div>
   </div>
 
-  <aside class="side"><section><h2>ABP workflow</h2><div class="seg" id="abpMode"><button data-m="discovery" aria-pressed="true">Discovery</button><button data-m="design" aria-pressed="false">Design</button><button data-m="development" aria-pressed="false">Development</button></div><div class="ground" style="margin-top:10px"><div class="g1" id="abpModeTitle">Discovery</div><div class="g2" id="abpModeText">Interrogate the primitive to identify intervention directions or combinations associated with movement toward the declared target state.</div></div></section>
+  <aside class="side"><section><h2>ABP workflow</h2><div class="seg" id="abpMode"><button data-m="discovery" aria-pressed="true">Discovery</button><button data-m="design" aria-pressed="false">Design</button><button data-m="development" aria-pressed="false">Development</button></div><div class="ground" style="margin-top:10px"><div class="g1" id="abpModeTitle">Discovery</div><div class="g2" id="abpModeText">Interrogate the primitive against a declared target.</div></div></section>
+    <section>
+      <h2>Evidence context</h2>
+      <select id="abpEvidence" style="width:100%;background:#08131b;color:#c8dce6;border:1px solid #1d2b38;border-radius:4px;padding:8px">
+        <option value="gbm">Glioblastoma · literature-grounded intervention design</option>
+        <option value="ohio">OhioT1DM · validated individual primitive</option>
+        <option value="nbl">TARGET-NBL · drug-regulator hypothesis screen</option>
+      </select>
+      <div class="ground" style="margin-top:10px"><div class="g1" id="evidenceTitle">Glioblastoma intervention design</div><div class="g2" id="evidenceText">The rotating GBM primitive is a literature-grounded demonstrator of target-directed inversion, intervention design, MGMT response modification, infiltration and treatment-associated harm.</div></div>
+      <p class="note" id="drugNote">Drug-development mode is defined as compound × dose × schedule × combination. Exact TARGET-NBL candidate drug names will be inserted only from the frozen ranked drug-regulator result table; this review build does not invent them.</p>
+    </section>
     <section>
       <h2>Compartments</h2>
       <div class="legend">
@@ -134,8 +170,8 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
       </label>
     </section>
 
-    <section>
-      <h2>Optimise for</h2>
+    <section id="designSection" style="display:none">
+      <h2>Design objective</h2>
       <div class="seg" id="opt">
         <button data-o="rano">Enhancing disease</button>
         <button data-o="inf">Least infiltration</button>
@@ -178,6 +214,7 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
       is consistently reported across cell lines, stem-like cells and in vivo models, with at
       least one co-culture study reporting the opposite.</p>
 
+      <button id="downloadReport" style="width:100%;margin-bottom:14px;padding:9px;border:1px solid var(--rim);background:#07131b;color:#dff;border-radius:4px;cursor:pointer">Download sample report</button>
       <p class="note"><b style="color:#8fa6b3">Literature-grounded ABP demonstrator.</b>
       The primitive encodes published qualitative relationships among glioblastoma growth, radiation
       exposure, alkylating therapy, MGMT status, treatment-associated necrosis, pseudoprogression,
@@ -328,7 +365,7 @@ function draw(){
   // harm halo — the field reddens as treatment damage accumulates
   if(state(P.rt,P.tz,P.wk,P.mg).harm>0.12){
     const hh=Math.min(1,state(P.rt,P.tz,P.wk,P.mg).harm);
-    const hg=ctx.createRadialGradient(W/2,H*0.52,10,W/2,H*0.52,Math.max(W,H)*0.55);
+    const hg=ctx.createRadialGradient(W*0.53,H*0.43,10,W*0.53,H*0.43,Math.max(W,H)*0.55);
     hg.addColorStop(0,"rgba(255,60,40,"+(0.16*hh).toFixed(3)+")");
     hg.addColorStop(1,"rgba(255,60,40,0)");
     ctx.fillStyle=hg; ctx.fillRect(0,0,W,H);
@@ -339,8 +376,8 @@ function draw(){
   ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
 
   ctx.globalCompositeOperation="lighter";
-  const cx=W/2, cy=H*0.52;
-  const scale=Math.min(W*0.42, H*0.40)/1.65;
+  const cx=W*0.53, cy=H*0.43;
+  const scale=Math.min(W*0.46, H*0.46)/1.65;
   const NS=44;
   const baseShow=(P.rt>0.5||P.tz>0.01||P.wk>0.5);
   const mix=(a,b,t)=>{const p=x=>parseInt(x,16);
@@ -388,6 +425,11 @@ function draw(){
   document.getElementById("mInf").textContent=
     ((s.ri/1.00-1)>=0?"+":"")+((s.ri/1.00-1)*100).toFixed(0)+"%";
   document.getElementById("mTot").textContent=(dT>=0?"+":"")+dT.toFixed(0)+"%";
+  const dI=(s.ri/1.00-1)*100;
+  const word=v=>Math.abs(v)<1?"did not materially move":v<0?`fell ${Math.abs(v).toFixed(0)}%`:`rose ${Math.abs(v).toFixed(0)}%`;
+  const grNow=ground(P.rt,P.tz,P.mg);
+  updateModeResult(s,dE,dI,dT,grNow);
+  document.getElementById("contrastLine").textContent=`Total volume ${word(dT)} while the infiltrative margin ${word(dI)}. Enhancing volume ${word(dE)}.`;
   let rano = dE<=-65?"partial response" : dE<=-25?"minor response" :
              dE< 25?"stable disease" : "progression";
   if(s.pseudo>0.10&&dE>0) rano="pseudoprogression";
@@ -522,8 +564,69 @@ seg.addEventListener("click",e=>{
 });
 
 
+let currentABPMode="discovery";
+function updateModeResult(st,dE,dI,dT,gr){
+ const eye=document.getElementById("modeResultEye"),title=document.getElementById("modeResultTitle"),txt=document.getElementById("modeResultText");
+ const l1=document.getElementById("r1l"),l2=document.getElementById("r2l"),l3=document.getElementById("r3l");
+ const v1=document.getElementById("r1v"),v2=document.getElementById("r2v"),v3=document.getElementById("r3v");
+ const pct=v=>(v>=0?"+":"")+v.toFixed(0)+"%";
+ if(currentABPMode==="discovery"){
+   eye.textContent="Discovery · target-directed interrogation";
+   title.textContent="Interrogate the primitive, then show what moved.";
+   l1.textContent="Support";v1.textContent=gr.t;
+   l2.textContent="Enhancing volume";v2.textContent=pct(dE);
+   l3.textContent="Infiltrative margin";v3.textContent=pct(dI);
+   txt.textContent="Discovery searches admissible intervention directions against the declared target while unsupported regions remain unresolved.";
+ }else if(currentABPMode==="design"){
+   eye.textContent="Design · objective-conditioned intervention comparison";
+   title.textContent="The preferred design depends on what the intervention is asked to preserve.";
+   l1.textContent="Combined response";v1.textContent=(st.kC*100).toFixed(0)+"%";
+   l2.textContent="Enhancing volume";v2.textContent=pct(dE);
+   l3.textContent="Treatment harm";v3.textContent=Math.round(st.harm*100)+"%";
+   txt.textContent="Design compares intervention constructions against the same primitive. Use the design objective controls at right to expose the response-versus-margin trade.";
+ }else{
+   eye.textContent="Development · response modifiers";
+   title.textContent="The primitive exposes which biological state variables alter the response.";
+   l1.textContent="MGMT state";v1.textContent=P.mg?"Methylated":"Unmethylated";
+   l2.textContent="Radiation necrosis";v2.textContent=Math.round(st.necrosis*100)+"%";
+   l3.textContent="Induced invasion";v3.textContent=Math.round(st.invasion*100)+"%";
+   txt.textContent="Development mode foregrounds biomarkers, context and response modifiers that alter effectiveness, toxicity, support or failure.";
+ }
+}
+function setABPMode(m){
+ currentABPMode=m;
+ const t=document.getElementById("abpModeTitle"),x=document.getElementById("abpModeText"),ds=document.getElementById("designSection");
+ if(m==="discovery"){t.textContent="Discovery";x.textContent="Interrogate the primitive against a declared target.";ds.style.display="none";}
+ else if(m==="design"){t.textContent="Design";x.textContent="Compare intervention constructions against the same primitive and objective.";ds.style.display="block";}
+ else{t.textContent="Development";x.textContent="Expose biomarkers, context and response modifiers that alter the intervention response.";ds.style.display="none";}
+ draw();
+}
 const abpMode=document.getElementById("abpMode");
-if(abpMode){abpMode.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;[...abpMode.children].forEach(c=>c.setAttribute("aria-pressed",c===b));const m=b.dataset.m,t=document.getElementById("abpModeTitle"),x=document.getElementById("abpModeText");if(m==="discovery"){t.textContent="Discovery";x.textContent="Interrogate the primitive to identify intervention directions or combinations associated with movement toward the declared target state."}else if(m==="design"){t.textContent="Design";x.textContent="Compare chemistry, combination, sequence, intensity, or other intervention constructions against the same primitive and declared objective."}else{t.textContent="Development";x.textContent="Vary biomarkers, state variables, context and response modifiers to identify which factors alter effectiveness, support, toxicity, or failure of the intervention."}})}
+if(abpMode){abpMode.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;[...abpMode.children].forEach(c=>c.setAttribute("aria-pressed",c===b));setABPMode(b.dataset.m);})}
+
+
+const evSel=document.getElementById("abpEvidence");
+if(evSel){evSel.onchange=()=>{
+  const v=evSel.value,t=document.getElementById("evidenceTitle"),e=document.getElementById("evidenceText"),n=document.getElementById("drugNote");
+  if(v==="gbm"){t.textContent="Glioblastoma intervention design";e.textContent="The rotating GBM primitive is a literature-grounded demonstrator of target-directed inversion, intervention design, MGMT response modification, infiltration and treatment-associated harm.";n.textContent="The GBM display is a literature-grounded demonstrator, not a fitted patient model or prospective treatment recommendation."}
+  if(v==="ohio"){t.textContent="Validated individual primitive · OhioT1DM";e.textContent="The principal ABP validation instantiated 12 separately interrogable primitives from 194,010 five-minute observations and observed therapeutic perturbations. The validated intervention coordinates were insulin/activity rather than oncology drugs.";n.textContent="This selector changes provenance context only; the visible GBM geometry remains the GBM demonstrator."}
+  if(v==="nbl"){t.textContent="TARGET-NBL drug-regulator hypothesis screen";e.textContent="The neuroblastoma extension maps substrate-supported regulator levers to DGIdb drug-gene interactions and ranks direction-matched intervention hypotheses.";n.textContent="Exact candidate drug names are deliberately not fabricated here. They will be populated from the frozen ranked_abp_intervention_hypotheses.csv before the public package is finalized."}
+}}
+document.getElementById("downloadReport").onclick=()=>{
+  const st=state(P.rt,P.tz,P.wk,P.mg), gr=ground(P.rt,P.tz,P.mg);
+  const mode=[...document.querySelectorAll("#abpMode button")].find(b=>b.getAttribute("aria-pressed")==="true")?.textContent||"Discovery";
+  const ev=evSel?evSel.options[evSel.selectedIndex].text:"GBM";
+  const vE=vol(st.re)-vol(st.rn),vI=vol(st.ri)-vol(st.re),vT=vol(st.ri),vE0=vol(.78)-vol(.44),vT0=vol(1);
+  const dE=(vE/vE0-1)*100,dI=(st.ri-1)*100,dT=(vT/vT0-1)*100;
+  const body=`<!doctype html><meta charset="utf-8"><title>ABP sample report</title><style>body{font:15px/1.55 system-ui;max-width:860px;margin:40px auto;padding:0 20px;color:#17212b}h1{font-size:28px}table{border-collapse:collapse;width:100%}td{padding:8px;border-bottom:1px solid #ddd}td:first-child{color:#667}.box{padding:14px;background:#f3f7f9;border-left:4px solid #1ebcb0}</style>
+  <h1>ABP · AI as a Biological Primitive · sample report</h1><div class="box"><b>${mode}</b><br>${gr.t}: ${gr.e}</div>
+  <h2>Declared context</h2><table><tr><td>Evidence context</td><td>${ev}</td></tr><tr><td>Objective layer</td><td>${mode}</td></tr><tr><td>MGMT</td><td>${P.mg?"methylated":"unmethylated"}</td></tr><tr><td>Radiation coordinate</td><td>${P.rt.toFixed(1)} Gy-eq</td></tr><tr><td>Alkylating-agent coordinate</td><td>${P.tz.toFixed(2)}</td></tr><tr><td>Weeks</td><td>${P.wk}</td></tr></table>
+  <h2>Primitive response</h2><table><tr><td>Radiation kill</td><td>${(st.kR*100).toFixed(1)}%</td></tr><tr><td>Agent kill</td><td>${(st.kT*100).toFixed(1)}%</td></tr><tr><td>Combined response</td><td>${(st.kC*100).toFixed(1)}%</td></tr><tr><td>Enhancing-volume change</td><td>${dE.toFixed(1)}%</td></tr><tr><td>Infiltrative-extent change</td><td>${dI.toFixed(1)}%</td></tr><tr><td>Total-volume change</td><td>${dT.toFixed(1)}%</td></tr><tr><td>Radiation-necrosis state</td><td>${(st.necrosis*100).toFixed(1)}%</td></tr><tr><td>Induced-invasion state</td><td>${(st.invasion*100).toFixed(1)}%</td></tr></table>
+  <h2>ABP interpretation</h2><p>ABP treats the focal biological system as an intervention-facing primitive. Discovery asks which intervention directions move it toward a declared target; design compares compound/dose/schedule/combination constructions; development asks which biomarkers, states and contexts alter the response. Unsupported regions should remain unresolved rather than being extrapolated into recommendations.</p>
+  <p><b>Boundary:</b> this GBM geometry is an illustrative literature-grounded demonstrator. It is not a patient-specific causal treatment estimate.</p>`;
+  const blob=new Blob([body],{type:"text/html"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="ABP_sample_report.html";a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+};
 
 size(); draw(); loop();
 })();

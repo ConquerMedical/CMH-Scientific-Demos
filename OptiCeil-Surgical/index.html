@@ -1,15 +1,359 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OptiCeil — Image Design</title><style>
-:root{--bg:#05090d;--panel:#0a1219;--panel2:#0e1922;--line:#1e3340;--ink:#eef7fa;--mut:#8ea4af;--cyan:#62d8ff;--green:#70e7b2;--yellow:#ffd36b;--red:#ff6778;--vio:#b6a6ff;--orange:#ff9e68}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#152533 0,#05090d 44%);color:var(--ink);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}.shell{max-width:1440px;margin:auto;padding:18px}.top{display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:14px}.brand{font-weight:850;letter-spacing:.12em}.brand small{display:block;color:var(--mut);font-size:10px;letter-spacing:.16em}.nav{display:flex;gap:8px;flex-wrap:wrap}.nav a,.btn{border:1px solid var(--line);background:#0b1720;color:var(--ink);padding:8px 10px;border-radius:9px;text-decoration:none;cursor:pointer}.nav a:hover,.btn:hover{border-color:var(--cyan)}.btn.primary{background:#0c2940;border-color:#2b6588}.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px}.card{background:linear-gradient(180deg,#0e1a24,#09131a);border:1px solid var(--line);border-radius:16px;overflow:hidden}.pad{padding:16px}.eyebrow{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--mut)}h1{font-size:32px;letter-spacing:-.035em;margin:3px 0 8px}h2{font-size:18px;margin:0 0 8px}h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#cfe0e8;margin:0 0 9px}.mut{color:var(--mut)}.controls{display:grid;gap:13px}.control label{display:flex;justify-content:space-between;font-size:11px;color:#c7d7df;margin-bottom:4px}.control input[type=range],.control select{width:100%;accent-color:var(--cyan)}.metricGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.metric{border:1px solid #1d3340;border-radius:10px;background:#07131a;padding:10px}.metric span{display:block;color:var(--mut);font-size:9px;text-transform:uppercase;letter-spacing:.08em}.metric b{display:block;font-size:20px;margin-top:3px}.callout{border-left:3px solid var(--cyan);background:#071923;padding:10px 12px;border-radius:8px;margin-top:10px}.callout.warn{border-color:var(--yellow);background:#1d180d}.callout.stop{border-color:var(--red);background:#1d0f13}.canvasWrap{position:relative;min-height:430px;background:#03070a}.canvasWrap canvas{display:block;width:100%;height:100%;min-height:430px}.legend{display:flex;gap:10px;flex-wrap:wrap;color:var(--mut);font-size:10px;margin-top:8px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}.tabs{display:flex;gap:7px;flex-wrap:wrap}.tabs button{border:1px solid var(--line);background:#07141d;color:var(--mut);padding:8px 10px;border-radius:9px;cursor:pointer}.tabs button.on{background:#0d2a3c;color:white;border-color:#327aa4}.evidence{margin-top:16px;border:1px solid #1f3946;border-radius:14px;background:#071118;padding:15px}.evidence .rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}.ev{border:1px solid #1a303b;border-radius:10px;padding:9px}.ev b{display:block;font-size:11px}.ev span{color:var(--mut);font-size:10px}.fine{font-size:10px;color:#718894;line-height:1.5}.footer{margin-top:18px;color:#6f8592;font-size:10px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:8px;border-bottom:1px solid #18303c;text-align:left;font-size:11px}.table th{color:#91a9b6}.pill{display:inline-block;border:1px solid #2b5367;border-radius:99px;padding:4px 8px;font-size:9px;color:#bee5f4}.accessBtn{background:#0f3428!important;border-color:#2f8b66!important}@media(max-width:900px){.grid{grid-template-columns:1fr}.metricGrid{grid-template-columns:1fr 1fr}.canvasWrap,.canvasWrap canvas{min-height:330px}.top{align-items:flex-start;flex-direction:column}}@media(max-width:520px){.metricGrid{grid-template-columns:1fr}.shell{padding:12px}h1{font-size:27px}}
-</style></head><body><div class="shell"><div class="top"><div class="brand">CMH SCIENTIFIC<small>OPTICEIL · TASK-CONDITIONED RECOVERABILITY</small></div><div class="nav"><a href="../">Demo hub</a><a href="https://conquermedical.health">Conquer Medical Health</a><a class="accessBtn" href="../Access/">Request software access</a></div></div><div class="grid"><section class="card"><div class="pad"><div class="eyebrow">OptiCeil · image design</div><h1>Design the acquisition before collecting the next frame</h1><p class="mut">Adjust the imaging protocol and watch how much event information arrives. The visual trace is interactive; the frozen evidence below is from simultaneous calcium-imaging/electrophysiology validation.</p></div><div class="canvasWrap"><canvas id="cv"></canvas></div></section><aside class="card"><div class="pad"><h3>Acquisition controls</h3><div class="controls"><div class="control"><label><span>Indicator</span><b id="indicatorV">GCaMP8m</b></label><select id="indicator"><option>GCaMP8m</option><option>GCaMP6s · nonspinal</option><option>GCaMP6s · spinal</option></select></div><div class="control"><label><span>Post-event window</span><b id="windowV">67 ms</b></label><input id="window" type="range" min="33" max="900" step="17" value="67"></div><div class="control"><label><span>Frame rate</span><b id="fpsV">30 Hz</b></label><input id="fps" type="range" min="10" max="60" step="1" value="30"></div><div class="control"><label><span>Noise</span><b id="noiseV">12%</b></label><input id="noise" type="range" min="0" max="45" step="1" value="12"></div><div class="control"><label><span>Target information</span><b id="targetV">99%</b></label><input id="target" type="range" min="90" max="99" step="1" value="99"></div></div><div class="metricGrid" style="margin-top:14px"><div class="metric"><span>Interactive recoverability estimate</span><b id="rec">—</b></div><div class="metric"><span>Interactive achieved estimate</span><b id="ach">—</b></div><div class="metric"><span>Extraction gap</span><b id="gap">—</b></div><div class="metric"><span>Volumes observed</span><b id="vols">—</b></div></div><div class="callout" id="guide">—</div><div class="fine" style="margin-top:8px">The live controls are a disclosure-safe design visualization calibrated to the frozen acquisition-frontier results; they are not a client-side copy of the protected OptiCeil estimator.</div></div></aside></div><section class="evidence"><h2>Validation & data provenance</h2><div class="rows"><div class="ev"><b>CASCADE simultaneous calcium/electrophysiology</b><span>914 recording segments · 312 neurons · 146,962 balanced spike/silent samples</span></div><div class="ev"><b>Frozen 99% prescriptions</b><span>67 ms / 2 volumes (GCaMP8m) · 250 ms / 8 volumes (nonspinal GCaMP6s) · 667 ms / 20 volumes (spinal GCaMP6s)</span></div><div class="ev"><b>Held-out result</b><span>All nine discovery-selected 90/95/99% prescriptions passed tolerance; eight of nine strictly met both nominal recoverability and achieved-performance targets.</span></div></div><div class="fine" style="margin-top:10px">Retrospective software-directed acquisition validation; not prospective microscope reconfiguration.</div></section><div class="footer"><span>Conquer Medical Health · research software demonstrations</span><span>Protected engine logic and API credentials are not embedded in this site.</span></div></div><script>
-const $=x=>document.getElementById(x),cv=$('cv'),ctx=cv.getContext('2d');
-const profiles={
- 'GCaMP8m':{front:67,max:.872,ach:.868,tau:52},
- 'GCaMP6s · nonspinal':{front:250,max:.861,ach:.855,tau:145},
- 'GCaMP6s · spinal':{front:667,max:.742,ach:.739,tau:360}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>OptiCeil — Image Design</title>
+<style>
+:root{--void:#04070c;--line:#1c2836;--text:#c8dce6;--dim:#6b8394;
+ --sheet:#4fd6ff;--cell:#3ce0c8;--ok:#2fe3d6;--warn:#ffb03a;--bad:#ff4b3a;--ask:#a68bff}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--void);color:var(--text);
+ font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+#app{position:fixed;inset:0;display:grid;grid-template-columns:280px 1fr 300px}
+.col{overflow-y:auto;padding:18px 18px 26px}
+.ask{background:#080b14;border-right:1px solid var(--line)}
+.out{background:#060a11;border-left:1px solid var(--line)}
+#stage{position:relative;overflow:hidden}
+canvas{display:block;width:100%;height:100%}
+h2{font-size:10.5px;font-weight:600;letter-spacing:.07em;color:var(--dim);margin:0 0 11px}
+section+section{margin-top:17px;padding-top:15px;border-top:1px solid var(--line)}
+.hud{position:absolute;left:20px;top:16px;max-width:34ch;pointer-events:none}
+.hud h1{font-size:14px;font-weight:500;margin:0 0 5px;text-shadow:0 1px 12px rgba(4,7,12,.95)}
+.hud p{margin:0;font-size:11.5px;line-height:1.5;color:var(--dim);
+ text-shadow:0 1px 10px rgba(4,7,12,.95)}
+.seg{display:flex;flex-direction:column;gap:5px}
+.seg.h{flex-direction:row;flex-wrap:wrap}
+.seg button{font:inherit;font-size:11.5px;padding:7px 9px;background:none;color:var(--dim);
+ border:1px solid var(--line);border-radius:3px;cursor:pointer;text-align:left}
+.seg.h button{flex:1 1 40px;text-align:center;font-size:11px;padding:6px 3px}
+.seg button[aria-pressed=true]{background:var(--ask);color:#04070c;border-color:var(--ask);
+ font-weight:600}
+label{display:block;margin-bottom:13px}
+label .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+label .n{font-size:12.5px}
+label .v{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
+ font-variant-numeric:tabular-nums;color:var(--ask)}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:20px;background:none;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
+ border-radius:50%;background:var(--ask);margin-top:-6px;box-shadow:0 0 10px rgba(166,139,255,.5)}
+input[type=range]::-moz-range-track{height:2px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--ask);border:none}
+.spec{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:8px;
+ padding-bottom:7px;border-bottom:1px solid rgba(28,40,54,.6)}
+.spec b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:600;
+ font-variant-numeric:tabular-nums}
+.verdict{padding:12px 13px;border-left:3px solid var(--dim);background:rgba(255,255,255,.035);
+ border-radius:2px;margin-bottom:14px}
+.verdict .t{font-size:13px;font-weight:600;margin-bottom:5px}
+.verdict .e{font-size:11.5px;line-height:1.5;color:var(--dim)}
+.lim{font-size:11px;line-height:1.6;color:var(--dim);margin-top:10px}
+.lim i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;
+ font-style:normal;vertical-align:middle}
+.note{font-size:10.5px;line-height:1.5;color:#48606f;margin-top:4px}
+@media(max-width:1000px){
+ #app{grid-template-columns:1fr;grid-template-rows:auto minmax(220px,34vh) auto}
+ .ask{border-right:none;border-bottom:1px solid var(--line)}
+ .out{border-left:none;border-top:1px solid var(--line)}
+ .hud p{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="col ask">
+    <section>
+      <h2>What do you need to resolve?</h2>
+      <div class="seg" id="q"></div>
+    </section>
+    <section>
+      <h2>Over what</h2>
+      <label><span class="row"><span class="n">Field of view</span>
+        <span class="v" id="vFov">450 µm</span></span>
+        <input type="range" id="fov" min="120" max="900" step="10" value="450"></label>
+      <label><span class="row"><span class="n">Depth required</span>
+        <span class="v" id="vDep">230 µm</span></span>
+        <input type="range" id="dep" min="40" max="700" step="10" value="230"></label>
+      <label style="margin-bottom:2px"><span class="row"><span class="n">Recording duration</span>
+        <span class="v" id="vDur">10 min</span></span>
+        <input type="range" id="dur" min="1" max="90" step="1" value="10"></label>
+    </section>
+    <section>
+      <h2>Indicator</h2>
+      <div class="seg h" id="ind"></div>
+      <p class="note">Brightness and kinetics set how many photons an event yields and how
+      quickly it must be sampled.</p>
+    </section>
+  </div>
+
+  <div id="stage">
+    <div class="hud">
+      <h1>OptiCeil</h1><p>Determines how much of a declared task's information a given acquisition can support, separates measurement limitation from observer limitation, and returns the shortest acquisition that reaches a stated fraction of the recoverable frontier.</p>
+    </div>
+    <canvas id="c"></canvas>
+  </div>
+
+  <div class="col out">
+    <section>
+      <h2>Required configuration</h2>
+      <div class="verdict" id="verdict">
+        <div class="t" id="vT">—</div>
+        <div class="e" id="vE">—</div>
+      </div>
+      <div class="spec"><span>Volume rate</span><b id="sRate">—</b></div>
+      <div class="spec"><span>Lateral sampling</span><b id="sVox">—</b></div>
+      <div class="spec"><span>Voxels per volume</span><b id="sVc">—</b></div>
+      <div class="spec"><span>Signal photons per voxel</span><b id="sPh">—</b></div>
+      <div class="spec"><span>Usable depth at this rate</span><b id="sDep">—</b></div>
+      <div class="spec"><span>Bleaching-limited duration</span><b id="sBl">—</b></div>
+    </section>
+    <section>
+      <h2>Binding constraint</h2>
+      <div class="lim" id="lims"></div>
+    </section>
+    <section>
+      <h2>If it does not close</h2>
+      <div class="lim" id="fix"></div>
+    </section>
+    <section>
+      <h2>Frozen validation</h2>
+      <div class="spec"><span>CASCADE recordings</span><b>914</b></div>
+      <div class="spec"><span>Neurons</span><b>312</b></div>
+      <div class="spec"><span>Balanced samples</span><b>146,962</b></div>
+      <div class="spec"><span>Best fixed balanced accuracy</span><b>83.8%</b></div>
+      <div class="spec"><span>Conservative ceiling</span><b>≈87.0%</b></div>
+      <div class="spec"><span>Information arrival</span><b>plateau ≈8 volumes</b></div>
+      <p class="note">The browser configuration model below is an interactive image-design demonstrator, not a SCAPE hardware calibration. OptiCeil's recoverability and acquisition logic was validated retrospectively on paired calcium-fluorescence/electrophysiology ground truth from CASCADE.</p>
+      <button id="downloadReport" style="width:100%;font:inherit;font-size:11.5px;padding:9px;background:#0d1721;color:#e9f6ff;border:1px solid var(--line);border-radius:4px;cursor:pointer">Download current sample report</button>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+const cv=document.getElementById("c"), ctx=cv.getContext("2d",{alpha:false});
+let W,H,DPR=1;
+function size(){DPR=Math.min(devicePixelRatio||1,2);
+  const r=cv.parentElement.getBoundingClientRect();
+  W=r.width;H=r.height;cv.width=W*DPR;cv.height=H*DPR;
+  cv.style.width=W+"px";cv.style.height=H+"px";ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener("resize",()=>{size();});
+
+// --- the questions a collaborator actually brings ---
+const Q=[
+ {k:"spike", n:"Spike timing in single neurons",
+  dt:0.010, vox:1.2, snr:9.0,
+  why:"Individual action potentials must be separated in time and assigned to one cell."},
+ {k:"cardiac", n:"Beating heart wall motion",
+  dt:0.004, vox:3.0, snr:5.0,
+  why:"Contraction is fast and spatially coarse; speed dominates, sampling does not."},
+ {k:"behave", n:"Whole-brain activity in a moving animal",
+  dt:0.050, vox:2.5, snr:6.0,
+  why:"Cells must stay identifiable while the animal moves; the volume must be caught whole."},
+ {k:"popmap", n:"Population response map to a stimulus",
+  dt:0.200, vox:2.0, snr:7.0,
+  why:"Amplitude per cell matters more than timing; slower volumes are acceptable."},
+ {k:"subcell", n:"Subcellular structure during activity",
+  dt:0.100, vox:0.45, snr:12.0,
+  why:"Fine sampling and high signal; the hardest configuration to close."}
+];
+const IND=[
+ {k:"6s",n:"GCaMP6s",bright:0.85,rise:0.14,dec:1.30},
+ {k:"6f",n:"GCaMP6f",bright:0.70,rise:0.07,dec:0.55},
+ {k:"7f",n:"jGCaMP7f",bright:0.95,rise:0.05,dec:0.42},
+ {k:"8f",n:"jGCaMP8f",bright:1.00,rise:0.02,dec:0.20},
+ {k:"8m",n:"jGCaMP8m",bright:1.15,rise:0.03,dec:0.28},
+ {k:"8s",n:"jGCaMP8s",bright:1.25,rise:0.05,dec:0.45}
+];
+let S={q:0, fov:450, dep:230, dur:10, ind:4};
+
+// --- instrument model ---
+const CAM_PIX_PER_S = 1.35e9;   // camera throughput ceiling, px/s
+const PHOTONS_PER_VOX_S = 4.2e4;// photons per voxel per second at full power, surface
+const L_SCATTER = 118;          // scattering length in tissue, um
+const BLEACH_BUDGET = 3.4e7;    // total photons per voxel before appreciable bleaching
+
+function design(){
+  const q=Q[S.q], I=IND[S.ind];
+  // temporal requirement: Nyquist against the indicator's rise, and against the question
+  const rateNeed = Math.max(1/q.dt, 1/(I.rise*2.2));
+  // spatial sampling
+  const dx=q.vox;
+  const nx=Math.round(S.fov/dx), ny=Math.round(S.fov*0.6/dx), nz=Math.round(S.dep/(dx*2.2));
+  const voxels=nx*ny*nz;
+  // camera throughput sets the achievable rate
+  const rateMax = CAM_PIX_PER_S/voxels;
+  const rate = Math.min(rateNeed, rateMax);
+  // photons per voxel per volume, attenuated with depth
+  const atten = Math.exp(-S.dep/L_SCATTER);
+  const phot = (PHOTONS_PER_VOX_S/rate)*I.bright*atten;
+  const snr = Math.sqrt(Math.max(0,phot));
+  // depth at which SNR falls to requirement, at the achievable rate
+  const phNeed = q.snr*q.snr;
+  const depthOK = -L_SCATTER*Math.log(Math.min(1,phNeed*rate/(PHOTONS_PER_VOX_S*I.bright)));
+  // bleaching
+  const blMin = (BLEACH_BUDGET*I.bright*I.bright)/PHOTONS_PER_VOX_S/60;
+  return {q,I,rateNeed,rateMax,rate,dx,nx,ny,nz,voxels,phot,snr,depthOK,blMin,atten};
+}
+
+function fmt(n){ return n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(0)+"k":n.toFixed(0); }
+
+function report(){
+  const d=design();
+  document.getElementById("sRate").textContent=d.rate.toFixed(d.rate<10?1:0)+" vol/s";
+  document.getElementById("sVox").textContent=d.dx.toFixed(2)+" µm";
+  document.getElementById("sVc").textContent=fmt(d.voxels);
+  document.getElementById("sPh").textContent=fmt(d.phot);
+  document.getElementById("sDep").textContent=(d.depthOK>0?d.depthOK.toFixed(0):"0")+" µm";
+  document.getElementById("sBl").textContent=d.blMin.toFixed(d.blMin<10?1:0)+" min";
+
+  const speedShort = d.rateMax < d.rateNeed*0.98;
+  const snrShort   = d.snr < d.q.snr;
+  const depthShort = d.depthOK < S.dep;
+  const bleachShort= d.blMin < S.dur;
+
+  const vt=document.getElementById("vT"), ve=document.getElementById("vE"),
+        vd=document.getElementById("verdict");
+  if(!speedShort && !snrShort && !bleachShort){
+    vt.textContent="Configuration closes";
+    ve.textContent="This acquisition supports the stated inference. "+
+      d.rate.toFixed(0)+" volumes per second at "+d.dx.toFixed(2)+
+      " µm sampling, with signal to spare at "+S.dep+" µm.";
+    vd.style.borderLeftColor="var(--ok)"; vt.style.color="var(--ok)";
+  }else if((speedShort?1:0)+(snrShort?1:0)+(bleachShort?1:0) >= 2){
+    vt.textContent="No configuration of this kind closes";
+    ve.textContent="More than one constraint is binding at once. Trading one against another "+
+      "will not recover the inference; the question or the measurement has to change.";
+    vd.style.borderLeftColor="var(--bad)"; vt.style.color="var(--bad)";
+  }else{
+    vt.textContent="Closes only with a trade";
+    ve.textContent="One constraint is binding. The panel below names it and what has to give.";
+    vd.style.borderLeftColor="var(--warn)"; vt.style.color="var(--warn)";
+  }
+
+  const dot=c=>'<i style="background:'+c+'"></i>';
+  let L="";
+  L+=dot(speedShort?"#ff4b3a":"#2fe3d6")+"Speed: needs "+d.rateNeed.toFixed(0)+
+     " vol/s, camera allows "+d.rateMax.toFixed(d.rateMax<10?1:0)+"<br>";
+  L+=dot(snrShort?"#ff4b3a":"#2fe3d6")+"Signal: SNR "+d.snr.toFixed(1)+
+     " against "+d.q.snr.toFixed(0)+" required<br>";
+  L+=dot(depthShort?"#ffb03a":"#2fe3d6")+"Depth: usable to "+Math.max(0,d.depthOK).toFixed(0)+
+     " µm, asked for "+S.dep+"<br>";
+  L+=dot(bleachShort?"#ff4b3a":"#2fe3d6")+"Bleaching: "+d.blMin.toFixed(1)+
+     " min available, asked for "+S.dur;
+  document.getElementById("lims").innerHTML=L;
+
+  let F=[];
+  if(speedShort) F.push("Shrink the field of view or coarsen sampling. Halving lateral extent "+
+    "quadruples the achievable volume rate.");
+  if(snrShort) F.push("A brighter indicator, a shallower target, or fewer volumes per second. "+
+    "Signal scales with dwell time, so speed and SNR trade directly.");
+  if(depthShort) F.push("Scattering is the limit, not the instrument. Beyond roughly "+
+    Math.max(0,d.depthOK).toFixed(0)+" µm no exposure recovers the signal at this rate.");
+  if(bleachShort) F.push("Reduce power and accept lower SNR, or record in intervals. "+
+    "The photon budget is spent whether or not the events of interest occur.");
+  if(!F.length) F.push("Nothing is binding. Sampling could be coarsened or the field widened "+
+    "before the inference is threatened.");
+  document.getElementById("fix").innerHTML=F.map(t=>dot("#6b8394")+t).join("<br>");
+}
+
+// --- volume rendering: swept sheet through a cell field ---
+const CELLS=[];(function(){let s=11;const r=()=>{s=(s*1103515245+12345)%2147483648;return s/2147483648;};
+ for(let i=0;i<260;i++) CELLS.push({x:r(),y:r(),z:r(),p:r()*Math.PI*2});})();
+let t0=0;
+function frame(){
+  const d=design();
+  ctx.fillStyle="#04070c"; ctx.fillRect(0,0,W,H);
+  const cx=W/2, cy=H*0.52, bw=Math.min(W*0.62,H*0.86), bh=bw*0.52, dz=bw*0.30;
+  // volume box, oblique
+  ctx.strokeStyle="rgba(28,40,54,.9)"; ctx.lineWidth=1;
+  const P=(u,v,w)=>[cx+(u-0.5)*bw+(w-0.5)*dz*0.55, cy+(v-0.5)*bh-(w-0.5)*dz*0.42];
+  [[0,0],[1,0],[1,1],[0,1]].forEach(([a,b],i,arr)=>{
+    const [c,e]=arr[(i+1)%4];
+    [0,1].forEach(w=>{const p=P(a,b,w),q2=P(c,e,w);
+      ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q2[0],q2[1]);ctx.stroke();});
+    const p0=P(a,b,0),p1=P(a,b,1);
+    ctx.beginPath();ctx.moveTo(p0[0],p0[1]);ctx.lineTo(p1[0],p1[1]);ctx.stroke();
+  });
+  // sweeping sheet
+  const sw=(t0*Math.min(1.4,d.rate/40))%1;
+  ctx.globalCompositeOperation="lighter";
+  const a=P(0,0,sw),b=P(1,0,sw),c2=P(1,1,sw),e2=P(0,1,sw);
+  const g=ctx.createLinearGradient(a[0],a[1],c2[0],c2[1]);
+  g.addColorStop(0,"rgba(79,214,255,.10)");g.addColorStop(.5,"rgba(79,214,255,.20)");
+  g.addColorStop(1,"rgba(79,214,255,.10)");
+  ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.lineTo(c2[0],c2[1]);
+  ctx.lineTo(e2[0],e2[1]);ctx.closePath();ctx.fillStyle=g;ctx.fill();
+  ctx.strokeStyle="rgba(79,214,255,.55)";ctx.lineWidth=1.2;ctx.stroke();
+  // cells: brightness falls with depth, blur grows, size follows sampling
+  const rad=Math.max(1.2, 7/Math.max(0.45,d.dx));
+  CELLS.forEach(o=>{
+    const depthUm=o.z*S.dep;
+    const att=Math.exp(-depthUm/L_SCATTER);
+    const near=Math.exp(-Math.pow((o.z-sw)/0.10,2));
+    const act=0.35+0.65*Math.pow(Math.sin(t0*2.2+o.p)*0.5+0.5,2);
+    const [px,py]=P(o.x,o.y,o.z);
+    const al=Math.min(1,(0.05+0.75*near)*att*act*Math.min(1,d.snr/8));
+    if(al<0.012) return;
+    ctx.beginPath();ctx.arc(px,py,rad*(0.7+0.5*near),0,Math.PI*2);
+    ctx.fillStyle="rgba(60,224,200,"+al.toFixed(3)+")";
+    ctx.shadowColor="#3ce0c8";ctx.shadowBlur=(2+depthUm/34)*near*6;
+    ctx.fill();ctx.shadowBlur=0;
+  });
+  ctx.globalCompositeOperation="source-over";
+  ctx.fillStyle="rgba(107,131,148,.8)";ctx.font="11px system-ui";
+  ctx.fillText(S.fov+" × "+Math.round(S.fov*0.6)+" × "+S.dep+" µm    "+
+    d.rate.toFixed(d.rate<10?1:0)+" vol/s    "+d.dx.toFixed(2)+" µm voxels", 20, H-18);
+  t0+=0.012; requestAnimationFrame(frame);
+}
+
+// --- controls ---
+const qs=document.getElementById("q");
+Q.forEach((d,i)=>{const b=document.createElement("button");b.textContent=d.n;
+ b.setAttribute("aria-pressed",i===S.q);
+ b.onclick=()=>{S.q=i;[...qs.children].forEach((c,j)=>c.setAttribute("aria-pressed",j===i));report();};
+ qs.appendChild(b);});
+const is=document.getElementById("ind");
+IND.forEach((d,i)=>{const b=document.createElement("button");b.textContent=d.k;b.title=d.n;
+ b.setAttribute("aria-pressed",i===S.ind);
+ b.onclick=()=>{S.ind=i;[...is.children].forEach((c,j)=>c.setAttribute("aria-pressed",j===i));report();};
+ is.appendChild(b);});
+const bind=(id,key,fmtF,out)=>{const s=document.getElementById(id),o=document.getElementById(out);
+ s.oninput=()=>{S[key]=parseFloat(s.value);o.textContent=fmtF(S[key]);report();};
+ o.textContent=fmtF(S[key]);};
+bind("fov","fov",v=>v+" µm","vFov");
+bind("dep","dep",v=>v+" µm","vDep");
+bind("dur","dur",v=>v+" min","vDur");
+
+
+document.getElementById("downloadReport").onclick=()=>{
+  const d=design(), q=Q[S.q], ind=IND[S.ind];
+  const speedShort=d.rateMax<d.rateNeed*0.98;
+  const snrShort=d.snr<d.q.snr;
+  const depthShort=d.depthOK<S.dep;
+  const bleachShort=d.blMin<S.dur;
+  const issues=[];
+  if(speedShort)issues.push("speed");
+  if(snrShort)issues.push("signal");
+  if(depthShort)issues.push("depth");
+  if(bleachShort)issues.push("bleaching");
+  const verdict=!issues.length?"CONFIGURATION CLOSES":issues.length>=2?"CHANGE MEASUREMENT / QUESTION":"CLOSES WITH A TRADE";
+  const guidance=[];
+  if(speedShort)guidance.push("Shrink the field of view or coarsen sampling.");
+  if(snrShort)guidance.push("Increase photon budget, use a brighter indicator, reduce depth, or lower volume rate.");
+  if(depthShort)guidance.push("The current depth request is beyond the supported optical depth at this rate.");
+  if(bleachShort)guidance.push("Reduce duty cycle/power or record intermittently.");
+  if(!guidance.length)guidance.push("No tested constraint is binding; acquisition can be widened or coarsened before the declared inference is threatened.");
+  const body=`<!doctype html><meta charset="utf-8"><title>OptiCeil sample report</title><style>body{font:15px/1.55 system-ui;max-width:860px;margin:40px auto;padding:0 20px;color:#17212b}h1{font-size:28px}table{border-collapse:collapse;width:100%}td{padding:8px;border-bottom:1px solid #ddd}td:first-child{color:#667}.box{padding:14px;background:#f3f7f9;border-left:4px solid #7856d8}</style><h1>OptiCeil · sample image-design report</h1><div class="box"><b>${verdict}</b><br>${q.why}</div><h2>Declared inference</h2><table><tr><td>Task</td><td>${q.n}</td></tr><tr><td>Indicator</td><td>${ind.n}</td></tr><tr><td>Field of view</td><td>${S.fov} µm</td></tr><tr><td>Depth</td><td>${S.dep} µm</td></tr><tr><td>Duration</td><td>${S.dur} min</td></tr></table><h2>Required / achieved acquisition</h2><table><tr><td>Required temporal rate</td><td>${d.rateNeed.toFixed(1)} vol/s</td></tr><tr><td>Achievable rate</td><td>${d.rate.toFixed(1)} vol/s</td></tr><tr><td>Lateral sampling</td><td>${d.dx.toFixed(2)} µm</td></tr><tr><td>Voxels per volume</td><td>${fmt(d.voxels)}</td></tr><tr><td>Signal photons / voxel</td><td>${fmt(d.phot)}</td></tr><tr><td>Usable depth at this rate</td><td>${Math.max(0,d.depthOK).toFixed(0)} µm</td></tr><tr><td>Bleaching-limited duration</td><td>${d.blMin.toFixed(1)} min</td></tr></table><h2>Binding constraints</h2><p>${issues.length?issues.join(", "):"none in the tested design space"}</p><h2>Guidance</h2><ul>${guidance.map(x=>"<li>"+x+"</li>").join("")}</ul><h2>Validation basis</h2><p>OptiCeil was retrospectively validated on the CASCADE ground-truth calcium-imaging collection: 914 recording segments, 312 neurons and 146,962 balanced spike-versus-silent samples. The best fixed model reached 83.8% balanced accuracy and the conservative cross-geometry ceiling was approximately 87%. Most recoverable information arrived within the first several post-target volumes; the present page is an interactive acquisition-design illustration rather than a calibration of a specific microscope.</p>`;
+  const blob=new Blob([body],{type:"text/html"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="OptiCeil_sample_report.html";a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
 };
-function size(){const r=cv.parentElement.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);cv.width=r.width*d;cv.height=Math.max(430,r.height)*d;ctx.setTransform(d,0,0,d,0,0)}
-function calc(){let p=profiles[$('indicator').value],w=+$('window').value,f=+$('fps').value,n=+$('noise').value/100,target=+$('target').value/100;let vols=Math.max(1,Math.round(w/1000*f));let sat=1-Math.exp(-w/p.tau);let fpsFac=.92+.08*Math.min(1,f/30);let rec=.5+(p.max-.5)*Math.min(1,sat*1.08)*fpsFac*(1-.28*n);let ach=.5+(p.ach-.5)*Math.min(1,sat)*fpsFac*(1-.42*n);rec=Math.max(.5,Math.min(p.max,rec));ach=Math.max(.5,Math.min(rec,ach));let g=rec-ach;$('indicatorV').textContent=$('indicator').value;$('windowV').textContent=w+' ms';$('fpsV').textContent=f+' Hz';$('noiseV').textContent=Math.round(n*100)+'%';$('targetV').textContent=Math.round(target*100)+'%';$('rec').textContent=rec.toFixed(3);$('ach').textContent=ach.toFixed(3);$('gap').textContent=g.toFixed(3);$('vols').textContent=vols;let need=p.front;if(w<need*.85)$('guide').innerHTML='<b>Extend the observation window.</b> The current window ends before the validated information-arrival frontier for this regime.';else if(n>.28)$('guide').innerHTML='<b>Improve signal quality before collecting more frames.</b> Noise is eroding both achieved performance and the recoverable envelope.';else if(w>need*1.55)$('guide').innerHTML='<b>Stop extending this dimension.</b> The interactive estimate is near saturation; another measurement dimension is more likely to add information.';else $('guide').innerHTML='<b>Acquisition near the validated frontier.</b> This protocol is close to the minimum tested window that preserved the target fraction of recoverable information.';draw(w,f,n,p,rec,ach,need)}
-function draw(w,f,n,p,rec,ach,need){const W=cv.clientWidth,H=cv.clientHeight;ctx.clearRect(0,0,W,H);ctx.fillStyle='#03070a';ctx.fillRect(0,0,W,H);let rows=7,cols=16,cw=W/cols,ch=H*.62/rows;for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){let t=(c/cols)*900,amp=Math.exp(-Math.pow((t-(90+r*18))/Math.max(55,p.tau*.65),2));let v=.10+.78*amp+(Math.sin((r+1)*(c+2)*.73)*.5+.5)*n*.25;ctx.fillStyle=`rgba(${Math.round(35+v*50)},${Math.round(80+v*170)},${Math.round(100+v*150)},${.2+.7*v})`;ctx.fillRect(c*cw+1,r*ch+1,cw-2,ch-2)}let x=Math.min(W,w/900*W);ctx.fillStyle='rgba(98,216,255,.12)';ctx.fillRect(0,0,x,H*.62);ctx.strokeStyle='#62d8ff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H*.62);ctx.stroke();let y0=H*.72;ctx.strokeStyle='#1e3340';ctx.beginPath();ctx.moveTo(0,y0);ctx.lineTo(W,y0);ctx.stroke();ctx.fillStyle='#8ea4af';ctx.font='11px system-ui';ctx.fillText('event information arriving through time',10,y0-8);ctx.strokeStyle='#70e7b2';ctx.lineWidth=2;ctx.beginPath();for(let i=0;i<=120;i++){let tt=i/120*900,yy=.5+(p.max-.5)*(1-Math.exp(-tt/p.tau));let xx=i/120*W,yp=H-24-(yy-.5)/(.4)*(H*.22);i?ctx.lineTo(xx,yp):ctx.moveTo(xx,yp)}ctx.stroke();ctx.strokeStyle='#ffd36b';let nx=need/900*W;ctx.beginPath();ctx.moveTo(nx,H*.63);ctx.lineTo(nx,H-16);ctx.stroke();ctx.fillStyle='#ffd36b';ctx.fillText('validated frontier',Math.min(W-110,nx+5),H-8)}
-['indicator','window','fps','noise','target'].forEach(id=>$(id).addEventListener('input',calc));window.addEventListener('resize',()=>{size();calc()});size();calc();
-</script></body></html>
+
+size(); report(); frame();
+
+})();
+</script>
+</body>
+</html>
