@@ -1,359 +1,389 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>OptiCeil — Image Design</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OptiCeil — constraint space</title>
 <style>
-:root{--void:#04070c;--line:#1c2836;--text:#c8dce6;--dim:#6b8394;
- --sheet:#4fd6ff;--cell:#3ce0c8;--ok:#2fe3d6;--warn:#ffb03a;--bad:#ff4b3a;--ask:#a68bff}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0;height:100%;background:var(--void);color:var(--text);
- font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
-#app{position:fixed;inset:0;display:grid;grid-template-columns:280px 1fr 300px}
-.col{overflow-y:auto;padding:18px 18px 26px}
-.ask{background:#080b14;border-right:1px solid var(--line)}
-.out{background:#060a11;border-left:1px solid var(--line)}
-#stage{position:relative;overflow:hidden}
-canvas{display:block;width:100%;height:100%}
-h2{font-size:10.5px;font-weight:600;letter-spacing:.07em;color:var(--dim);margin:0 0 11px}
-section+section{margin-top:17px;padding-top:15px;border-top:1px solid var(--line)}
-.hud{position:absolute;left:20px;top:16px;max-width:34ch;pointer-events:none}
-.hud h1{font-size:14px;font-weight:500;margin:0 0 5px;text-shadow:0 1px 12px rgba(4,7,12,.95)}
-.hud p{margin:0;font-size:11.5px;line-height:1.5;color:var(--dim);
- text-shadow:0 1px 10px rgba(4,7,12,.95)}
-.seg{display:flex;flex-direction:column;gap:5px}
-.seg.h{flex-direction:row;flex-wrap:wrap}
-.seg button{font:inherit;font-size:11.5px;padding:7px 9px;background:none;color:var(--dim);
- border:1px solid var(--line);border-radius:3px;cursor:pointer;text-align:left}
-.seg.h button{flex:1 1 40px;text-align:center;font-size:11px;padding:6px 3px}
-.seg button[aria-pressed=true]{background:var(--ask);color:#04070c;border-color:var(--ask);
- font-weight:600}
-label{display:block;margin-bottom:13px}
-label .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
-label .n{font-size:12.5px}
-label .v{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
- font-variant-numeric:tabular-nums;color:var(--ask)}
-input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:20px;background:none;margin:0}
-input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line)}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
- border-radius:50%;background:var(--ask);margin-top:-6px;box-shadow:0 0 10px rgba(166,139,255,.5)}
-input[type=range]::-moz-range-track{height:2px;background:var(--line)}
-input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--ask);border:none}
-.spec{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:8px;
- padding-bottom:7px;border-bottom:1px solid rgba(28,40,54,.6)}
-.spec b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:600;
- font-variant-numeric:tabular-nums}
-.verdict{padding:12px 13px;border-left:3px solid var(--dim);background:rgba(255,255,255,.035);
- border-radius:2px;margin-bottom:14px}
-.verdict .t{font-size:13px;font-weight:600;margin-bottom:5px}
-.verdict .e{font-size:11.5px;line-height:1.5;color:var(--dim)}
-.lim{font-size:11px;line-height:1.6;color:var(--dim);margin-top:10px}
-.lim i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;
- font-style:normal;vertical-align:middle}
-.note{font-size:10.5px;line-height:1.5;color:#48606f;margin-top:4px}
-@media(max-width:1000px){
- #app{grid-template-columns:1fr;grid-template-rows:auto minmax(220px,34vh) auto}
- .ask{border-right:none;border-bottom:1px solid var(--line)}
- .out{border-left:none;border-top:1px solid var(--line)}
- .hud p{display:none}
+:root{
+  --bg:#050a10;--pane:#0a1622;--edge:#16303f;--ink:#e9f3f9;--dim:#8aa4b6;--faint:#5d7686;
+  --cy:#4fd4ff;--gr:#5fe3a6;--am:#ffc857;--rd:#ff6b7f;--vi:#a897ff;
 }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;letter-spacing:-.004em}
+.wrap{max-width:1500px;margin:auto;padding:16px}
+.eyebrow{font-size:11px;color:var(--cy);letter-spacing:.08em;margin-bottom:5px}
+h1{font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 6px}
+.lede{color:#a4bccc;max-width:74ch;margin:0 0 10px;font-size:14.5px}.instant{margin:0 0 14px;border-left:4px solid var(--cy);background:#071923;padding:10px 13px;border-radius:8px;font-size:15px;line-height:1.45}.instant b{color:#fff}
+.grid{display:grid;grid-template-columns:250px minmax(0,1fr) 320px;grid-template-areas:"controls stage rail";gap:14px;align-items:start}.controlPane{grid-area:controls}.stagePane{grid-area:stage}.rail{grid-area:rail}
+.pane{background:var(--pane);border:1px solid var(--edge);border-radius:12px;overflow:hidden}
+.sec{padding:13px 15px;border-bottom:1px solid #0f2230}
+.sec:last-child{border-bottom:0}
+h3{margin:0 0 10px;font-size:11.5px;font-weight:600;color:#b6cddb}
+.opt{display:block;width:100%;text-align:left;border:1px solid #24404f;background:#091724;color:var(--ink);
+  padding:9px 11px;border-radius:8px;font:inherit;font-size:13px;cursor:pointer;margin-bottom:6px}
+.opt:hover{border-color:var(--cy)}
+.opt.on{background:#2a2160;border-color:var(--vi);color:#fff}
+.opt:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
+.sl{margin-bottom:11px}
+.sl label{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-bottom:3px}
+.sl label b{color:var(--ink);font-variant-numeric:tabular-nums}
+.sl input{width:100%;accent-color:var(--vi);margin:0}
+.chips{display:flex;gap:5px;flex-wrap:wrap}
+.chip{border:1px solid #24404f;background:#091724;color:var(--ink);padding:6px 11px;border-radius:7px;
+  font:inherit;font-size:12.5px;cursor:pointer}
+.chip.on{background:#2a2160;border-color:var(--vi)}
+
+.stage{padding:16px 18px 6px}
+.stagehead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
+.stagehead b{font-size:14px;font-weight:600}
+.stagehead span{font-size:12px;color:var(--faint)}
+.plots{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:center}
+canvas{display:block;width:100%;touch-action:none}.stage canvas{cursor:crosshair}
+.cap{font-size:11.5px;color:var(--faint);text-align:center;margin-top:2px}
+
+.verdict{margin:0 18px 16px;padding:12px 14px;border-radius:9px;border:1px solid;display:flex;gap:12px;align-items:flex-start}
+.verdict.ok{background:#08211a;border-color:#1f6a4c}
+.verdict.no{background:#231a06;border-color:#6d5518}.verdict.bad{background:#241018;border-color:#7b2637}
+.verdict .m{font-size:22px;line-height:1;flex:none}
+.verdict h4{margin:0 0 3px;font-size:15px;font-weight:600}
+.verdict.ok h4{color:var(--gr)}.verdict.no h4{color:var(--am)}.verdict.bad h4{color:var(--rd)}
+.verdict p{margin:0;font-size:13px;color:#b7cbd8}
+
+.kv{display:grid;grid-template-columns:1fr auto;gap:6px 10px;font-size:13px}
+.kv dt{color:var(--dim);margin:0}
+.kv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
+.con{display:grid;grid-template-columns:auto 1fr auto;gap:6px 9px;font-size:12.5px;align-items:baseline}
+.con .d{width:7px;height:7px;border-radius:50%;align-self:center}
+.con .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--dim)}
+.con .n.bind{color:var(--am);font-weight:600}
+.rel{border-left:2px solid var(--am);background:#1a1507;padding:9px 11px;border-radius:0 7px 7px 0;
+  font-size:12.5px;color:#f0dfae;line-height:1.45;margin-top:10px}
+.rel.ok{border-color:var(--gr);background:#071a13;color:#bfe8d4}
+.frozen{font-size:12px}
+.foot{margin-top:14px;color:var(--faint);font-size:11.5px;line-height:1.5}
+@media(max-width:1200px){.grid{grid-template-columns:230px minmax(0,1fr)}.rail{grid-column:1/-1}
+  .plots{grid-template-columns:1fr}}
+@media(max-width:760px){.grid{display:flex;flex-direction:column}.stagePane{order:1}.controlPane{order:2}.rail{order:3}.wrap{padding:11px}.plots{grid-template-columns:1fr}.stage{padding:13px 12px 6px}.stagehead{display:block}.stagehead span{display:block;margin-top:3px}}
 </style>
 </head>
 <body>
-<div id="app">
-  <div class="col ask">
-    <section>
-      <h2>What do you need to resolve?</h2>
-      <div class="seg" id="q"></div>
-    </section>
-    <section>
-      <h2>Over what</h2>
-      <label><span class="row"><span class="n">Field of view</span>
-        <span class="v" id="vFov">450 µm</span></span>
-        <input type="range" id="fov" min="120" max="900" step="10" value="450"></label>
-      <label><span class="row"><span class="n">Depth required</span>
-        <span class="v" id="vDep">230 µm</span></span>
-        <input type="range" id="dep" min="40" max="700" step="10" value="230"></label>
-      <label style="margin-bottom:2px"><span class="row"><span class="n">Recording duration</span>
-        <span class="v" id="vDur">10 min</span></span>
-        <input type="range" id="dur" min="1" max="90" step="1" value="10"></label>
-    </section>
-    <section>
-      <h2>Indicator</h2>
-      <div class="seg h" id="ind"></div>
-      <p class="note">Brightness and kinetics set how many photons an event yields and how
-      quickly it must be sampled.</p>
-    </section>
-  </div>
+<div class="wrap">
+  <div class="eyebrow">OPTICEIL · ACQUISITION DESIGN</div>
+  <h1>State the inference. OptiCeil returns the acquisition that supports it.</h1>
+  <p class="lede">State the inference you need to make, and OptiCeil returns the acquisition that supports it — volume rate, sampling, depth, photon budget — along with the one constraint that binds and what it would take to relieve it. When a specification cannot close, it says so and names the trade.</p><div class="instant" id="instant">—</div>
 
-  <div id="stage">
-    <div class="hud">
-      <h1>OptiCeil</h1><p>Determines how much of a declared task's information a given acquisition can support, separates measurement limitation from observer limitation, and returns the shortest acquisition that reaches a stated fraction of the recoverable frontier.</p>
-    </div>
-    <canvas id="c"></canvas>
-  </div>
+  <div class="grid">
+    <!-- controls -->
+    <aside class="pane controlPane">
+      <section class="sec">
+        <h3>What do you need to resolve?</h3>
+        <div id="tasks"></div>
+      </section>
+      <section class="sec">
+        <h3>Over what</h3>
+        <div class="sl"><label>Field of view <b id="nFov">450</b></label><input type="range" id="fov" min="120" max="900" value="450"></div>
+        <div class="sl"><label>Depth required <b id="nDep">230</b></label><input type="range" id="dep" min="40" max="500" value="230"></div>
+        <div class="sl"><label>Recording duration <b id="nDur">10</b></label><input type="range" id="dur" min="1" max="60" value="10"></div>
+      </section>
+      <section class="sec">
+        <h3>Indicator</h3>
+        <div class="chips" id="inds"></div>
+      </section>
+      <section class="sec">
+        <h3>Falsify the estimator</h3>
+        <div class="sl"><label>Geometry agreement <b id="nStable">100%</b></label><input type="range" id="stable" min="10" max="100" step="5" value="100"></div>
+        <button class="chip" id="breakEstimator" style="width:100%">Push past the validity boundary</button>
+        <p class="foot" style="margin-top:8px">Illustrative stress control: when the tested geometries stop agreeing, OptiCeil refuses to report a ceiling.</p>
+      </section>
+    </aside>
 
-  <div class="col out">
-    <section>
-      <h2>Required configuration</h2>
-      <div class="verdict" id="verdict">
-        <div class="t" id="vT">—</div>
-        <div class="e" id="vE">—</div>
+    <!-- stage -->
+    <main class="pane stagePane">
+      <div class="stage">
+        <div class="stagehead"><b>Constraint space</b><span id="stageSub">requested configuration against the achievable envelope</span></div>
+        <div class="plots">
+          <div><canvas id="env" height="340"></canvas><div class="cap">Achievable envelope — volume rate against usable depth. The point is your request.</div></div>
+          <div><canvas id="rad" height="300"></canvas><div class="cap">Required against available, per constraint.</div></div>
+        </div>
+        <div style="margin-top:9px;border-top:1px solid #132836;padding-top:10px"><canvas id="trace" height="118"></canvas><div class="cap">Frozen timing evidence — target event at 0; GCaMP8m 99% discovery-selected protocol: 67 ms / 2 post-target volumes at 30 Hz. The acquisition-constraint model above is an interactive design demonstrator, not a claim that its illustrative hardware numbers were prospectively calibrated.</div></div>
       </div>
-      <div class="spec"><span>Volume rate</span><b id="sRate">—</b></div>
-      <div class="spec"><span>Lateral sampling</span><b id="sVox">—</b></div>
-      <div class="spec"><span>Voxels per volume</span><b id="sVc">—</b></div>
-      <div class="spec"><span>Signal photons per voxel</span><b id="sPh">—</b></div>
-      <div class="spec"><span>Usable depth at this rate</span><b id="sDep">—</b></div>
-      <div class="spec"><span>Bleaching-limited duration</span><b id="sBl">—</b></div>
-    </section>
-    <section>
-      <h2>Binding constraint</h2>
-      <div class="lim" id="lims"></div>
-    </section>
-    <section>
-      <h2>If it does not close</h2>
-      <div class="lim" id="fix"></div>
-    </section>
-    <section>
-      <h2>Frozen validation</h2>
-      <div class="spec"><span>CASCADE recordings</span><b>914</b></div>
-      <div class="spec"><span>Neurons</span><b>312</b></div>
-      <div class="spec"><span>Balanced samples</span><b>146,962</b></div>
-      <div class="spec"><span>Best fixed balanced accuracy</span><b>83.8%</b></div>
-      <div class="spec"><span>Conservative ceiling</span><b>≈87.0%</b></div>
-      <div class="spec"><span>Information arrival</span><b>plateau ≈8 volumes</b></div>
-      <p class="note">The browser configuration model below is an interactive image-design demonstrator, not a SCAPE hardware calibration. OptiCeil's recoverability and acquisition logic was validated retrospectively on paired calcium-fluorescence/electrophysiology ground truth from CASCADE.</p>
-      <button id="downloadReport" style="width:100%;font:inherit;font-size:11.5px;padding:9px;background:#0d1721;color:#e9f6ff;border:1px solid var(--line);border-radius:4px;cursor:pointer">Download current sample report</button>
-    </section>
+      <div class="verdict ok" id="verdict">
+        <div class="m" id="vm">✓</div>
+        <div><h4 id="vh">Configuration closes</h4><p id="vp">Every constraint has margin at the stated inference.</p></div>
+      </div>
+    </main>
+
+    <!-- readout -->
+    <aside class="pane rail">
+      <section class="sec">
+        <h3>Required configuration</h3>
+        <dl class="kv">
+          <dt>Volume rate</dt><dd><span id="kRate">100</span> vol/s</dd>
+          <dt>Lateral sampling</dt><dd><span id="kSamp">1.20</span> µm</dd>
+          <dt>Voxels per volume</dt><dd id="kVox">7.3M</dd>
+          <dt>Signal photons per voxel</dt><dd id="kPh">69</dd>
+          <dt>Usable depth at this rate</dt><dd><span id="kUse">211</span> µm</dd>
+          <dt>Bleaching-limited duration</dt><dd><span id="kBl">18</span> min</dd>
+        </dl>
+      </section>
+      <section class="sec">
+        <h3>Binding constraint</h3>
+        <div class="con" id="cons"></div>
+        <p class="rel" id="rel"></p>
+      </section>
+      <section class="sec">
+        <h3>Frozen validation</h3>
+        <dl class="kv frozen">
+          <dt>CASCADE recordings</dt><dd>914</dd>
+          <dt>Neurons</dt><dd>312</dd>
+          <dt>Balanced samples</dt><dd>146,962</dd>
+          <dt>Best fixed balanced accuracy</dt><dd>83.8%</dd>
+          <dt>Conservative recoverability envelope</dt><dd>≈87.0%</dd>
+          <dt>GCaMP8m 99% timing protocol</dt><dd>67 ms / 2 volumes</dd>
+          <dt>nonspinal GCaMP6s 99%</dt><dd>250 ms / 8 volumes</dd>
+          <dt>spinal GCaMP6s 99%</dt><dd>667 ms / 20 volumes</dd>
+        </dl>
+        <button id="downloadReport" class="chip" style="width:100%;margin-top:12px">Download current report</button>
+        <p class="foot">The configuration model above is an interactive image-design demonstrator, not a hardware calibration. OptiCeil's recoverability and acquisition logic were validated retrospectively on paired calcium-fluorescence/electrophysiology ground truth from CASCADE.</p>
+      </section>
+    </aside>
   </div>
 </div>
 
 <script>
-(function(){
-"use strict";
-const cv=document.getElementById("c"), ctx=cv.getContext("2d",{alpha:false});
-let W,H,DPR=1;
-function size(){DPR=Math.min(devicePixelRatio||1,2);
-  const r=cv.parentElement.getBoundingClientRect();
-  W=r.width;H=r.height;cv.width=W*DPR;cv.height=H*DPR;
-  cv.style.width=W+"px";cv.style.height=H+"px";ctx.setTransform(DPR,0,0,DPR,0,0);}
-addEventListener("resize",()=>{size();});
+const $=i=>document.getElementById(i);
 
-// --- the questions a collaborator actually brings ---
-const Q=[
- {k:"spike", n:"Spike timing in single neurons",
-  dt:0.010, vox:1.2, snr:9.0,
-  why:"Individual action potentials must be separated in time and assigned to one cell."},
- {k:"cardiac", n:"Beating heart wall motion",
-  dt:0.004, vox:3.0, snr:5.0,
-  why:"Contraction is fast and spatially coarse; speed dominates, sampling does not."},
- {k:"behave", n:"Whole-brain activity in a moving animal",
-  dt:0.050, vox:2.5, snr:6.0,
-  why:"Cells must stay identifiable while the animal moves; the volume must be caught whole."},
- {k:"popmap", n:"Population response map to a stimulus",
-  dt:0.200, vox:2.0, snr:7.0,
-  why:"Amplitude per cell matters more than timing; slower volumes are acceptable."},
- {k:"subcell", n:"Subcellular structure during activity",
-  dt:0.100, vox:0.45, snr:12.0,
-  why:"Fine sampling and high signal; the hardest configuration to close."}
+const TASKS=[
+ {k:'spike', n:'Spike timing in single neurons',   rate:100, samp:1.20, snr:9.0,  dwellNeed:1.0},
+ {k:'heart', n:'Beating heart wall motion',        rate:200, samp:2.60, snr:6.0,  dwellNeed:0.7},
+ {k:'brain', n:'Whole-brain activity, moving animal', rate:20, samp:2.50, snr:6.5, dwellNeed:1.4},
+ {k:'pop',   n:'Population response map to a stimulus', rate:10, samp:2.00, snr:5.5, dwellNeed:1.6},
+ {k:'sub',   n:'Subcellular structure during activity', rate:5,  samp:0.35, snr:12.0, dwellNeed:2.4}
 ];
-const IND=[
- {k:"6s",n:"GCaMP6s",bright:0.85,rise:0.14,dec:1.30},
- {k:"6f",n:"GCaMP6f",bright:0.70,rise:0.07,dec:0.55},
- {k:"7f",n:"jGCaMP7f",bright:0.95,rise:0.05,dec:0.42},
- {k:"8f",n:"jGCaMP8f",bright:1.00,rise:0.02,dec:0.20},
- {k:"8m",n:"jGCaMP8m",bright:1.15,rise:0.03,dec:0.28},
- {k:"8s",n:"jGCaMP8s",bright:1.25,rise:0.05,dec:0.45}
+const INDS=[
+ {k:'6s',n:'6s',bright:0.55,tau:1.60},{k:'6f',n:'6f',bright:0.50,tau:0.70},
+ {k:'7f',n:'7f',bright:0.80,tau:0.55},{k:'8f',n:'8f',bright:1.00,tau:0.22},
+ {k:'8m',n:'8m',bright:1.15,tau:0.30},{k:'8s',n:'8s',bright:1.30,tau:0.45}
 ];
-let S={q:0, fov:450, dep:230, dur:10, ind:4};
+let task=TASKS[0], ind=INDS[4];
 
-// --- instrument model ---
-const CAM_PIX_PER_S = 1.35e9;   // camera throughput ceiling, px/s
-const PHOTONS_PER_VOX_S = 4.2e4;// photons per voxel per second at full power, surface
-const L_SCATTER = 118;          // scattering length in tissue, um
-const BLEACH_BUDGET = 3.4e7;    // total photons per voxel before appreciable bleaching
+$('tasks').innerHTML=TASKS.map(t=>`<button class="opt" data-t="${t.k}">${t.n}</button>`).join('');
+$('inds').innerHTML=INDS.map(i=>`<button class="chip" data-i="${i.k}">${i.n}</button>`).join('');
 
-function design(){
-  const q=Q[S.q], I=IND[S.ind];
-  // temporal requirement: Nyquist against the indicator's rise, and against the question
-  const rateNeed = Math.max(1/q.dt, 1/(I.rise*2.2));
-  // spatial sampling
-  const dx=q.vox;
-  const nx=Math.round(S.fov/dx), ny=Math.round(S.fov*0.6/dx), nz=Math.round(S.dep/(dx*2.2));
-  const voxels=nx*ny*nz;
-  // camera throughput sets the achievable rate
-  const rateMax = CAM_PIX_PER_S/voxels;
-  const rate = Math.min(rateNeed, rateMax);
-  // photons per voxel per volume, attenuated with depth
-  const atten = Math.exp(-S.dep/L_SCATTER);
-  const phot = (PHOTONS_PER_VOX_S/rate)*I.bright*atten;
-  const snr = Math.sqrt(Math.max(0,phot));
-  // depth at which SNR falls to requirement, at the achievable rate
-  const phNeed = q.snr*q.snr;
-  const depthOK = -L_SCATTER*Math.log(Math.min(1,phNeed*rate/(PHOTONS_PER_VOX_S*I.bright)));
-  // bleaching
-  const blMin = (BLEACH_BUDGET*I.bright*I.bright)/PHOTONS_PER_VOX_S/60;
-  return {q,I,rateNeed,rateMax,rate,dx,nx,ny,nz,voxels,phot,snr,depthOK,blMin,atten};
+// ---------- physics-flavoured model (illustrative, not a hardware calibration) ----------
+function model(){
+  const fov=+$('fov').value, dep=+$('dep').value, dur=+$('dur').value, stable=+$('stable').value;
+  const rate=task.rate, samp=task.samp;
+  const vox=(fov/samp)*(fov*0.6/samp)*(dep/(samp*2.6));
+  // photons per voxel: brightness / (rate * voxels), scaled
+  const ph=Math.max(1, 6.5e10*ind.bright/(rate*vox));
+  const snr=Math.sqrt(ph)*0.83;
+  // scattering-limited usable depth falls with rate and with finer sampling
+  const useDepth=Math.round(850*Math.pow(ind.bright,0.42)/Math.pow(rate,0.30)*Math.pow(samp,0.16));
+  // bleaching: total dose budget over duration
+  const bleach=Math.max(0.4, 900*ind.bright/(rate*Math.pow(fov/450,1.15)));
+  // camera ceiling for this sampling
+  const camMax=Math.round(2.0e8/((fov/samp)*(fov*0.6/samp)));
+  const cons=[
+    {k:'speed',  n:'Speed',     need:rate,      have:camMax,   unit:'vol/s', ok:camMax>=rate},
+    {k:'signal', n:'Signal',    need:task.snr,  have:+snr.toFixed(1), unit:'SNR', ok:snr>=task.snr},
+    {k:'depth',  n:'Depth',     need:dep,       have:useDepth, unit:'µm',    ok:useDepth>=dep},
+    {k:'bleach', n:'Bleaching', need:dur,       have:+bleach.toFixed(1), unit:'min', ok:bleach>=dur}
+  ];
+  cons.forEach(c=>c.margin=c.have/c.need);
+  const failing=cons.filter(c=>!c.ok).sort((a,b)=>a.margin-b.margin);
+  const valid=stable>=35;return{fov,dep,dur,stable,valid,rate,samp,vox,ph,snr,useDepth,bleach,camMax,cons,
+         bind:failing[0]||null, closes:failing.length===0};
 }
 
-function fmt(n){ return n>=1e6?(n/1e6).toFixed(1)+"M":n>=1e3?(n/1e3).toFixed(0)+"k":n.toFixed(0); }
+// ---------- envelope plot: volume rate vs usable depth ----------
+function drawEnv(m){
+  const c=$('env'), dpr=devicePixelRatio||1, W=c.clientWidth, H=340;
+  c.width=W*dpr;c.height=H*dpr;const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,W,H);
+  const L=52,R=W-16,T=16,B=H-38, w=R-L, h=B-T;
+  const xmax=260, ymax=600;
+  const X=v=>L+(Math.min(v,xmax)/xmax)*w, Y=v=>B-(Math.min(v,ymax)/ymax)*h;
 
-function report(){
-  const d=design();
-  document.getElementById("sRate").textContent=d.rate.toFixed(d.rate<10?1:0)+" vol/s";
-  document.getElementById("sVox").textContent=d.dx.toFixed(2)+" µm";
-  document.getElementById("sVc").textContent=fmt(d.voxels);
-  document.getElementById("sPh").textContent=fmt(d.phot);
-  document.getElementById("sDep").textContent=(d.depthOK>0?d.depthOK.toFixed(0):"0")+" µm";
-  document.getElementById("sBl").textContent=d.blMin.toFixed(d.blMin<10?1:0)+" min";
+  // grid
+  g.strokeStyle='#132836';g.lineWidth=1;
+  for(let i=0;i<=5;i++){const y=T+i*h/5;g.beginPath();g.moveTo(L,y);g.lineTo(R,y);g.stroke()}
+  for(let i=0;i<=5;i++){const x=L+i*w/5;g.beginPath();g.moveTo(x,T);g.lineTo(x,B);g.stroke()}
 
-  const speedShort = d.rateMax < d.rateNeed*0.98;
-  const snrShort   = d.snr < d.q.snr;
-  const depthShort = d.depthOK < S.dep;
-  const bleachShort= d.blMin < S.dur;
-
-  const vt=document.getElementById("vT"), ve=document.getElementById("vE"),
-        vd=document.getElementById("verdict");
-  if(!speedShort && !snrShort && !bleachShort){
-    vt.textContent="Configuration closes";
-    ve.textContent="This acquisition supports the stated inference. "+
-      d.rate.toFixed(0)+" volumes per second at "+d.dx.toFixed(2)+
-      " µm sampling, with signal to spare at "+S.dep+" µm.";
-    vd.style.borderLeftColor="var(--ok)"; vt.style.color="var(--ok)";
-  }else if((speedShort?1:0)+(snrShort?1:0)+(bleachShort?1:0) >= 2){
-    vt.textContent="No configuration of this kind closes";
-    ve.textContent="More than one constraint is binding at once. Trading one against another "+
-      "will not recover the inference; the question or the measurement has to change.";
-    vd.style.borderLeftColor="var(--bad)"; vt.style.color="var(--bad)";
-  }else{
-    vt.textContent="Closes only with a trade";
-    ve.textContent="One constraint is binding. The panel below names it and what has to give.";
-    vd.style.borderLeftColor="var(--warn)"; vt.style.color="var(--warn)";
+  // achievable envelope curve: usable depth vs rate for current indicator+sampling
+  const pts=[];
+  for(let r=2;r<=xmax;r+=2){
+    const d=850*Math.pow(ind.bright,0.42)/Math.pow(r,0.30)*Math.pow(m.samp,0.16);
+    pts.push([r,d]);
   }
+  // shaded unreachable region above curve
+  g.beginPath();g.moveTo(X(pts[0][0]),Y(pts[0][1]));
+  pts.forEach(p=>g.lineTo(X(p[0]),Y(p[1])));
+  g.lineTo(X(xmax),T);g.lineTo(X(2),T);g.closePath();
+  g.fillStyle='rgba(255,107,127,.09)';g.fill();
 
-  const dot=c=>'<i style="background:'+c+'"></i>';
-  let L="";
-  L+=dot(speedShort?"#ff4b3a":"#2fe3d6")+"Speed: needs "+d.rateNeed.toFixed(0)+
-     " vol/s, camera allows "+d.rateMax.toFixed(d.rateMax<10?1:0)+"<br>";
-  L+=dot(snrShort?"#ff4b3a":"#2fe3d6")+"Signal: SNR "+d.snr.toFixed(1)+
-     " against "+d.q.snr.toFixed(0)+" required<br>";
-  L+=dot(depthShort?"#ffb03a":"#2fe3d6")+"Depth: usable to "+Math.max(0,d.depthOK).toFixed(0)+
-     " µm, asked for "+S.dep+"<br>";
-  L+=dot(bleachShort?"#ff4b3a":"#2fe3d6")+"Bleaching: "+d.blMin.toFixed(1)+
-     " min available, asked for "+S.dur;
-  document.getElementById("lims").innerHTML=L;
+  g.beginPath();pts.forEach((p,i)=>i?g.lineTo(X(p[0]),Y(p[1])):g.moveTo(X(p[0]),Y(p[1])));
+  g.strokeStyle='#4fd4ff';g.lineWidth=2;g.stroke();
 
-  let F=[];
-  if(speedShort) F.push("Shrink the field of view or coarsen sampling. Halving lateral extent "+
-    "quadruples the achievable volume rate.");
-  if(snrShort) F.push("A brighter indicator, a shallower target, or fewer volumes per second. "+
-    "Signal scales with dwell time, so speed and SNR trade directly.");
-  if(depthShort) F.push("Scattering is the limit, not the instrument. Beyond roughly "+
-    Math.max(0,d.depthOK).toFixed(0)+" µm no exposure recovers the signal at this rate.");
-  if(bleachShort) F.push("Reduce power and accept lower SNR, or record in intervals. "+
-    "The photon budget is spent whether or not the events of interest occur.");
-  if(!F.length) F.push("Nothing is binding. Sampling could be coarsened or the field widened "+
-    "before the inference is threatened.");
-  document.getElementById("fix").innerHTML=F.map(t=>dot("#6b8394")+t).join("<br>");
+  // camera speed ceiling
+  g.setLineDash([5,5]);g.strokeStyle='#a897ff';g.lineWidth=1.5;
+  g.beginPath();g.moveTo(X(m.camMax),T);g.lineTo(X(m.camMax),B);g.stroke();g.setLineDash([]);
+  g.fillStyle='#a897ff';g.font='11px Inter,sans-serif';g.textAlign='right';
+  if(m.camMax<xmax) g.fillText('camera ceiling',X(m.camMax)-6,T+13);
+
+  // requested point
+  const px=X(m.rate), py=Y(m.dep), inside=m.cons[0].ok&&m.cons[2].ok;
+  g.beginPath();g.arc(px,py,20,0,7);g.fillStyle=inside?'rgba(95,227,166,.14)':'rgba(255,107,127,.16)';g.fill();
+  g.beginPath();g.arc(px,py,6.5,0,7);g.fillStyle=inside?'#5fe3a6':'#ff6b7f';g.fill();
+  g.strokeStyle='#04101a';g.lineWidth=2;g.stroke();
+
+  // drop lines
+  g.setLineDash([3,4]);g.strokeStyle=inside?'rgba(95,227,166,.5)':'rgba(255,107,127,.5)';g.lineWidth=1;
+  g.beginPath();g.moveTo(px,py);g.lineTo(px,B);g.moveTo(px,py);g.lineTo(L,py);g.stroke();g.setLineDash([]);
+
+  g.fillStyle='#e9f3f9';g.font='600 12px Inter,sans-serif';g.textAlign='left';
+  g.fillText('requested',px+11,py-9);
+
+  // axes
+  g.strokeStyle='#24404f';g.lineWidth=1;
+  g.beginPath();g.moveTo(L,T);g.lineTo(L,B);g.lineTo(R,B);g.stroke();
+  g.fillStyle='#5d7686';g.font='11px Inter,sans-serif';g.textAlign='center';
+  for(let i=0;i<=5;i++){const v=Math.round(i*xmax/5);g.fillText(v,L+i*w/5,B+15)}
+  g.fillText('volume rate (vol/s)',L+w/2,B+31);
+  g.textAlign='right';
+  for(let i=0;i<=5;i++){const v=Math.round(i*ymax/5);g.fillText(v,L-7,B-i*h/5+4)}
+  g.save();g.translate(13,T+h/2);g.rotate(-Math.PI/2);g.textAlign='center';
+  g.fillText('usable depth (µm)',0,0);g.restore();
 }
 
-// --- volume rendering: swept sheet through a cell field ---
-const CELLS=[];(function(){let s=11;const r=()=>{s=(s*1103515245+12345)%2147483648;return s/2147483648;};
- for(let i=0;i<260;i++) CELLS.push({x:r(),y:r(),z:r(),p:r()*Math.PI*2});})();
-let t0=0;
-function frame(){
-  const d=design();
-  ctx.fillStyle="#04070c"; ctx.fillRect(0,0,W,H);
-  const cx=W/2, cy=H*0.52, bw=Math.min(W*0.62,H*0.86), bh=bw*0.52, dz=bw*0.30;
-  // volume box, oblique
-  ctx.strokeStyle="rgba(28,40,54,.9)"; ctx.lineWidth=1;
-  const P=(u,v,w)=>[cx+(u-0.5)*bw+(w-0.5)*dz*0.55, cy+(v-0.5)*bh-(w-0.5)*dz*0.42];
-  [[0,0],[1,0],[1,1],[0,1]].forEach(([a,b],i,arr)=>{
-    const [c,e]=arr[(i+1)%4];
-    [0,1].forEach(w=>{const p=P(a,b,w),q2=P(c,e,w);
-      ctx.beginPath();ctx.moveTo(p[0],p[1]);ctx.lineTo(q2[0],q2[1]);ctx.stroke();});
-    const p0=P(a,b,0),p1=P(a,b,1);
-    ctx.beginPath();ctx.moveTo(p0[0],p0[1]);ctx.lineTo(p1[0],p1[1]);ctx.stroke();
+// ---------- radar: required vs available ----------
+function drawRad(m){
+  const c=$('rad'),dpr=devicePixelRatio||1,W=c.clientWidth,H=300;
+  c.width=W*dpr;c.height=H*dpr;const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+  g.clearRect(0,0,W,H);
+  const cx=W/2, cy=H/2-2, R=Math.min(W,H)/2-52, N=4;
+  const ang=i=>-Math.PI/2+i*2*Math.PI/N;
+
+  // rings
+  g.strokeStyle='#132836';g.lineWidth=1;
+  [0.25,0.5,0.75,1].forEach(f=>{
+    g.beginPath();
+    for(let i=0;i<=N;i++){const a=ang(i%N);const x=cx+Math.cos(a)*R*f,y=cy+Math.sin(a)*R*f;i?g.lineTo(x,y):g.moveTo(x,y)}
+    g.stroke();
   });
-  // sweeping sheet
-  const sw=(t0*Math.min(1.4,d.rate/40))%1;
-  ctx.globalCompositeOperation="lighter";
-  const a=P(0,0,sw),b=P(1,0,sw),c2=P(1,1,sw),e2=P(0,1,sw);
-  const g=ctx.createLinearGradient(a[0],a[1],c2[0],c2[1]);
-  g.addColorStop(0,"rgba(79,214,255,.10)");g.addColorStop(.5,"rgba(79,214,255,.20)");
-  g.addColorStop(1,"rgba(79,214,255,.10)");
-  ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.lineTo(c2[0],c2[1]);
-  ctx.lineTo(e2[0],e2[1]);ctx.closePath();ctx.fillStyle=g;ctx.fill();
-  ctx.strokeStyle="rgba(79,214,255,.55)";ctx.lineWidth=1.2;ctx.stroke();
-  // cells: brightness falls with depth, blur grows, size follows sampling
-  const rad=Math.max(1.2, 7/Math.max(0.45,d.dx));
-  CELLS.forEach(o=>{
-    const depthUm=o.z*S.dep;
-    const att=Math.exp(-depthUm/L_SCATTER);
-    const near=Math.exp(-Math.pow((o.z-sw)/0.10,2));
-    const act=0.35+0.65*Math.pow(Math.sin(t0*2.2+o.p)*0.5+0.5,2);
-    const [px,py]=P(o.x,o.y,o.z);
-    const al=Math.min(1,(0.05+0.75*near)*att*act*Math.min(1,d.snr/8));
-    if(al<0.012) return;
-    ctx.beginPath();ctx.arc(px,py,rad*(0.7+0.5*near),0,Math.PI*2);
-    ctx.fillStyle="rgba(60,224,200,"+al.toFixed(3)+")";
-    ctx.shadowColor="#3ce0c8";ctx.shadowBlur=(2+depthUm/34)*near*6;
-    ctx.fill();ctx.shadowBlur=0;
+  for(let i=0;i<N;i++){const a=ang(i);g.beginPath();g.moveTo(cx,cy);g.lineTo(cx+Math.cos(a)*R,cy+Math.sin(a)*R);g.stroke()}
+
+  // requirement ring = 1.0
+  g.beginPath();
+  for(let i=0;i<=N;i++){const a=ang(i%N);const x=cx+Math.cos(a)*R*0.5,y=cy+Math.sin(a)*R*0.5;i?g.lineTo(x,y):g.moveTo(x,y)}
+  g.strokeStyle='#ffc857';g.lineWidth=1.5;g.setLineDash([4,4]);g.stroke();g.setLineDash([]);
+
+  // available polygon, scaled so requirement sits at 0.5R and margin 2x at R
+  const f=c2=>Math.max(.06,Math.min(1,(Math.log2(Math.max(.06,c2.margin))+2)/4+0.0)*1);
+  const rad=m.cons.map(c2=>Math.max(.08,Math.min(1, 0.5*Math.min(2.2,c2.margin))));
+  g.beginPath();
+  rad.forEach((v,i)=>{const a=ang(i);const x=cx+Math.cos(a)*R*v,y=cy+Math.sin(a)*R*v;i?g.lineTo(x,y):g.moveTo(x,y)});
+  g.closePath();
+  g.fillStyle=m.closes?'rgba(95,227,166,.18)':'rgba(255,107,127,.16)';g.fill();
+  g.strokeStyle=m.closes?'#5fe3a6':'#ff6b7f';g.lineWidth=2;g.stroke();
+
+  rad.forEach((v,i)=>{
+    const a=ang(i),x=cx+Math.cos(a)*R*v,y=cy+Math.sin(a)*R*v;
+    g.beginPath();g.arc(x,y,4,0,7);
+    g.fillStyle=m.cons[i].ok?'#5fe3a6':'#ff6b7f';g.fill();
   });
-  ctx.globalCompositeOperation="source-over";
-  ctx.fillStyle="rgba(107,131,148,.8)";ctx.font="11px system-ui";
-  ctx.fillText(S.fov+" × "+Math.round(S.fov*0.6)+" × "+S.dep+" µm    "+
-    d.rate.toFixed(d.rate<10?1:0)+" vol/s    "+d.dx.toFixed(2)+" µm voxels", 20, H-18);
-  t0+=0.012; requestAnimationFrame(frame);
+
+  g.font='11.5px Inter,sans-serif';g.textAlign='center';
+  m.cons.forEach((c2,i)=>{
+    const a=ang(i),x=cx+Math.cos(a)*(R+22),y=cy+Math.sin(a)*(R+22)+4;
+    g.fillStyle=c2.ok?'#8aa4b6':'#ff6b7f';
+    g.fillText(c2.n,x,y);
+  });
+  g.fillStyle='#ffc857';g.font='10.5px Inter,sans-serif';
+  g.fillText('required',cx,cy-R*0.5-6);
 }
 
-// --- controls ---
-const qs=document.getElementById("q");
-Q.forEach((d,i)=>{const b=document.createElement("button");b.textContent=d.n;
- b.setAttribute("aria-pressed",i===S.q);
- b.onclick=()=>{S.q=i;[...qs.children].forEach((c,j)=>c.setAttribute("aria-pressed",j===i));report();};
- qs.appendChild(b);});
-const is=document.getElementById("ind");
-IND.forEach((d,i)=>{const b=document.createElement("button");b.textContent=d.k;b.title=d.n;
- b.setAttribute("aria-pressed",i===S.ind);
- b.onclick=()=>{S.ind=i;[...is.children].forEach((c,j)=>c.setAttribute("aria-pressed",j===i));report();};
- is.appendChild(b);});
-const bind=(id,key,fmtF,out)=>{const s=document.getElementById(id),o=document.getElementById(out);
- s.oninput=()=>{S[key]=parseFloat(s.value);o.textContent=fmtF(S[key]);report();};
- o.textContent=fmtF(S[key]);};
-bind("fov","fov",v=>v+" µm","vFov");
-bind("dep","dep",v=>v+" µm","vDep");
-bind("dur","dur",v=>v+" min","vDur");
+// ---------- validated timing evidence trace ----------
+function drawTrace(m){
+  const c=$('trace'),dpr=devicePixelRatio||1,W=c.clientWidth,H=118;
+  c.width=W*dpr;c.height=H*dpr;const g=c.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,W,H);
+  const L=40,R=W-14,T=12,B=H-25,w=R-L,h=B-T, X=t=>L+(t+0.10)/0.45*w;
+  g.strokeStyle='#132836';g.beginPath();g.moveTo(L,B);g.lineTo(R,B);g.stroke();
+  g.setLineDash([3,3]);g.strokeStyle='#ffc857';g.beginPath();g.moveTo(X(0),T);g.lineTo(X(0),B);g.stroke();g.setLineDash([]);
+  const tau=Math.max(.06,ind.tau*.22), amp=ind.k==='8m'?1:ind.k==='6s'?.72:.85;
+  g.beginPath();for(let i=0;i<=180;i++){const t=-.10+.45*i/180;const rise=t<=0?0:(1-Math.exp(-t/.025))*Math.exp(-t/tau);const y=B-h*(.12+amp*rise*.76);const x=X(t);i?g.lineTo(x,y):g.moveTo(x,y)}g.strokeStyle='#4fd4ff';g.lineWidth=2;g.stroke();
+  const win=ind.k==='8m'?.067:ind.k==='6s'?.250:.167;g.fillStyle='rgba(168,151,255,.13)';g.fillRect(X(0),T,Math.max(2,X(Math.min(.35,win))-X(0)),B-T);
+  g.strokeStyle='#a897ff';g.beginPath();g.moveTo(X(Math.min(.35,win)),T);g.lineTo(X(Math.min(.35,win)),B);g.stroke();
+  g.fillStyle='#8aa4b6';g.font='10.5px Inter,sans-serif';g.fillText('target',X(0)+5,T+12);g.textAlign='right';g.fillText(ind.k==='8m'?'validated anchor 67 ms / 2 volumes':`${ind.n} illustrative response trace`,R,B+17);g.textAlign='left';
+}
 
+// ---------- render ----------
+function render(){
+  const m=model();
+  $('nFov').textContent=$('fov').value;$('nDep').textContent=$('dep').value;$('nDur').textContent=$('dur').value;$('nStable').textContent=m.stable+'%';
+  $('kRate').textContent=m.rate;$('kSamp').textContent=m.samp.toFixed(2);
+  $('kVox').textContent=(m.vox/1e6).toFixed(1)+'M';
+  $('kPh').textContent=Math.round(m.ph);
+  $('kUse').textContent=m.useDepth;$('kBl').textContent=m.bleach.toFixed(1);
 
-document.getElementById("downloadReport").onclick=()=>{
-  const d=design(), q=Q[S.q], ind=IND[S.ind];
-  const speedShort=d.rateMax<d.rateNeed*0.98;
-  const snrShort=d.snr<d.q.snr;
-  const depthShort=d.depthOK<S.dep;
-  const bleachShort=d.blMin<S.dur;
-  const issues=[];
-  if(speedShort)issues.push("speed");
-  if(snrShort)issues.push("signal");
-  if(depthShort)issues.push("depth");
-  if(bleachShort)issues.push("bleaching");
-  const verdict=!issues.length?"CONFIGURATION CLOSES":issues.length>=2?"CHANGE MEASUREMENT / QUESTION":"CLOSES WITH A TRADE";
-  const guidance=[];
-  if(speedShort)guidance.push("Shrink the field of view or coarsen sampling.");
-  if(snrShort)guidance.push("Increase photon budget, use a brighter indicator, reduce depth, or lower volume rate.");
-  if(depthShort)guidance.push("The current depth request is beyond the supported optical depth at this rate.");
-  if(bleachShort)guidance.push("Reduce duty cycle/power or record intermittently.");
-  if(!guidance.length)guidance.push("No tested constraint is binding; acquisition can be widened or coarsened before the declared inference is threatened.");
-  const body=`<!doctype html><meta charset="utf-8"><title>OptiCeil sample report</title><style>body{font:15px/1.55 system-ui;max-width:860px;margin:40px auto;padding:0 20px;color:#17212b}h1{font-size:28px}table{border-collapse:collapse;width:100%}td{padding:8px;border-bottom:1px solid #ddd}td:first-child{color:#667}.box{padding:14px;background:#f3f7f9;border-left:4px solid #7856d8}</style><h1>OptiCeil · sample image-design report</h1><div class="box"><b>${verdict}</b><br>${q.why}</div><h2>Declared inference</h2><table><tr><td>Task</td><td>${q.n}</td></tr><tr><td>Indicator</td><td>${ind.n}</td></tr><tr><td>Field of view</td><td>${S.fov} µm</td></tr><tr><td>Depth</td><td>${S.dep} µm</td></tr><tr><td>Duration</td><td>${S.dur} min</td></tr></table><h2>Required / achieved acquisition</h2><table><tr><td>Required temporal rate</td><td>${d.rateNeed.toFixed(1)} vol/s</td></tr><tr><td>Achievable rate</td><td>${d.rate.toFixed(1)} vol/s</td></tr><tr><td>Lateral sampling</td><td>${d.dx.toFixed(2)} µm</td></tr><tr><td>Voxels per volume</td><td>${fmt(d.voxels)}</td></tr><tr><td>Signal photons / voxel</td><td>${fmt(d.phot)}</td></tr><tr><td>Usable depth at this rate</td><td>${Math.max(0,d.depthOK).toFixed(0)} µm</td></tr><tr><td>Bleaching-limited duration</td><td>${d.blMin.toFixed(1)} min</td></tr></table><h2>Binding constraints</h2><p>${issues.length?issues.join(", "):"none in the tested design space"}</p><h2>Guidance</h2><ul>${guidance.map(x=>"<li>"+x+"</li>").join("")}</ul><h2>Validation basis</h2><p>OptiCeil was retrospectively validated on the CASCADE ground-truth calcium-imaging collection: 914 recording segments, 312 neurons and 146,962 balanced spike-versus-silent samples. The best fixed model reached 83.8% balanced accuracy and the conservative cross-geometry ceiling was approximately 87%. Most recoverable information arrived within the first several post-target volumes; the present page is an interactive acquisition-design illustration rather than a calibration of a specific microscope.</p>`;
-  const blob=new Blob([body],{type:"text/html"}),url=URL.createObjectURL(blob),a=document.createElement("a");
-  a.href=url;a.download="OptiCeil_sample_report.html";a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
-};
+  $('cons').innerHTML=m.cons.map(c=>`
+    <span class="d" style="background:${c.ok?'var(--gr)':'var(--rd)'}"></span>
+    <span class="n${(!c.ok&&m.bind&&m.bind.k===c.k)?' bind':''}">${c.n}</span>
+    <span class="v">${c.have} / ${c.need} ${c.unit}</span>`).join('');
 
-size(); report(); frame();
+  const v=$('verdict');
+  if(!m.valid){
+    v.className='verdict bad';$('vm').textContent='!';
+    $('vh').textContent='CEILING_UNRESOLVED';
+    $('vp').textContent=`Estimator geometry agreement is only ${m.stable}%. OptiCeil refuses to report a recoverability ceiling in this region.`;
+    $('rel').className='rel';$('rel').textContent='Validity failed: widen or reject the candidate ceiling, stabilize the geometry / support, and re-estimate before optimizing an acquisition against it.';
+  } else if(m.closes){
+    v.className='verdict ok';$('vm').textContent='✓';
+    $('vh').textContent='Configuration closes';
+    $('vp').textContent='Every constraint has margin at the stated inference. Further adjustment is unlikely to add anything for this task.';
+    $('rel').className='rel ok';
+    $('rel').textContent='No single constraint is limiting. The requested acquisition sits inside the achievable envelope.';
+  } else {
+    v.className='verdict no';$('vm').textContent='◎';
+    $('vh').textContent='Closes only with a trade';
+    $('vp').textContent=`${m.bind.n} is binding: ${m.bind.have} ${m.bind.unit} available against ${m.bind.need} required. The panel names what it would take to relieve it.`;
+    const R={
+      speed:'Reduce field of view or coarsen lateral sampling. Voxels per volume scale with both, and camera bandwidth is fixed.',
+      signal:'A brighter indicator, a shallower target, or fewer volumes per second. Signal scales with dwell time, so speed and SNR trade directly.',
+      depth:'Scattering is the limit, not the instrument. Beyond roughly '+m.useDepth+' µm no exposure recovers the signal at this rate.',
+      bleach:'Lower the volume rate or shorten the recording. Photon dose accumulates with both.'};
+    $('rel').className='rel';$('rel').textContent=R[m.bind.k];
+  }
+  if(!m.valid){$('instant').innerHTML=`<b>OptiCeil refuses the number.</b> The estimator is outside its own validity region, so the ceiling is unresolved rather than guessed.`}
+  else if(m.bind&&m.bind.k==='bleach'){$('instant').innerHTML=`<b>Your ${m.dur}-minute recording dies at minute ${m.bleach.toFixed(1)}.</b> Lower the volume rate or shorten the recording.`}
+  else if(m.bind){$('instant').innerHTML=`<b>${m.bind.n} fails first.</b> You asked for ${m.bind.need} ${m.bind.unit}; this configuration can supply ${m.bind.have} ${m.bind.unit}.`}
+  else {$('instant').innerHTML=`<b>At this setting, the usable recording dies at minute ${m.bleach.toFixed(1)}.</b> You asked for ${m.dur} minutes, so the request clears the bleaching budget by ${Math.max(0,m.bleach-m.dur).toFixed(1)} minutes.`}
+  $('stageSub').textContent=task.n.toLowerCase()+' · '+ind.n;
+  drawEnv(m);drawRad(m);drawTrace(m);
+}
 
-})();
+document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{
+  task=TASKS.find(t=>t.k===b.dataset.t);
+  document.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x===b));render()});
+document.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{
+  ind=INDS.find(i=>i.k===b.dataset.i);
+  document.querySelectorAll('[data-i]').forEach(x=>x.classList.toggle('on',x===b));render()});
+['fov','dep','dur','stable'].forEach(id=>$(id).oninput=render);$('breakEstimator').onclick=()=>{$('stable').value=20;render()};
+
+// Direct figure interaction: drag the envelope to change field-of-view/depth; wheel changes duration.
+let envDrag=false;
+function envPoint(e){const r=$('env').getBoundingClientRect(),x=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(e.clientY-r.top)/r.height));$('fov').value=Math.round(120+x*(900-120));$('dep').value=Math.round(40+(1-y)*(500-40));render()}
+$('env').addEventListener('pointerdown',e=>{envDrag=true;$('env').setPointerCapture(e.pointerId);envPoint(e)});$('env').addEventListener('pointermove',e=>{if(envDrag)envPoint(e)});$('env').addEventListener('pointerup',()=>envDrag=false);$('env').addEventListener('pointercancel',()=>envDrag=false);$('env').addEventListener('wheel',e=>{e.preventDefault();$('dur').value=Math.max(1,Math.min(60,+$('dur').value-Math.sign(e.deltaY)));render()},{passive:false});
+$('rad').addEventListener('pointerdown',e=>{const r=$('rad').getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;if(y<.35)$('fov').value=Math.max(120,+$('fov').value-40);else if(y>.65)$('dep').value=Math.max(40,+$('dep').value-20);else if(x>.55){const a=[...document.querySelectorAll('[data-i]')],idx=a.findIndex(b=>b.classList.contains('on'));a[Math.min(a.length-1,idx+1)]?.click()}else $('dur').value=Math.max(1,+$('dur').value-2);render()});
+$('trace').addEventListener('wheel',e=>{e.preventDefault();const a=[...document.querySelectorAll('[data-i]')],idx=a.findIndex(b=>b.classList.contains('on')),j=Math.max(0,Math.min(a.length-1,idx+Math.sign(e.deltaY)));a[j]?.click()},{passive:false});
+$('downloadReport').onclick=()=>{const m=model(), bind=m.bind, body=`<!doctype html><meta charset="utf-8"><title>OptiCeil current report</title><style>body{font:15px/1.55 system-ui;max-width:920px;margin:40px auto;padding:0 20px;color:#17212b}table{border-collapse:collapse;width:100%}td{padding:8px;border-bottom:1px solid #ddd}td:first-child{color:#667}.box{padding:14px;background:#f3f7f9;border-left:4px solid #1a9fc7}</style><h1>OptiCeil · current acquisition report</h1><div class="box"><b>${$('vh').textContent}</b><br>${$('vp').textContent}</div><h2>Requested inference / configuration</h2><table><tr><td>Inference</td><td>${task.n}</td></tr><tr><td>Indicator</td><td>${ind.n}</td></tr><tr><td>Field of view</td><td>${m.fov}</td></tr><tr><td>Required depth</td><td>${m.dep} µm</td></tr><tr><td>Recording duration</td><td>${m.dur} min</td></tr><tr><td>Estimator geometry agreement</td><td>${m.stable}% · ${m.valid?'valid':'CEILING_UNRESOLVED'}</td></tr><tr><td>Required volume rate</td><td>${m.rate} vol/s</td></tr><tr><td>Lateral sampling</td><td>${m.samp.toFixed(2)} µm</td></tr></table><h2>Constraint result</h2><table>${m.cons.map(c=>`<tr><td>${c.n}</td><td>${c.have} / ${c.need} ${c.unit} · ${c.ok?'passes':'fails'}</td></tr>`).join('')}</table><p><b>Estimator validity:</b> ${m.valid?'passes':'CEILING_UNRESOLVED — do not report or optimize against the ceiling'}.</p><p><b>Binding constraint:</b> ${bind?bind.n:'none'}.</p><p>${$('rel').textContent}</p><h2>Validation anchor</h2><p>The frozen calcium-imaging validation selected 67 ms / 2 post-target volumes for GCaMP8m at the 99% frontier; nonspinal GCaMP6s selected 250 ms / 8 volumes and spinal GCaMP6s 667 ms / 20 volumes. The speed/signal/depth/bleaching configuration model on this public page is an interactive design demonstrator rather than a prospective microscope calibration.</p>`;const blob=new Blob([body],{type:'text/html'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='OptiCeil_current_report.html';a.click();setTimeout(()=>URL.revokeObjectURL(u),5000)};
+
+addEventListener('resize',render);
+document.querySelector('[data-t]').classList.add('on');
+document.querySelector('[data-i="8m"]').classList.add('on');
+render();
 </script>
 </body>
 </html>
