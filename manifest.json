@@ -1,0 +1,20 @@
+{
+  "version": "2026-09-09-final",
+  "primary": [
+    "Deferra-Surgery",
+    "Deferra-Anaesthesiology",
+    "OptiCeil-Surgical",
+    "NPIS",
+    "TotemicAI",
+    "Acquire",
+    "TopolAI",
+    "ABP",
+    "AIO",
+    "CTF"
+  ],
+  "support": [
+    "CMH-Interface",
+    "CMH-Authenticated-Gateway",
+    "CMH-Guard"
+  ]
+}

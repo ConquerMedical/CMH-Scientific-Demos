@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deferra — Simulated Operating-Room Demo</title>
+<style>
+:root{--bg:#050a10;--panel:#0b1520;--panel2:#08111a;--line:#1c3242;--ink:#f1f7fb;--mut:#8fa7b8;--cyan:#62d8ff;--green:#77efb4;--yellow:#ffd36a;--red:#ff6578;--vio:#b7a5ff;--orange:#ff9f68}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0,#17283a 0,#050a10 44%);color:var(--ink);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,sans-serif}.wrap{max-width:1480px;margin:auto;padding:18px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}.brand{font-weight:850;letter-spacing:.12em}.brand small{display:block;color:var(--mut);font-size:10px;letter-spacing:.19em;margin-top:2px}.badge{padding:7px 10px;border:1px solid var(--line);border-radius:99px;color:var(--yellow);font-size:11px}.layout{display:grid;grid-template-columns:240px minmax(580px,1fr) 330px;gap:14px}.card{background:linear-gradient(180deg,#0e1b28f2,#08131dee);border:1px solid var(--line);border-radius:17px;box-shadow:0 18px 55px rgba(0,0,0,.25);overflow:hidden}.pad{padding:15px}.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.16em;color:var(--mut)}h1{margin:0;font-size:34px;letter-spacing:-.04em}.stateBig{font-size:28px;font-weight:900;letter-spacing:-.035em;margin:3px 0}.sub{color:#b9cad7;margin:6px 0 0}.monitor{position:relative;background:#02070b;aspect-ratio:16/10;overflow:hidden}.monitor video,.monitor canvas{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}.monitor video{z-index:0;background:#02070b;transform-origin:center center}.monitor canvas{z-index:1;pointer-events:none}.hud{position:absolute;inset:0;pointer-events:none;z-index:2}.hudTop{position:absolute;top:12px;left:13px;right:13px;display:flex;justify-content:space-between;gap:8px}.chip{padding:5px 8px;border-radius:99px;background:#06131dcc;border:1px solid #21465e;color:#dcecf5;font-size:10px;backdrop-filter:blur(8px)}.supportRing{position:absolute;right:14px;bottom:14px;width:112px;height:112px;border-radius:50%;background:conic-gradient(var(--green) 0deg,var(--green) 280deg,#152838 280deg);display:grid;place-items:center;box-shadow:0 0 0 1px #31546a inset}.supportRing:after{content:"";position:absolute;width:84px;height:84px;border-radius:50%;background:#07131ddd;border:1px solid #1b384b}.supportRing .n{position:relative;z-index:2;text-align:center;font-size:25px;font-weight:900}.supportRing small{display:block;font-size:8px;color:var(--mut);letter-spacing:.11em;text-transform:uppercase}.reticle{position:absolute;left:50%;top:50%;width:66px;height:66px;margin:-33px;border:1px solid #9be7ff55;border-radius:50%}.reticle:before,.reticle:after{content:"";position:absolute;background:#9be7ff66}.reticle:before{left:50%;top:-10px;width:1px;height:86px}.reticle:after{top:50%;left:-10px;height:1px;width:86px}.timeline{padding:12px 14px;border-top:1px solid var(--line);background:#07121b}.bar{height:7px;border-radius:99px;background:#132432;overflow:hidden;position:relative}.bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--vio));transition:.2s}.timeLabels{display:flex;justify-content:space-between;color:var(--mut);font-size:9px;margin-top:5px}.vital{padding:12px 13px;border-bottom:1px solid #172b3a}.vital .row{display:flex;justify-content:space-between;align-items:end}.vital b{font-size:29px;letter-spacing:-.04em}.vital span{color:var(--mut);font-size:10px}.mini{height:54px;width:100%;display:block;margin-top:4px}.signal{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid #172b3a}.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 14px currentColor}.control{padding:11px 13px;border-top:1px solid #172b3a}.control label{display:flex;justify-content:space-between;color:#c7d6df;font-size:11px}.control input{width:100%;accent-color:var(--cyan)}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px}.btn{border:1px solid #2c475a;background:#0b1924;color:white;padding:10px;border-radius:10px;font-weight:760;cursor:pointer}.btn:hover{border-color:var(--cyan)}.btn.primary{background:#0c2940;border-color:#28658a}.btn.warn{border-color:#6b4f20;background:#221a0e}.btn.danger{border-color:#6b2630;background:#211014}.module{padding:13px;border-bottom:1px solid #172b3a}.module h3{font-size:12px;text-transform:uppercase;letter-spacing:.11em;color:#cfe1ec;margin:0 0 8px}.meter{height:9px;border:1px solid #1a3a4e;background:#08121a;border-radius:99px;overflow:hidden}.meter div{height:100%;width:78%;background:linear-gradient(90deg,var(--red),var(--yellow),var(--green));transition:.35s}.kv{display:grid;grid-template-columns:1fr auto;gap:7px 10px;margin-top:9px;font-size:11px}.kv span:nth-child(odd){color:var(--mut)}.route{font-size:22px;font-weight:900;color:var(--green);letter-spacing:-.03em}.msg{border-left:3px solid var(--cyan);padding:9px 10px;background:#081822;border-radius:8px;color:#d9e9f2;margin-top:9px;font-size:11px}.msg.alert{border-color:var(--yellow);background:#1c180d;color:#f1dfab}.msg.stop{border-color:var(--red);background:#1c0e12;color:#ffd5da}.feed{grid-column:1/-1;display:grid;grid-template-columns:1.1fr .9fr;gap:14px;margin-top:14px}.feedHead{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;border-bottom:1px solid var(--line)}.log{max-height:230px;overflow:auto;padding:10px 14px}.entry{display:grid;grid-template-columns:72px 88px 1fr;gap:8px;padding:7px 0;border-bottom:1px solid #122532;font-size:11px}.entry .t{color:#6f899b}.entry .who{color:var(--cyan);font-weight:700}.entry .system{color:var(--vio)}.voiceChoices{display:flex;gap:7px;flex-wrap:wrap;padding:10px 14px 14px}.voiceBtn{font-size:10px;padding:7px 9px}.footer{margin:16px 4px 3px;color:#6f8595;font-size:10px;display:flex;justify-content:space-between}.disclaimer{padding:10px 12px;background:#17170e;border:1px solid #474120;color:#d9ca92;border-radius:10px;margin:10px 0 0;font-size:10px}@media(max-width:1150px){.layout{grid-template-columns:220px 1fr}.right{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr)}.feed{grid-template-columns:1fr}}@media(max-width:760px){.layout{grid-template-columns:1fr}.right{display:block}.feed{grid-template-columns:1fr}.monitor{aspect-ratio:4/3}.top{align-items:flex-start;gap:10px}.badge{font-size:9px}}
+
+.provenance{padding:8px 14px;border-top:1px solid var(--line);background:#061019;color:#91a8b8;font-size:10px;line-height:1.45}
+.provenance b{color:#d7e7f0}
+.stateGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.stateCell{padding:9px;border:1px solid #1d3444;border-radius:10px;background:#07131c}
+.stateCell span{display:block;color:var(--mut);font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+.stateCell b{display:block;margin-top:3px;font-size:12px;color:#dcecf5}
+.routeRule{margin-top:9px;padding:8px 9px;border-radius:8px;background:#071923;border:1px solid #19364a;color:#b8ccd9;font-size:10px}
+</style></head>
+<body><div class="wrap">
+<div class="top"><div class="brand">CMH SCIENTIFIC<small>DEFERRA · SURGERY · INFORMATION ROUTING</small></div><div class="badge">SIMULATED PROCEDURAL DEMONSTRATION · NOT CLINICAL GUIDANCE</div></div>
+<div class="layout">
+  <aside class="card left">
+    <div class="pad"><div class="eyebrow">Patient telemetry</div><h1 style="font-size:26px">Live context</h1><p class="sub" style="font-size:12px">Synthetic signals are fused with the procedural view and surgeon notes.</p></div>
+    <div class="vital"><div class="row"><div><span>Heart rate</span><b id="hr">76</b></div><span>bpm</span></div><canvas class="mini" id="hrc"></canvas></div>
+    <div class="vital"><div class="row"><div><span>Mean arterial pressure</span><b id="map">82</b></div><span>mmHg</span></div><canvas class="mini" id="mapc"></canvas></div>
+    <div class="vital"><div class="row"><div><span>SpO₂</span><b id="spo">99</b></div><span>%</span></div><canvas class="mini" id="spoc"></canvas></div>
+    <div class="signal"><span class="dot" id="vitalDot"></span><span id="vitalText">physiology coherent</span></div>
+    <div class="control"><label>Focus <b id="focusV">92</b></label><input id="focus" type="range" min="40" max="100" value="92"></div>
+    <div class="control"><label>Glare <b id="glareV">14</b></label><input id="glare" type="range" min="0" max="70" value="14"></div>
+    <div class="control"><label>Scope angle <b id="angleV">0°</b></label><input id="angle" type="range" min="-18" max="18" value="0"></div>
+    <div class="actions"><button class="btn primary" id="play">▶ Run 60-sec case</button><button class="btn" id="reset">Reset</button><button class="btn warn" id="visual">Visual degradation</button><button class="btn danger" id="phys">Physiologic departure</button></div>
+  </aside>
+
+  <main class="card">
+    <div class="monitor"><video id="surgVideo" autoplay muted loop playsinline preload="auto" src="assets/field.mp4"></video><canvas id="surg"></canvas><div class="hud"><div class="hudTop"><span class="chip">Camera · laparoscope · LIVE</span><span class="chip" id="phase">Phase · stable dissection</span><span class="chip" id="clock">00:00</span></div><div class="reticle"></div><div class="supportRing" id="ring"><div class="n"><span id="supportNum">92</span><small>visual support</small></div></div></div></div>
+    <div class="provenance"><b>Synthetic AI-generated operative visualization.</b> No patient data or real operative recording is used. The video is illustrative only and does not perform anatomical or tissue-structure identification.</div>
+    <div class="timeline"><div class="bar"><i id="progress"></i></div><div class="timeLabels"><span>stable</span><span>view degraded</span><span>view restored</span><span>response change</span><span>reference forming</span></div></div>
+    <div class="pad" style="display:flex;justify-content:space-between;gap:16px;align-items:center"><div><div class="eyebrow">What should happen now?</div><div class="stateBig" id="mainState">DEFER · NO REASON TO INTERRUPT</div><div class="sub" id="mainReason">The view is adequate and no supported change requires interruption.</div></div><button class="btn" id="explain">Why?</button></div>
+  </main>
+
+  <aside class="card right">
+    <div class="module"><h3>Four questions Deferra checks</h3>
+      <div class="route" id="route">DEFER</div>
+      <div class="stateGrid">
+        <div class="stateCell"><span>1 · Can the system trust the view?</span><b id="measureState">Adequate</b></div>
+        <div class="stateCell"><span>2 · Has the course moved?</span><b id="trajState">Coherent</b></div>
+        <div class="stateCell"><span>3 · Has the response changed?</span><b id="deformState">No supported change</b></div>
+        <div class="stateCell"><span>4 · Is there enough evidence?</span><b id="opSupportState">Strong</b></div>
+      </div>
+      <div class="kv"><span>Assistance eligibility</span><b id="elig">not needed</b><span>Routing precedence</span><b id="precedence">coherent state</b></div>
+      <div class="routeRule" id="routeRule">Measurement validity is checked first; unsupported or ambiguous evidence cannot authorize stronger assistance or a law-state update.</div>
+      <div class="msg" id="deferMsg">Observed trajectory remains coherent with the recent procedural course.</div>
+    </div>
+    <div class="module"><h3>OptiCeil acquisition gate</h3><div class="meter"><div id="optBar"></div></div><div class="kv"><span>Task-conditioned optical support</span><b id="optScore">92%</b><span>Acquisition action</span><b id="optAction">USE / HOLD</b><span>Dominant limitation</span><b id="limitation">none</b></div><div class="msg" id="optMsg">Current view is adequate for the simulated visual-support task.</div></div>
+    <div class="module"><h3>Multimodal context</h3><div class="kv"><span>Operative image</span><b id="imgState">stable</b><span>Voice context</span><b id="voiceState">quiet</b><span>Physiology</span><b id="phyState">stable</b><span>Instrument motion</span><b id="instState">expected</b></div></div>
+    <div class="disclaimer">All scores, thresholds, vitals, events, routing states, and recommendations are synthetic. The operative visualization is AI-generated, uses no patient data, and makes no anatomical-identification claim. The source video is a clean field; smoke, glare, blur, and field-change cues are applied live by the demo controls and scenario logic. This page demonstrates architecture and workflow only.</div>
+  </aside>
+</div>
+
+<div class="feed">
+  <section class="card"><div class="feedHead"><div><div class="eyebrow">Live event log</div><b>What changed, and why the system changed state</b></div><button class="btn" id="clearLog">Clear</button></div><div class="log" id="log"></div></section>
+  <section class="card"><div class="feedHead"><div><div class="eyebrow">Surgeon voice context</div><b>Tap a phrase or use the browser microphone</b></div><button class="btn" id="mic">🎙 Enable mic</button></div><div class="voiceChoices"><button class="btn voiceBtn" data-say="Field looks clean. Continuing the current dissection.">“Field looks clean.”</button><button class="btn voiceBtn" data-say="I cannot see the plane clearly.">“I can’t see the plane.”</button><button class="btn voiceBtn" data-say="Why are you deferring?">“Why are you deferring?”</button><button class="btn voiceBtn" data-say="Mark this as a point of interest.">“Mark this point.”</button></div><div class="log" id="transcript"></div></section>
+</div>
+<div class="footer"><span>CMH Scientific · Deferra public prototype</span><span>Simulated operating-room workflow · no patient data · no clinical instruction</span></div>
+</div>
+<script>
+const $=id=>document.getElementById(id); const video=$('surgVideo'),canv=$('surg'),ctx=canv.getContext('2d'); let W=0,H=0,t=0,playing=false,last=performance.now(),manualOptics=false,manualHaze=false,manualPhys=false; const logs=[]; const transcript=[]; const histories={hr:[],map:[],spo:[]}; let voiceSignal='';
+function resize(){const r=canv.getBoundingClientRect();W=r.width;H=r.height;canv.width=W*devicePixelRatio;canv.height=H*devicePixelRatio;ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);['hrc','mapc','spoc'].forEach(id=>{const c=$(id),q=c.getBoundingClientRect();c.width=q.width*devicePixelRatio;c.height=q.height*devicePixelRatio;c.getContext('2d').setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0)})}
+function pad(n){return String(n).padStart(2,'0')} function stamp(){return `00:${pad(Math.floor(t))}`}
+function addLog(who,msg){logs.unshift({time:stamp(),who,msg}); $('log').innerHTML=logs.slice(0,18).map(e=>`<div class="entry"><span class="t">${e.time}</span><span class="who ${e.who==='DEFERRA'?'system':''}">${e.who}</span><span>${e.msg}</span></div>`).join('')}
+function addVoice(msg){transcript.unshift({time:stamp(),msg}); $('transcript').innerHTML=transcript.slice(0,8).map(e=>`<div class="entry"><span class="t">${e.time}</span><span class="who">SURGEON</span><span>${e.msg}</span></div>`).join(''); voiceSignal=msg.toLowerCase(); $('voiceState').textContent='active'; addLog('SURGEON',msg); if(voiceSignal.includes('cannot see')||voiceSignal.includes("can't see")){manualOptics=true;manualHaze=true;$('focus').value=58;$('glare').value=42;addLog('DEFERRA','Voice context indicates inadequate visualization; support gate re-evaluated.')} if(voiceSignal.includes('why')) explainState(); setTimeout(()=>{$('voiceState').textContent='quiet';voiceSignal=''},5000)}
+function drawField(){
+ const f=+$('focus').value/100,gla=+$('glare').value,ang=+$('angle').value;
+ ctx.save();ctx.clearRect(0,0,W,H);
+ // Optically plausible smoke/haze during degraded visualization.
+ const visualBad=manualHaze || (playing&&t>12&&t<23);
+ if(visualBad){
+   for(let i=0;i<9;i++){
+     ctx.beginPath();
+     ctx.arc(W*(.18+i*.085),H*(.22+(Math.sin(t*.75+i)+1)*.17),42+i*7,0,Math.PI*2);
+     ctx.fillStyle='rgba(220,224,218,.065)';ctx.fill();
+   }
+ }
+ // A diffuse red field-change cue during the synthetic departure segment.
+ const severe=manualPhys || (playing&&t>36&&t<48);
+ if(severe){
+   const rg=ctx.createRadialGradient(W*.56,H*.59,8,W*.56,H*.59,W*.25);
+   rg.addColorStop(0,'rgba(105,8,14,.28)');rg.addColorStop(.55,'rgba(82,5,10,.15)');rg.addColorStop(1,'rgba(80,0,0,0)');
+   ctx.fillStyle=rg;ctx.fillRect(0,0,W,H);
+ }
+ // Specular glare is rendered as a live acquisition artifact over the video.
+ const gr=ctx.createRadialGradient(W*.71,H*.25,1,W*.71,H*.25,85+gla*1.6);
+ gr.addColorStop(0,`rgba(255,248,224,${Math.min(.65,gla/100)})`);gr.addColorStop(1,'rgba(255,255,255,0)');
+ ctx.fillStyle=gr;ctx.fillRect(0,0,W,H);ctx.restore();
+ const blur=Math.max(0,(1-f)*5.2);
+ video.style.filter=`blur(${blur}px) saturate(${.90+f*.18}) brightness(${1+gla/700}) contrast(${1.03+(f-.4)*.05})`;
+ video.style.transform=`scale(1.045) rotate(${ang*.055}deg)`;
+}
+function scenario(){
+ let phase='stable dissection',autoFocus=92,autoGlare=14,autoAngle=0,hr=76,map=82,spo=99,deformation=.08,historySupport=.92;
+ if(t>=12&&t<23){phase='visual support degraded';autoFocus=57;autoGlare=46;autoAngle=9;hr=80;map=80;deformation=.10;historySupport=.86}
+ else if(t>=23&&t<36){phase='view restored';autoFocus=94;autoGlare=10;autoAngle=2;hr=78;map=82;deformation=.12;historySupport=.91}
+ else if(t>=36&&t<48){phase='supported response-relation change';autoFocus=82;autoGlare=18;autoAngle=-4;hr=96;map=64;spo=97;deformation=.82;historySupport=.84}
+ else if(t>=48&&t<54){phase='settling / reassessment';autoFocus=91;autoGlare=11;autoAngle=1;hr=86;map=72;spo=98;deformation=.48;historySupport=.66}
+ else if(t>=54){phase='reference forming';autoFocus=92;autoGlare=11;autoAngle=1;hr=81;map=79;spo=98;deformation=.34;historySupport=.70}
+ if(playing&&!manualOptics){$('focus').value=autoFocus;$('glare').value=autoGlare;$('angle').value=autoAngle}
+ if(manualPhys){hr=101;map=61;spo=96;deformation=.34;historySupport=.58}
+ $('phase').textContent='Phase · '+phase;
+ return {hr,map,spo,phase,deformation,historySupport}
+}
+function score(s){
+ const focus=+$('focus').value,glare=+$('glare').value,ang=Math.abs(+$('angle').value);
+ let visual=Math.max(18,Math.min(99,focus-(glare*.48)-(ang*.62)));
+ if(manualHaze)visual-=7;
+ if(s.phase==='supported response-relation change')visual-=5;
+ visual=Math.max(12,Math.min(99,visual));
+ const physDep=Math.max(0,Math.abs(s.map-82)/24+Math.abs(s.hr-76)/55+Math.abs(s.spo-99)/8);
+ const visualPenalty=(100-visual)/100;
+ // Separate evidence channels. No single scalar controls the route.
+ const trajectory=Math.min(1.4,.06 + physDep*.72 + visualPenalty*.20);
+ const deformation=Math.max(0,Math.min(1,s.deformation));
+ const support=Math.max(0,Math.min(1,s.historySupport - Math.max(0,physDep-.75)*.16));
+ const measurement = visual>=80?'VALID':visual>=58?'DEGRADED':'INSUFFICIENT';
+ return {visual,physDep,trajectory,deformation,support,measurement}
+}
+function routeDecision(s,z){
+ // Explicit precedence: measurement -> support/ambiguity -> structural change -> departure -> coherent defer.
+ if(z.measurement==='INSUFFICIENT'){
+   return {route:'ACQUIRE MORE INFORMATION',state:'HOLD · MEASUREMENT INSUFFICIENT',
+     reason:'The current image is not adequate for the declared visual-support task.',
+     msg:'Reacquire or adjust the view before visual assistance is trusted.',cls:'msg stop',
+     elig:'blocked',precedence:'measurement gate',rule:'Measurement validity failed, so downstream visual assistance is withheld before any trajectory interpretation.'};
+ }
+ if(z.support<.62){
+   return {route:'UNRESOLVED',state:'UNRESOLVED · SUPPORT INADEQUATE',
+     reason:'The system sees change but does not have enough supported response history to classify it safely.',
+     msg:'Evidence is insufficient to distinguish transient departure from a durable response-relation change. Human review or more information is required.',cls:'msg alert',
+     elig:'human review',precedence:'support gate',rule:'Ambiguous or unsupported evidence cannot authorize stronger assistance or a law-state update.'};
+ }
+ if(z.deformation>=.68 && z.trajectory>=.62){
+   return {route:'REASSESS',state:'REASSESS · COURSE AND RESPONSE CHANGED',
+     reason:'The course has moved and the supported response relation has changed under adequate measurement.',
+     msg:'The prior response relation is no longer a supported reference for the next decision. Human reassessment is required.',cls:'msg alert',
+     elig:'human reassessment',precedence:'course + response change',rule:'High course departure plus high response-relation change routes to reassessment.'};
+ }
+ if(z.deformation>=.68 && z.trajectory<.62){
+   return {route:'FLAG',state:'FLAG · RESPONSE CHANGED',
+     reason:'The current readings can still look acceptable while the supported response relation has changed underneath them.',
+     msg:'Silent shift detected: the response relation changed without a large course departure. Human review is required.',cls:'msg alert',
+     elig:'human review',precedence:'silent response change',rule:'Low course departure with high response-relation change is not treated as ordinary variation.'};
+ }
+ if(z.trajectory>=.48 && z.deformation<.68){
+   return {route:'MONITOR',state:'MONITOR · COURSE MOVED, RESPONSE INTACT',
+     reason:'The course has moved, but the supported response relation remains within the prior structure.',
+     msg:'Continue observation. Departure alone does not authorize rewriting the response relation.',cls:'msg alert',
+     elig:'monitoring',precedence:'course departure only',rule:'High course departure with low response-relation change routes to monitoring, not adaptation.'};
+ }
+ if(z.deformation>=.36){
+   return {route:'UNRESOLVED',state:'UNRESOLVED · RESPONSE CHANGE NOT MATURE',
+     reason:'The response relation is changing, but the evidence has not reached the support required for a stronger route.',
+     msg:'Continue observation or request human review. No law-state update is authorized yet.',cls:'msg alert',
+     elig:'observe',precedence:'immature response evidence',rule:'Uncertain response change remains unresolved until support matures.'};
+ }
+ if(z.visual>86 && s.phase==='view restored'){
+   return {route:'ASSIST AVAILABLE',state:'ASSIST AVAILABLE · SUPPORT RESTORED',
+     reason:'Measurement and support are adequate and no material relation change is established.',
+     msg:'Advisory assistance is available if requested; it is not forced.',cls:'msg',
+     elig:'available',precedence:'supported optional assistance',rule:'Adequate measurement makes assistance eligible, but coherent states still favor clinician primacy.'};
+ }
+ return {route:'DEFER',state:'DEFER · NO REASON TO INTERRUPT',
+   reason:'No supported evidence requires the system to compete with the surgeon.',
+   msg:'No deformation detected within the declared representation and current support. This is not a claim of global stability.',cls:'msg',
+   elig:'not needed',precedence:'coherent state',rule:'Low departure with no supported deformation routes to clinician-first deferral.'};
+}
+function updateUI(){
+ const s=scenario(),z=score(s),r=routeDecision(s,z);
+ $('hr').textContent=Math.round(s.hr);$('map').textContent=Math.round(s.map);$('spo').textContent=Math.round(s.spo);
+ $('focusV').textContent=$('focus').value;$('glareV').textContent=$('glare').value;$('angleV').textContent=$('angle').value+'°';
+ $('supportNum').textContent=Math.round(z.visual);$('optScore').textContent=Math.round(z.visual)+'%';$('optBar').style.width=z.visual+'%';
+ $('progress').style.width=Math.min(100,t/60*100)+'%';$('clock').textContent=stamp();
+ const deg=z.visual*3.6;$('ring').style.background=`conic-gradient(${z.visual>=80?'var(--green)':z.visual>=58?'var(--yellow)':'var(--red)'} 0deg ${deg}deg,#152838 ${deg}deg)`;
+
+ $('route').textContent=r.route;$('mainState').textContent=r.state;$('mainReason').textContent=r.reason;
+ $('deferMsg').className=r.cls;$('deferMsg').textContent=r.msg;$('elig').textContent=r.elig;$('precedence').textContent=r.precedence;$('routeRule').textContent=r.rule;
+ $('measureState').textContent=z.measurement==='VALID'?'Adequate':z.measurement==='DEGRADED'?'Limited':'Insufficient';
+ $('trajState').textContent=z.trajectory>=.72?'Departed':z.trajectory>=.42?'Changing':'Coherent';
+ $('deformState').textContent=z.deformation>=.68?'Supported change':z.deformation>=.36?'Uncertain':'No supported change';
+ $('opSupportState').textContent=z.support>=.78?'Strong':z.support>=.62?'Limited':'Insufficient';
+
+ $('imgState').textContent=z.visual>=80?'stable':z.visual>=58?'degraded':'unsupported';
+ $('phyState').textContent=z.physDep>.8?'departed':z.physDep>.35?'changing':'stable';
+ $('instState').textContent=s.phase==='supported response-relation change'?'unexpected response':'expected';
+ $('vitalText').textContent=z.physDep>.8?'physiology departed':z.physDep>.35?'physiology changing':'physiology coherent';
+ $('vitalDot').style.background=z.physDep>.8?'var(--red)':z.physDep>.35?'var(--yellow)':'var(--green)';
+
+ let act='USE / HOLD',lim='none',om='Current view is adequate for the simulated visual-support task.',oc='msg';
+ if(z.visual<58){act='REACQUIRE VIEW';lim=z.visual<42?'support collapse':'focus / occlusion';om='Current optical information is insufficient. Re-establish the view before relying on visual assistance.';oc='msg stop'}
+ else if(z.visual<80){act='ADJUST VIEW';lim=+$('glare').value>35?'glare':+$('focus').value<75?'focus':'camera geometry';om='Acquisition can likely be improved by correcting the dominant visual limitation.';oc='msg alert'}
+ else if(z.visual>92){act='STOP / USE';om='Additional visual adjustment is unlikely to materially improve this simulated task.'}
+ $('optAction').textContent=act;$('limitation').textContent=lim;$('optMsg').className=oc;$('optMsg').textContent=om;
+
+ histories.hr.push(s.hr);histories.map.push(s.map);histories.spo.push(s.spo);
+ Object.values(histories).forEach(a=>{if(a.length>90)a.shift()});
+ drawSpark('hrc',histories.hr,65,110);drawSpark('mapc',histories.map,55,90);drawSpark('spoc',histories.spo,94,100)
+}
+function drawSpark(id,a,min,max){const c=$(id),g=c.getContext('2d'),w=c.clientWidth,h=c.clientHeight;g.clearRect(0,0,w,h);g.strokeStyle='#17374a';g.lineWidth=1;g.beginPath();g.moveTo(0,h*.5);g.lineTo(w,h*.5);g.stroke();g.strokeStyle='#65d8ff';g.lineWidth=2;g.beginPath();a.forEach((v,i)=>{const x=i/(Math.max(1,a.length-1))*w,y=h-(v-min)/(max-min)*h*.86-h*.07;i?g.lineTo(x,y):g.moveTo(x,y)});g.stroke()}
+function explainState(){
+ const s=scenario(),z=score(s),r=routeDecision(s,z);
+ addLog('DEFERRA',`${r.reason} Routing precedence: ${r.rule}`)
+}
+function scheduledEvents(){
+ const e=Math.floor(t);
+ if(e===1&&!scheduledEvents.a){addLog('DEFERRA','No deformation detected under current support. Clinician-first deferral remains active.');scheduledEvents.a=1}
+ if(e===12&&!scheduledEvents.b){addVoice('I cannot see the plane clearly.');addLog('OPTICEIL','Task-conditioned visual support fell below the acquisition gate; reacquisition requested before downstream visual assistance.');scheduledEvents.b=1}
+ if(e===23&&!scheduledEvents.c){manualOptics=false;manualHaze=false;addLog('OPTICEIL','View restored; measurement validity returned to supported range.');addLog('DEFERRA','Advisory assistance is eligible if requested.');scheduledEvents.c=1}
+ if(e===36&&!scheduledEvents.d){addLog('DEFERRA','Course departure and response-relation change are both elevated under adequate support; routing changed to REASSESS.');scheduledEvents.d=1}
+ if(e===48&&!scheduledEvents.e){addLog('DEFERRA','Updated relation is not yet settled. State is UNRESOLVED until sufficient support accumulates.');scheduledEvents.e=1}
+ if(e===54&&!scheduledEvents.f){addLog('DEFERRA','A new reference is still forming. Deferra does not declare the new relation stable automatically.');scheduledEvents.f=1}
+}
+function tick(now){const dt=(now-last)/1000;last=now;if(playing){t+=dt;if(t>=60){t=60;playing=false;$('play').textContent='↻ Replay case'}scheduledEvents()}drawField();updateUI();requestAnimationFrame(tick)}
+function resetAll(){t=0;playing=false;manualOptics=false;manualHaze=false;manualPhys=false;$('focus').value=92;$('glare').value=14;$('angle').value=0;$('play').textContent='▶ Run 60-sec case';Object.keys(scheduledEvents).forEach(k=>delete scheduledEvents[k]);logs.length=0;transcript.length=0;$('log').innerHTML='';$('transcript').innerHTML='';Object.values(histories).forEach(a=>a.length=0);addLog('DEFERRA','Simulation ready. Measurement validity, trajectory departure, structural deformation, and operative support are evaluated separately.')}
+$('play').onclick=()=>{if(t>=60)t=0;playing=!playing;$('play').textContent=playing?'❚❚ Pause case':'▶ Continue case'};$('reset').onclick=resetAll;$('visual').onclick=()=>{manualHaze=!manualHaze;manualOptics=manualHaze;if(manualHaze){$('focus').value=54;$('glare').value=48;addLog('SIM','Synthetic visual degradation introduced.')}else{manualOptics=false;addLog('SIM','Manual visual degradation removed.')}};$('phys').onclick=()=>{manualPhys=!manualPhys;addLog('SIM',manualPhys?'Synthetic physiologic departure introduced.':'Synthetic physiologic departure removed.')};$('explain').onclick=explainState;$('clearLog').onclick=()=>{logs.length=0;$('log').innerHTML=''};document.querySelectorAll('.voiceBtn').forEach(b=>b.onclick=()=>addVoice(b.dataset.say));['focus','glare','angle'].forEach(id=>$(id).oninput=()=>{manualOptics=true});
+$('mic').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){addLog('SYSTEM','Browser speech recognition is unavailable here. Use the sample voice phrases.');return}const r=new SR();r.lang='en-US';r.interimResults=false;r.onresult=e=>addVoice(e.results[0][0].transcript);r.onerror=()=>addLog('SYSTEM','Microphone input could not be started.');r.start();$('mic').textContent='🎙 Listening…'};
+resize();window.addEventListener('resize',resize);resetAll();video.play().catch(()=>{});document.addEventListener('pointerdown',()=>video.play().catch(()=>{}),{once:true});requestAnimationFrame(tick);
+</script></body></html>
