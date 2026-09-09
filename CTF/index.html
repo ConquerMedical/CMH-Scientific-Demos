@@ -73,6 +73,24 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
 @media(max-width:1050px){.grid{grid-template-columns:1fr}.controls{position:relative;top:0}.two{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:660px){.wrap{padding:14px}.metrics{grid-template-columns:1fr 1fr}.actions{grid-template-columns:1fr}.badges{justify-content:flex-start}.verdictline{display:block}.scorebox{text-align:left;margin-top:14px}.preset-row{grid-template-columns:1fr}.footer{display:block}}
 </style>
+
+<style id="cmh-validation-style">
+.cmh-validation{max-width:1180px;margin:24px auto;padding:20px 22px;border:1px solid rgba(120,170,185,.28);border-radius:14px;background:rgba(7,18,24,.72);box-shadow:0 12px 34px rgba(0,0,0,.16);font-family:inherit}
+.cmh-validation h2{margin:0 0 6px;font-size:20px;letter-spacing:-.01em}
+.cmh-validation .cmh-v-sub{margin:0 0 14px;color:#91a8ae;font-size:12px;line-height:1.55}
+.cmh-validation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0 14px}
+.cmh-v-item{border:1px solid rgba(120,170,185,.18);border-radius:10px;padding:11px 12px;background:rgba(255,255,255,.025)}
+.cmh-v-item strong{display:block;font-size:12px;margin-bottom:5px;color:#d9f4ef}
+.cmh-v-item span{display:block;color:#9eb5ba;font-size:11px;line-height:1.5}
+.cmh-v-boundary{border-left:3px solid #4de5d0;padding:9px 11px;margin:10px 0 14px;background:rgba(77,229,208,.045);color:#a9c1c5;font-size:11px;line-height:1.55}
+.cmh-v-cites{border-top:1px solid rgba(120,170,185,.18);padding-top:11px;color:#829ba1;font-size:10px;line-height:1.55}
+.cmh-v-cites b{color:#a7bec3}
+.cmh-v-cites ol{margin:6px 0 0 18px;padding:0}
+.cmh-v-cites li{margin:4px 0}
+.cmh-v-cites a{color:#8fded4;text-decoration:none}
+.cmh-v-cites a:hover{text-decoration:underline}
+@media(max-width:650px){.cmh-validation{margin:18px 12px;padding:16px}.cmh-validation-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -81,7 +99,7 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
     <div class="mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M5 22.5 11.2 9l5.2 9.4L21.3 6 27 22.5" stroke="#4de5d0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 25h22" stroke="#8ff4e6" stroke-width="1.4" opacity=".7"/></svg></div>
     <div><div class="brandline">CMH SCIENTIFIC</div><h1>Clinical Trials Falsifier <span style="color:#4de5d0">CTF</span></h1><div class="sub">Stress-test what a trial can actually falsify. Change the response structure, endpoint, follow-up, and measurement design; CTF separates a population result from stronger individual, subgroup, and mechanistic claims.</div></div>
   </div>
-  <div class="badges"><div class="badge live">Interactive demo</div><div class="badge">Synthetic cohort</div><div class="badge">CLS validated · ALS PRO-ACT</div></div>
+  <div class="badges"><div class="badge live">Interactive demo</div><div class="badge">Adjustable illustrative cohort</div><div class="badge">CLS validated · ALS PRO-ACT</div></div>
 </header>
 
 <div class="grid">
@@ -101,9 +119,9 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
     </div>
 
     <div class="divider"></div>
-    <div class="section-title">Synthetic response field</div>
+    <div class="section-title">Interactive response field</div>
     <div class="control"><label>Responder share <b id="responderShareVal"></b></label><input id="responderShare" type="range" min="10" max="90" step="1" value="58"><div class="hint">Fraction on the latent benefit branch.</div></div>
-    <div class="control"><label>Responder benefit <b id="benefitVal"></b></label><input id="benefit" type="range" min="2" max="30" step="1" value="18"><div class="hint">Synthetic improvement magnitude for the benefit branch.</div></div>
+    <div class="control"><label>Responder benefit <b id="benefitVal"></b></label><input id="benefit" type="range" min="2" max="30" step="1" value="18"><div class="hint">Illustrative improvement magnitude for the benefit branch.</div></div>
     <div class="control"><label>Other-group effect <b id="otherVal"></b></label><input id="other" type="range" min="-20" max="15" step="1" value="-8"><div class="hint">Can reveal null response or harm hidden by the mean.</div></div>
 
     <div class="divider"></div>
@@ -114,7 +132,7 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
     <div class="control"><label>Mechanism discrimination <b id="mechanismVal"></b></label><input id="mechanism" type="range" min="0" max="100" step="1" value="28"><div class="hint">Whether measured variables distinguish the proposed mechanism from plausible alternatives.</div></div>
 
     <div class="divider"></div>
-    <button class="primary" id="rerun" style="width:100%">Re-randomize synthetic cohort</button>
+    <button class="primary" id="rerun" style="width:100%">Re-randomize illustrative cohort</button>
     <div class="micro" style="margin-top:12px"><span class="chip">No patient data</span><span class="chip">No clinical recommendation</span><span class="chip">No proprietary estimator</span></div>
   </aside>
 
@@ -126,18 +144,18 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
       </div>
       <div class="story" id="story"></div>
       <div class="metrics">
-        <div class="metric"><div class="k">Observed mean effect</div><div class="v" id="meanEffect"></div><div class="s">synthetic endpoint units</div></div>
+        <div class="metric"><div class="k">Observed mean effect</div><div class="v" id="meanEffect"></div><div class="s">illustrative endpoint units</div></div>
         <div class="metric"><div class="k">Opposed response mass</div><div class="v" id="opposed"></div><div class="s">latent sign contradiction</div></div>
         <div class="metric"><div class="k">Information visibility</div><div class="v" id="visibility"></div><div class="s">task-conditioned design</div></div>
         <div class="metric"><div class="k">Claim strength gap</div><div class="v" id="claimGap"></div><div class="s">evidence vs wording</div></div>
       </div>
-      <div class="callout"><strong>CTF principle:</strong> a trial may support a narrow population claim while simultaneously falsifying—or failing to test—a stronger claim about individual benefit, subgroup uniformity, or mechanism. <strong>CLS is a validated metric demonstrated on ALS PRO-ACT; the adjustable cohort shown here is synthetic so visitors can see how claim support changes when the trial design changes.</strong></div>
+      <div class="callout"><strong>CTF principle:</strong> a trial may support a narrow population claim while simultaneously falsifying—or failing to test—a stronger claim about individual benefit, subgroup uniformity, or mechanism. <strong>CLS is a validated metric demonstrated on ALS PRO-ACT; the adjustable cohort shown here is an interactive illustration so visitors can see how claim support changes when the trial design changes.</strong></div>
     </section>
 
     <div class="two">
       <section class="card panel">
-        <div class="panelhead"><h2>Trial response field</h2><span>synthetic randomized cohort</span></div>
-        <svg id="trialSvg" viewBox="0 0 760 360" role="img" aria-label="Synthetic treatment and control response plot"></svg>
+        <div class="panelhead"><h2>Trial response field</h2><span>interactive illustrative cohort</span></div>
+        <svg id="trialSvg" viewBox="0 0 760 360" role="img" aria-label="Illustrative treatment and control response plot"></svg>
         <div class="legend"><span><i class="dot" style="background:#4de5d0"></i>benefit branch</span><span><i class="dot" style="background:#ff6f7d"></i>non-benefit / harm branch</span><span><i class="dot" style="background:#70878e"></i>control</span><span>solid line = observed arm mean</span></div>
       </section>
       <section class="card panel">
@@ -153,7 +171,7 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
   </main>
 </div>
 
-<div class="footer"><div><strong>CTF · Clinical Trials Falsifier</strong><br>CMH Scientific public demonstration. The adjustable cohort is synthetic; CLS is a validated metric demonstrated on ALS PRO-ACT. Not a power calculator, trial-registration system, or clinical decision tool.</div><div style="max-width:620px">CTF illustrates an information-first trial audit: can the design distinguish the claim it is being asked to support, and what measurement or design change would make the claim genuinely falsifiable?</div></div>
+<div class="footer"><div><strong>CTF · Clinical Trials Falsifier</strong><br>CMH Scientific public demonstration. The adjustable cohort is illustrative; CLS is a validated metric demonstrated on ALS PRO-ACT. Not a power calculator, trial-registration system, or clinical decision tool.</div><div style="max-width:620px">CTF illustrates an information-first trial audit: can the design distinguish the claim it is being asked to support, and what measurement or design change would make the claim genuinely falsifiable?</div></div>
 </div>
 
 <script>
@@ -200,22 +218,22 @@ function compute(){
   if(claim==='population'){
     if(taskVisibility<req){verdict='DESIGN CANNOT FALSIFY';reason='The endpoint/follow-up combination does not expose enough of the declared population effect.'}
     else if(observedMean<=0){verdict='CLAIM FALSIFIED';cls='red';reason='The observed mean effect does not support a positive population-efficacy claim.'}
-    else {verdict='SURVIVES — NARROWLY';cls='green';reason='The population-mean claim survives this synthetic trial, but stronger claims require separate tests.'}
+    else {verdict='SURVIVES — NARROWLY';cls='green';reason='The population-mean claim survives this illustrative trial, but stronger claims require separate tests.'}
   }
   if(claim==='uniform'){
     if(taskVisibility<req){verdict='DESIGN CANNOT FALSIFY';reason='The design does not adequately expose patient-level response heterogeneity.'}
     else if(signOpposed && opposed>=12){verdict='UNIFORM CLAIM FALSIFIED';cls='red';reason='A materially sized response branch moves in the opposite direction despite a favorable aggregate mean.'}
-    else if(b>0 && o>0){verdict='SURVIVES THIS TEST';cls='green';reason='Both latent response branches are beneficial in this synthetic field.'}
+    else if(b>0 && o>0){verdict='SURVIVES THIS TEST';cls='green';reason='Both latent response branches are beneficial in this illustrative field.'}
     else {verdict='UNRESOLVED';reason='The evidence does not support a strong uniform-benefit statement.'}
   }
   if(claim==='biomarker'){
     if(mk<.42 || taskVisibility<req){verdict='BIOMARKER CLAIM UNTESTABLE';reason='The trial does not measure the subgroup-separating signal strongly enough to test the biomarker claim.'}
-    else if(Math.abs(b-o)<6){verdict='BIOMARKER CLAIM FALSIFIED';cls='red';reason='Measured groups do not separate a clinically meaningful synthetic response contrast.'}
-    else {verdict='SURVIVES THIS TEST';cls='green';reason='The synthetic marker is visible enough and response branches are sufficiently separated to support a predictive-biomarker test.'}
+    else if(Math.abs(b-o)<6){verdict='BIOMARKER CLAIM FALSIFIED';cls='red';reason='Measured groups do not separate a clinically meaningful illustrative response contrast.'}
+    else {verdict='SURVIVES THIS TEST';cls='green';reason='The illustrative marker is visible enough and response branches are sufficiently separated to support a predictive-biomarker test.'}
   }
   if(claim==='mechanism'){
     if(me<.62 || taskVisibility<req){verdict='MECHANISM NOT ADJUDICATED';reason='The endpoint may show efficacy, but the measured substrate does not distinguish the proposed mechanism from alternatives.'}
-    else if(observedMean<=0){verdict='MECHANISTIC STORY FALSIFIED';cls='red';reason='The proposed mechanism predicts benefit, but the declared endpoint moves against that prediction in this synthetic trial.'}
+    else if(observedMean<=0){verdict='MECHANISTIC STORY FALSIFIED';cls='red';reason='The proposed mechanism predicts benefit, but the declared endpoint moves against that prediction in this illustrative trial.'}
     else {verdict='MECHANISM TESTABLE';cls='cyan';reason='The design contains a mechanism-discriminating layer; causal interpretation would still depend on the actual trial design and assumptions.'}
   }
   const rawScore=Math.max(0,Math.min(100,taskVisibility));
@@ -253,7 +271,7 @@ function drawTrial(m){
   }
   s+=`<line x1="${left+5}" y1="${y(cm)}" x2="${left+300}" y2="${y(cm)}" stroke="#b4c5c8" stroke-width="2.4"/><text x="${left+300}" y="${y(cm)-7}" fill="#b4c5c8" font-size="10" text-anchor="end">mean ${fmtSigned(cm)}</text>`;
   s+=`<line x1="${split+5}" y1="${y(tm)}" x2="${W-right-5}" y2="${y(tm)}" stroke="#f5ffff" stroke-width="2.4"/><text x="${W-right-5}" y="${y(tm)-7}" fill="#eaffff" font-size="10" text-anchor="end">mean ${fmtSigned(tm)}</text>`;
-  s+=`<text x="${left}" y="${H-12}" fill="#6f8d95" font-size="10">Synthetic endpoint change → higher = better</text>`;
+  s+=`<text x="${left}" y="${H-12}" fill="#6f8d95" font-size="10">Illustrative endpoint change → higher = better</text>`;
   svg.innerHTML=s;
 }
 function ladder(m){
@@ -291,7 +309,7 @@ function render(){
   $('opposed').textContent=pct(m.opposed);
   $('visibility').textContent=pct(m.taskVisibility);
   $('claimGap').textContent=m.gap>0?'-'+Math.round(m.gap)+' pts':'0 pts';
-  const branchText=m.signOpposed?`${Math.round(m.opposed)}% of the latent response field sits on an opposed branch.`:'The synthetic response branches do not have opposing signs.';
+  const branchText=m.signOpposed?`${Math.round(m.opposed)}% of the latent response field sits on an opposed branch.`:'The illustrative response branches do not have opposing signs.';
   $('story').innerHTML=`<strong>${claimNames[m.claim]}:</strong> ${m.reason} The simulated observed mean is <strong>${fmtSigned(m.observedMean)}</strong> units. ${branchText} CTF therefore separates what the randomized average says from what the same design can support about individuals, subgroups, or mechanism.`;
   drawTrial(m);ladder(m);makeActions(m);
 }
@@ -306,5 +324,14 @@ document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click'
 $('rerun').addEventListener('click',()=>{state.seed=(state.seed+7)%997;render()});
 render();
 </script>
+
+<section class="cmh-validation" aria-label="Validation and data provenance">
+  <h2>Validation & data provenance</h2>
+  <p class="cmh-v-sub">The adjustable cohort on this page is illustrative. The falsification / CLS evidence is grounded in the pooled PRO-ACT ALS placebo-control experiment reported on Research Square.</p>
+  <div class="cmh-validation-grid"><div class="cmh-v-item"><strong>PRO-ACT ALS clinical-trial validation</strong><span>2,445 patients · 54,007 landmark–horizon pairs</span></div><div class="cmh-v-item"><strong>Held-out horizons</strong><span>60, 90, and 180 days; active- and placebo-arm prognostic laws evaluated in held-out patients</span></div><div class="cmh-v-item"><strong>Negative-control test</strong><span>The same apparent responder/harm procedure was applied to placebo patients to measure its false-positive behavior</span></div></div>
+  <div class="cmh-v-boundary"><strong>Boundary:</strong> the sliders generate an illustrative response field so a viewer can see the logic move. They are not the validation cohort. The empirical falsification basis is PRO-ACT; no individual treatment effect is inferred from prognostic residuals alone.</div>
+  <div class="cmh-v-cites"><b>Dataset / validation references</b><ol><li>Atassi N, Berry J, Shui A, et al. <i>The PRO-ACT database: design, initial analyses, and predictive features.</i> Neurology. 2014;83(19):1719–1725. <a href="https://doi.org/10.1212/WNL.0000000000000951">doi:10.1212/WNL.0000000000000951</a>.</li><li>Ewing MA. <i>Prediction Error Masquerades as Individual Treatment Response: A Placebo-Controlled Falsification Study in Pooled ALS Trials.</i> Research Square. 2026. <a href="https://doi.org/10.21203/rs.3.rs-10898606/v1">doi:10.21203/rs.3.rs-10898606/v1</a>.</li></ol></div>
+</section>
+
 </body>
 </html>

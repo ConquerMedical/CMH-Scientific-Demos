@@ -12,12 +12,30 @@
 .stateCell span{display:block;color:var(--mut);font-size:9px;text-transform:uppercase;letter-spacing:.08em}
 .stateCell b{display:block;margin-top:3px;font-size:12px;color:#dcecf5}
 .routeRule{margin-top:9px;padding:8px 9px;border-radius:8px;background:#071923;border:1px solid #19364a;color:#b8ccd9;font-size:10px}
-</style></head>
+</style>
+<style id="cmh-validation-style">
+.cmh-validation{max-width:1180px;margin:24px auto;padding:20px 22px;border:1px solid rgba(120,170,185,.28);border-radius:14px;background:rgba(7,18,24,.72);box-shadow:0 12px 34px rgba(0,0,0,.16);font-family:inherit}
+.cmh-validation h2{margin:0 0 6px;font-size:20px;letter-spacing:-.01em}
+.cmh-validation .cmh-v-sub{margin:0 0 14px;color:#91a8ae;font-size:12px;line-height:1.55}
+.cmh-validation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0 14px}
+.cmh-v-item{border:1px solid rgba(120,170,185,.18);border-radius:10px;padding:11px 12px;background:rgba(255,255,255,.025)}
+.cmh-v-item strong{display:block;font-size:12px;margin-bottom:5px;color:#d9f4ef}
+.cmh-v-item span{display:block;color:#9eb5ba;font-size:11px;line-height:1.5}
+.cmh-v-boundary{border-left:3px solid #4de5d0;padding:9px 11px;margin:10px 0 14px;background:rgba(77,229,208,.045);color:#a9c1c5;font-size:11px;line-height:1.55}
+.cmh-v-cites{border-top:1px solid rgba(120,170,185,.18);padding-top:11px;color:#829ba1;font-size:10px;line-height:1.55}
+.cmh-v-cites b{color:#a7bec3}
+.cmh-v-cites ol{margin:6px 0 0 18px;padding:0}
+.cmh-v-cites li{margin:4px 0}
+.cmh-v-cites a{color:#8fded4;text-decoration:none}
+.cmh-v-cites a:hover{text-decoration:underline}
+@media(max-width:650px){.cmh-validation{margin:18px 12px;padding:16px}.cmh-validation-grid{grid-template-columns:1fr}}
+</style>
+</head>
 <body><div class="wrap">
 <div class="top"><div class="brand">CMH SCIENTIFIC<small>DEFERRA · SURGERY · INFORMATION ROUTING</small></div><div class="badge">SIMULATED PROCEDURAL DEMONSTRATION · NOT CLINICAL GUIDANCE</div></div>
 <div class="layout">
   <aside class="card left">
-    <div class="pad"><div class="eyebrow">Patient telemetry</div><h1 style="font-size:26px">Live context</h1><p class="sub" style="font-size:12px">Synthetic signals are fused with the procedural view and surgeon notes.</p></div>
+    <div class="pad"><div class="eyebrow">Patient telemetry</div><h1 style="font-size:26px">Live context</h1><p class="sub" style="font-size:12px">Interactive signals are fused with the procedural view and surgeon notes. The Deferra architecture has been evaluated retrospectively on real surgical and physiologic datasets.</p></div>
     <div class="vital"><div class="row"><div><span>Heart rate</span><b id="hr">76</b></div><span>bpm</span></div><canvas class="mini" id="hrc"></canvas></div>
     <div class="vital"><div class="row"><div><span>Mean arterial pressure</span><b id="map">82</b></div><span>mmHg</span></div><canvas class="mini" id="mapc"></canvas></div>
     <div class="vital"><div class="row"><div><span>SpO₂</span><b id="spo">99</b></div><span>%</span></div><canvas class="mini" id="spoc"></canvas></div>
@@ -30,7 +48,7 @@
 
   <main class="card">
     <div class="monitor"><video id="surgVideo" autoplay muted loop playsinline preload="auto" src="assets/field.mp4"></video><canvas id="surg"></canvas><div class="hud"><div class="hudTop"><span class="chip">Camera · laparoscope · LIVE</span><span class="chip" id="phase">Phase · stable dissection</span><span class="chip" id="clock">00:00</span></div><div class="reticle"></div><div class="supportRing" id="ring"><div class="n"><span id="supportNum">92</span><small>visual support</small></div></div></div></div>
-    <div class="provenance"><b>Synthetic AI-generated operative visualization.</b> No patient data or real operative recording is used. The video is illustrative only and does not perform anatomical or tissue-structure identification.</div>
+    <div class="provenance"><b>Illustrative AI-generated operative visualization.</b> Deferra has retrospective validation on real surgical data, including robotic kinematics and laparoscopic operative video. This browser visualization contains no patient data or real operative recording and does not perform anatomical or tissue-structure identification.</div>
     <div class="timeline"><div class="bar"><i id="progress"></i></div><div class="timeLabels"><span>stable</span><span>view degraded</span><span>view restored</span><span>response change</span><span>reference forming</span></div></div>
     <div class="pad" style="display:flex;justify-content:space-between;gap:16px;align-items:center"><div><div class="eyebrow">What should happen now?</div><div class="stateBig" id="mainState">DEFER · NO REASON TO INTERRUPT</div><div class="sub" id="mainReason">The view is adequate and no supported change requires interruption.</div></div><button class="btn" id="explain">Why?</button></div>
   </main>
@@ -50,7 +68,7 @@
     </div>
     <div class="module"><h3>OptiCeil acquisition gate</h3><div class="meter"><div id="optBar"></div></div><div class="kv"><span>Task-conditioned optical support</span><b id="optScore">92%</b><span>Acquisition action</span><b id="optAction">USE / HOLD</b><span>Dominant limitation</span><b id="limitation">none</b></div><div class="msg" id="optMsg">Current view is adequate for the simulated visual-support task.</div></div>
     <div class="module"><h3>Multimodal context</h3><div class="kv"><span>Operative image</span><b id="imgState">stable</b><span>Voice context</span><b id="voiceState">quiet</b><span>Physiology</span><b id="phyState">stable</b><span>Instrument motion</span><b id="instState">expected</b></div></div>
-    <div class="disclaimer">All scores, thresholds, vitals, events, routing states, and recommendations are synthetic. The operative visualization is AI-generated, uses no patient data, and makes no anatomical-identification claim. The source video is a clean field; smoke, glare, blur, and field-change cues are applied live by the demo controls and scenario logic. This page demonstrates architecture and workflow only.</div>
+    <div class="disclaimer">Deferra has been evaluated retrospectively on real surgical, physiologic, and longitudinal datasets. The operative visualization and adjustable browser control values on this page are illustrative; they are not a patient recording or a prospective clinical test. The page makes no anatomical-identification claim and provides no clinical treatment instruction.</div>
   </aside>
 </div>
 
@@ -78,7 +96,7 @@ function drawField(){
      ctx.fillStyle='rgba(220,224,218,.065)';ctx.fill();
    }
  }
- // A diffuse red field-change cue during the synthetic departure segment.
+ // A diffuse red field-change cue during the illustrative departure segment.
  const severe=manualPhys || (playing&&t>36&&t<48);
  if(severe){
    const rg=ctx.createRadialGradient(W*.56,H*.59,8,W*.56,H*.59,W*.25);
@@ -216,7 +234,16 @@ function scheduledEvents(){
 }
 function tick(now){const dt=(now-last)/1000;last=now;if(playing){t+=dt;if(t>=60){t=60;playing=false;$('play').textContent='↻ Replay case'}scheduledEvents()}drawField();updateUI();requestAnimationFrame(tick)}
 function resetAll(){t=0;playing=false;manualOptics=false;manualHaze=false;manualPhys=false;$('focus').value=92;$('glare').value=14;$('angle').value=0;$('play').textContent='▶ Run 60-sec case';Object.keys(scheduledEvents).forEach(k=>delete scheduledEvents[k]);logs.length=0;transcript.length=0;$('log').innerHTML='';$('transcript').innerHTML='';Object.values(histories).forEach(a=>a.length=0);addLog('DEFERRA','Simulation ready. Measurement validity, trajectory departure, structural deformation, and operative support are evaluated separately.')}
-$('play').onclick=()=>{if(t>=60)t=0;playing=!playing;$('play').textContent=playing?'❚❚ Pause case':'▶ Continue case'};$('reset').onclick=resetAll;$('visual').onclick=()=>{manualHaze=!manualHaze;manualOptics=manualHaze;if(manualHaze){$('focus').value=54;$('glare').value=48;addLog('SIM','Synthetic visual degradation introduced.')}else{manualOptics=false;addLog('SIM','Manual visual degradation removed.')}};$('phys').onclick=()=>{manualPhys=!manualPhys;addLog('SIM',manualPhys?'Synthetic physiologic departure introduced.':'Synthetic physiologic departure removed.')};$('explain').onclick=explainState;$('clearLog').onclick=()=>{logs.length=0;$('log').innerHTML=''};document.querySelectorAll('.voiceBtn').forEach(b=>b.onclick=()=>addVoice(b.dataset.say));['focus','glare','angle'].forEach(id=>$(id).oninput=()=>{manualOptics=true});
+$('play').onclick=()=>{if(t>=60)t=0;playing=!playing;$('play').textContent=playing?'❚❚ Pause case':'▶ Continue case'};$('reset').onclick=resetAll;$('visual').onclick=()=>{manualHaze=!manualHaze;manualOptics=manualHaze;if(manualHaze){$('focus').value=54;$('glare').value=48;addLog('SIM','Illustrative visual degradation introduced.')}else{manualOptics=false;addLog('SIM','Manual visual degradation removed.')}};$('phys').onclick=()=>{manualPhys=!manualPhys;addLog('SIM',manualPhys?'Illustrative physiologic departure introduced.':'Illustrative physiologic departure removed.')};$('explain').onclick=explainState;$('clearLog').onclick=()=>{logs.length=0;$('log').innerHTML=''};document.querySelectorAll('.voiceBtn').forEach(b=>b.onclick=()=>addVoice(b.dataset.say));['focus','glare','angle'].forEach(id=>$(id).oninput=()=>{manualOptics=true});
 $('mic').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){addLog('SYSTEM','Browser speech recognition is unavailable here. Use the sample voice phrases.');return}const r=new SR();r.lang='en-US';r.interimResults=false;r.onresult=e=>addVoice(e.results[0][0].transcript);r.onerror=()=>addLog('SYSTEM','Microphone input could not be started.');r.start();$('mic').textContent='🎙 Listening…'};
 resize();window.addEventListener('resize',resize);resetAll();video.play().catch(()=>{});document.addEventListener('pointerdown',()=>video.play().catch(()=>{}),{once:true});requestAnimationFrame(tick);
-</script></body></html>
+</script>
+<section class="cmh-validation" aria-label="Validation and data provenance">
+  <h2>Validation & data provenance</h2>
+  <p class="cmh-v-sub">The operative visualization is illustrative; Deferra’s surgical trajectory/departure signals were retrospectively tested on real surgical datasets.</p>
+  <div class="cmh-validation-grid"><div class="cmh-v-item"><strong>JIGSAWS robotic surgery</strong><span>336,628 kinematic states · 8 operators · suturing, needle passing, and knot tying</span></div><div class="cmh-v-item"><strong>Cholec80 laparoscopic video</strong><span>46,079 sampled visual states · 20 complete laparoscopic cholecystectomy procedures</span></div><div class="cmh-v-item"><strong>Independent labels</strong><span>Expert gesture / phase annotations were used for external validation, not supplied to the departure signal</span></div></div>
+  <div class="cmh-v-boundary"><strong>Boundary:</strong> this page does not identify anatomy or tissue structures and does not represent prospective surgical effectiveness. It demonstrates measurement-first routing and trajectory/departure logic against an illustrative operative field.</div>
+  <div class="cmh-v-cites"><b>Dataset / validation references</b><ol><li>Gao Y, Vedula SS, Reiley CE, et al. <i>JHU-ISI Gesture and Skill Assessment Working Set (JIGSAWS): A Surgical Activity Dataset for Human Motion Modeling.</i> MICCAI M2CAI Workshop, 2014.</li><li>Twinanda AP, Shehata S, Mutter D, Marescaux J, de Mathelin M, Padoy N. <i>EndoNet: A Deep Architecture for Recognition Tasks on Laparoscopic Videos.</i> IEEE Trans Med Imaging. 2017;36(1):86–97. <a href="https://doi.org/10.1109/TMI.2016.2593957">doi:10.1109/TMI.2016.2593957</a>.</li><li>Ewing MA. <i>Intelligence Preserves the System It Assists.</i> Research Square. 2026. <a href="https://doi.org/10.21203/rs.3.rs-10831345/v1">doi:10.21203/rs.3.rs-10831345/v1</a>. This is Deferra's direct retrospective surgery/intervention-aware validation paper.</li></ol></div>
+</section>
+
+</body></html>

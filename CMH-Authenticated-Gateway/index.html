@@ -4,7 +4,25 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CMH Authenticated Gateway — Public Demo</title>
 <style>
 :root{--bg:#050d14;--panel:#0a1721;--ink:#eff8ff;--mut:#8da5b7;--line:#1b3446;--a:#64d9ff;--g:#8df5c1;--y:#ffd166;--r:#ff7189}*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 14% 0,#102338,#050d14 46%);color:var(--ink);font:15px/1.45 Inter,system-ui,sans-serif}.wrap{max-width:1180px;margin:auto;padding:22px}.top{display:flex;justify-content:space-between;align-items:center;padding:14px 0 22px}.brand{font-weight:850;letter-spacing:.12em}.brand small{display:block;color:var(--mut);font-size:11px;letter-spacing:.19em}.tag{border:1px solid var(--line);border-radius:99px;padding:7px 10px;color:var(--g);font-size:12px}.hero{display:grid;grid-template-columns:.9fr 1.1fr;gap:18px}.card{background:linear-gradient(180deg,#101e2bdd,#09131def);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 18px 55px rgba(0,0,0,.2)}h1{font-size:43px;line-height:1.02;letter-spacing:-.045em;margin:0 0 12px}.sub{font-size:17px;color:#b8cad7}.form{display:grid;gap:10px;margin-top:16px}.field{background:#07131c;border:1px solid #183146;border-radius:12px;padding:11px}.field label{display:block;font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.11em;margin-bottom:5px}.field select,.field input{width:100%;border:0;background:transparent;color:#eef8ff;font:inherit;outline:none}.checks{display:grid;grid-template-columns:1fr 1fr;gap:8px}.check{background:#07131c;border:1px solid #183146;border-radius:11px;padding:10px;color:#c4d5e1}.check input{accent-color:#64d9ff}.run{width:100%;border:1px solid #2d7693;background:#0e2a3b;color:white;border-radius:12px;padding:12px;font-weight:800;cursor:pointer}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.step{background:#07131c;border:1px solid #183146;border-radius:13px;padding:12px;min-height:118px;transition:.3s;position:relative}.step:not(:last-child):after{content:'→';position:absolute;right:-8px;top:45%;color:#31546b}.step b{font-size:11px;color:#b7cbd9;letter-spacing:.08em}.step span{display:block;font-size:17px;font-weight:800;margin:6px 0}.step small{color:var(--mut)}.step.active{border-color:var(--a);background:#0d2230;box-shadow:0 0 25px #64d9ff22}.step.ok{border-color:#3c6c59}.step.ok span{color:var(--g)}.terminal{margin-top:14px;background:#061018;border:1px solid #173047;border-radius:13px;padding:13px;font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#a7becf;min-height:155px;white-space:pre-wrap}.terminal .good{color:var(--g)}.terminal .warn{color:var(--y)}.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:14px}.s{background:#07131c;border:1px solid #183146;border-radius:12px;padding:11px}.s b{font-size:10px;color:var(--a);letter-spacing:.1em}.s span{display:block;font-weight:800;margin-top:3px}.safe{border-left:3px solid var(--g);background:#0b1c1a;color:#c8e7dd;border-radius:8px;padding:10px 12px;font-size:12px;margin-top:14px}.foot{margin:25px 0 5px;color:#6e8495;font-size:11px;display:flex;justify-content:space-between}@media(max-width:900px){.hero{grid-template-columns:1fr}.flow{grid-template-columns:1fr 1fr}.step:after{display:none}.summary{grid-template-columns:1fr 1fr}.checks{grid-template-columns:1fr}h1{font-size:36px}}
-</style></head>
+</style>
+<style id="cmh-validation-style">
+.cmh-validation{max-width:1180px;margin:24px auto;padding:20px 22px;border:1px solid rgba(120,170,185,.28);border-radius:14px;background:rgba(7,18,24,.72);box-shadow:0 12px 34px rgba(0,0,0,.16);font-family:inherit}
+.cmh-validation h2{margin:0 0 6px;font-size:20px;letter-spacing:-.01em}
+.cmh-validation .cmh-v-sub{margin:0 0 14px;color:#91a8ae;font-size:12px;line-height:1.55}
+.cmh-validation-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0 14px}
+.cmh-v-item{border:1px solid rgba(120,170,185,.18);border-radius:10px;padding:11px 12px;background:rgba(255,255,255,.025)}
+.cmh-v-item strong{display:block;font-size:12px;margin-bottom:5px;color:#d9f4ef}
+.cmh-v-item span{display:block;color:#9eb5ba;font-size:11px;line-height:1.5}
+.cmh-v-boundary{border-left:3px solid #4de5d0;padding:9px 11px;margin:10px 0 14px;background:rgba(77,229,208,.045);color:#a9c1c5;font-size:11px;line-height:1.55}
+.cmh-v-cites{border-top:1px solid rgba(120,170,185,.18);padding-top:11px;color:#829ba1;font-size:10px;line-height:1.55}
+.cmh-v-cites b{color:#a7bec3}
+.cmh-v-cites ol{margin:6px 0 0 18px;padding:0}
+.cmh-v-cites li{margin:4px 0}
+.cmh-v-cites a{color:#8fded4;text-decoration:none}
+.cmh-v-cites a:hover{text-decoration:underline}
+@media(max-width:650px){.cmh-validation{margin:18px 12px;padding:16px}.cmh-validation-grid{grid-template-columns:1fr}}
+</style>
+</head>
 <body><div class="wrap">
 <div class="top"><div class="brand">CMH SCIENTIFIC<small>AUTHENTICATED GATEWAY · CONTROLLED ACCESS TO PRIVATE ENGINES</small></div><div class="tag">PUBLIC DEMO · SECURITY FLOW</div></div>
 <div class="hero"><div class="card"><h1>Expose the <span style="color:var(--a)">capability.</span> Keep the engine private.</h1><p class="sub">The authenticated gateway is the boundary between a permitted scientific request and protected CMH Scientific execution. A public client can request an allowed capability; the private engine remains server-side and only approved outputs cross the boundary.</p>
@@ -14,4 +32,13 @@
 <div class="foot"><span>CMH Scientific · Authenticated Gateway public demonstration</span><span>Capability access without implementation disclosure</span></div></div>
 <script>
 const term=document.getElementById('terminal');const steps=[...document.querySelectorAll('.step')];function log(lines){term.innerHTML=lines.join('\n')}run.onclick=()=>{steps.forEach(s=>s.classList.remove('active','ok'));const ok=[scope.checked,schema.checked,output.checked,rate.checked];const lines=['request: '+cap.value,'profile: '+profile.value,''];let failure=-1;if(!scope.checked)failure=1;else if(!schema.checked)failure=0;else if(!rate.checked)failure=2;else if(!output.checked)failure=4;steps.forEach((s,i)=>setTimeout(()=>{s.classList.add('active');lines.push('['+String(i+1).padStart(2,'0')+'] '+s.querySelector('span').textContent+' …');log(lines);setTimeout(()=>{s.classList.remove('active');if(i===failure){lines.push('     BLOCKED — request did not cross this control boundary');log(lines);return}s.classList.add('ok');if(i===3)lines.push('     protected engine invoked behind gateway boundary');if(i===4)lines.push('     APPROVED — public-safe result envelope returned');log(lines)},260)},i*420));if(failure>=0)setTimeout(()=>{for(let i=failure+1;i<steps.length;i++)steps[i].classList.remove('active','ok');lines.push('\nrequest terminated before protected result delivery');log(lines)},failure*420+900)};
-</script></body></html>
+</script>
+<section class="cmh-validation" aria-label="Validation and data provenance">
+  <h2>Live-system verification</h2>
+  <p class="cmh-v-sub">This page describes infrastructure rather than a scientific estimator, so dataset validation is not the relevant unit.</p>
+  <div class="cmh-validation-grid"><div class="cmh-v-item"><strong>Live secure gateway</strong><span>9 protected products registered: ABP, Acquire, AIO, CTF, Deferra, NPIS, OptiCeil, TopolAI, TotemicAI</span></div><div class="cmh-v-item"><strong>Authenticated live smoke</strong><span>Every registered product accepted an authenticated live scientific call through the deployed secure gateway</span></div><div class="cmh-v-item"><strong>Access boundary</strong><span>Unauthenticated scientific calls rejected; data-class header enforced</span></div></div>
+  <div class="cmh-v-boundary"><strong>Boundary:</strong> this is deployment verification, not an external security certification and not a biomedical validation claim.</div>
+  <div class="cmh-v-cites"><b>Dataset / validation references</b><ol><li>CMH Scientific deployment verification, 9 September 2026. Scientific validation belongs to the individual product pages and their cited datasets.</li></ol></div>
+</section>
+
+</body></html>
