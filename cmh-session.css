@@ -1,0 +1,7 @@
+/* CMH Scientific session-report layer v3.0 */
+.cmh-report-dock{display:flex;flex-direction:column;align-items:flex-start;gap:5px;margin:8px 0 4px;position:relative;z-index:6}
+.cmh-report-dock .cmh-report-nudge{font:600 11.5px/1.35 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#e8bd62;background:rgba(55,43,12,.72);border:1px solid rgba(232,189,98,.28);border-radius:7px;padding:5px 8px;opacity:0;transform:translateY(3px);pointer-events:none;transition:opacity .35s ease,transform .35s ease;max-width:min(460px,94vw)}
+.cmh-report-dock .cmh-report-nudge.show{opacity:1;transform:translateY(0)}
+.cmh-report-dock > button{width:auto!important;max-width:100%!important;margin:0!important;padding:8px 11px!important;border:1px solid #315363!important;background:#08161d!important;color:#d9ebef!important;border-radius:8px!important;font:600 11.5px/1.2 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;letter-spacing:0!important;text-transform:none!important;box-shadow:none!important;cursor:pointer!important}
+.cmh-report-dock > button:hover{border-color:#68cbbd!important;background:#0a1d22!important}
+@media(max-width:900px){.cmh-report-dock{margin-top:6px}.cmh-report-dock > button{font-size:12px!important;padding:9px 11px!important}.cmh-report-dock .cmh-report-nudge{font-size:11px}}
