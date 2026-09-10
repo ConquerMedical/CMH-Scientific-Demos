@@ -1,11 +1,25 @@
-/* ==========================================================================
-   CMH DEMO PATCH v3 — final mobile interaction pass
-   ========================================================================== */
+/* CMH Scientific corrective interaction layer v3.1 */
 (function(){
 "use strict";
 
-/* Generic video fallback is only for pages that do NOT manage their own source
-   playlist. Deferra-Surgery is explicitly page-managed. */
+/* Phone landscape should behave like the desktop/iPad composition instead of
+   stacking a portrait mobile layout. iPads/tablets retain their native viewport. */
+var meta=document.querySelector('meta[name="viewport"]');
+var base=meta?meta.getAttribute('content'):'width=device-width,initial-scale=1,viewport-fit=cover';
+function phoneLandscape(){
+  return window.matchMedia('(orientation: landscape)').matches &&
+         Math.min(screen.width,screen.height)<=600;
+}
+function setViewport(){
+  if(!meta)return;
+  var desired=phoneLandscape()?'width=1180,viewport-fit=cover':base;
+  if(meta.getAttribute('content')!==desired)meta.setAttribute('content',desired);
+}
+setViewport();
+window.addEventListener('orientationchange',function(){setTimeout(setViewport,80)});
+window.addEventListener('resize',setViewport);
+
+/* Generic video fallback only for pages which do not own their source. */
 var CANDIDATES=["field.mp4","assets/field.mp4","Deferra_Synthetic_Operative_Field_Clean.mp4","assets/Deferra_Synthetic_Operative_Field_Clean.mp4","../assets/field.mp4"];
 Array.prototype.forEach.call(document.querySelectorAll("video"),function(v){
   if(v.dataset.cmhManaged==="1") return;
@@ -18,61 +32,14 @@ Array.prototype.forEach.call(document.querySelectorAll("video"),function(v){
   function next(){if(done)return;i++;if(i>=CANDIDATES.length){msg.classList.add("on");return;}v.src=CANDIDATES[i];v.load();}
   v.addEventListener("error",next);
   v.addEventListener("loadeddata",function(){done=true;msg.classList.remove("on");});
-  if(!v.currentSrc||v.readyState===0)setTimeout(function(){if(v.readyState===0)next();},1200);
-  v.muted=true;v.playsInline=true;v.play().catch(function(){});
-  document.addEventListener("pointerdown",function(){v.play().catch(function(){});},{once:true});
 });
 
-/* Move an instant-result callout immediately after the visual when a page put it
-   before the visual. This does not reorder controls or overwrite page grids. */
-function reflow(){
-  if(innerWidth>900)return;
-  Array.prototype.forEach.call(document.querySelectorAll("section.card"),function(card){
-    var visual=card.querySelector(".canvasWrap,.fieldwrap,.stage,.videoBox,canvas,svg");
-    var inst=card.querySelector(".instant");
-    if(visual&&inst&&(visual.compareDocumentPosition(inst)&Node.DOCUMENT_POSITION_PRECEDING))visual.insertAdjacentElement("afterend",inst);
-  });
+/* The old v3 patch pinned the largest canvas/video with position:fixed.
+   Explicitly unwind that state if cached markup/script left classes behind. */
+function unpin(){
+  document.querySelectorAll('.cmh-sticky').forEach(function(x){x.classList.remove('cmh-sticky')});
+  document.querySelectorAll('.cmh-spacer').forEach(function(x){x.remove()});
 }
-reflow();addEventListener("resize",reflow);
-
-/* Pin the largest visual only after it scrolls to the top. Initial reading order
-   remains title/caption -> visual -> controls. The spacer preserves layout. */
-var pinState={box:null,sp:null,anchor:0,on:false};
-function findVisualBox(){
-  var el=null,area=0;
-  Array.prototype.forEach.call(document.querySelectorAll("canvas,video,svg"),function(n){
-    var r=n.getBoundingClientRect(),a=r.width*r.height;
-    if(a>area&&r.height>120){area=a;el=n;}
-  });
-  if(!el)return null;
-  var box=el.parentElement;
-  if(!box||box.tagName==="BODY")return null;
-  return box;
-}
-function preparePin(){
-  if(innerWidth>900){
-    if(pinState.box)pinState.box.classList.remove("cmh-sticky");
-    if(pinState.sp)pinState.sp.style.display="none";
-    pinState={box:null,sp:null,anchor:0,on:false};return;
-  }
-  var box=findVisualBox();if(!box)return;
-  if(pinState.box!==box){
-    if(pinState.box)pinState.box.classList.remove("cmh-sticky");
-    var sp=box.previousElementSibling;
-    if(!sp||!sp.classList.contains("cmh-spacer")){sp=document.createElement("div");sp.className="cmh-spacer";box.parentElement.insertBefore(sp,box);}
-    pinState={box:box,sp:sp,anchor:box.getBoundingClientRect().top+scrollY,on:false};
-  }
-  updatePin();
-}
-function updatePin(){
-  if(innerWidth>900||!pinState.box)return;
-  var should=scrollY>pinState.anchor-4;
-  if(should===pinState.on)return;
-  pinState.on=should;
-  var h=Math.min(380,Math.round(innerHeight*.44));
-  pinState.box.classList.toggle("cmh-sticky",should);
-  pinState.sp.style.height=should?h+"px":"0px";pinState.sp.style.display=should?"block":"none";
-  requestAnimationFrame(function(){dispatchEvent(new Event("resize"));setTimeout(function(){dispatchEvent(new Event("resize"));},120);});
-}
-preparePin();addEventListener("resize",function(){pinState.anchor=0;pinState.box=null;preparePin();});addEventListener("scroll",updatePin,{passive:true});
+unpin();
+document.addEventListener('DOMContentLoaded',unpin,{once:true});
 })();

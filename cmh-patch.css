@@ -1,40 +1,14 @@
-/* ==========================================================================
-   CMH DEMO PATCH v3 — final mobile interaction pass
-   - Preserve each demo's own mobile ordering.
-   - Pin the primary visual only after it reaches the top of the viewport, so
-     the title/caption still appear first.
-   - Let fixed-viewport ABP scroll normally on phones.
-   ========================================================================== */
-
-@media (max-width: 900px){
-  .cmh-sticky{
-    position: fixed !important; top: 0; left: 0; right: 0; z-index: 40;
-    background: #03070a; box-shadow: 0 8px 20px rgba(0,0,0,.6);
-    border-bottom: 1px solid #16303f;
-    height: 44vh !important; max-height: 380px; min-height: 210px !important;
-    overflow: hidden;
-  }
-  .cmh-sticky > canvas, .cmh-sticky > video, .cmh-sticky > svg{
-    object-fit: cover; max-height: 100% !important;
-  }
-  .cmh-spacer{ flex:none; }
-
-  /* ABP used a fixed desktop viewport. On mobile it becomes a normal document. */
-  html,body{overflow:auto !important;height:auto !important}
-  #app{
-    position:relative !important;inset:auto !important;min-height:100vh;
-    display:flex !important;flex-direction:column;
-    grid-template-columns:none !important;grid-template-rows:none !important;
-  }
-  #app > .side{
-    order:2;overflow-y:visible !important;max-height:none !important;
-    border-left:none;border-top:1px solid #1e3340;
-  }
-
-  h1{font-size:26px !important}
-  .shell{padding:12px !important}
+/* CMH Scientific corrective interaction layer v3.1
+   Phone portrait: natural document flow; primary figures never pin over text.
+   Phone landscape: cmh-patch.js requests a desktop-width viewport.
+*/
+html,body{max-width:100%;overflow-x:hidden}
+.cmh-sticky{position:static!important;inset:auto!important;height:auto!important;max-height:none!important;min-height:0!important;box-shadow:none!important;border-bottom:0!important}
+.cmh-spacer{display:none!important;height:0!important}
+@media(max-width:900px) and (orientation:portrait){
+  html,body{height:auto!important;min-height:100%!important;overflow-y:auto!important}
+  .cmh-report-dock{position:relative!important;z-index:2!important}
 }
-
 .cmh-vidfail{
   position:absolute;inset:0;display:none;place-items:center;text-align:center;
   background:repeating-linear-gradient(45deg,#0a1620,#0a1620 12px,#0c1a26 12px,#0c1a26 24px);

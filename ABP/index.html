@@ -14,7 +14,7 @@
   --core:#ffb03a;
   --rim:#2fe3d6;
   --marg:#a86bff;
-  --warn:#ff6b5e;
+  --warn:#ff6b5e;--green:#62e39f;--green2:#22b86d;
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;height:100%;background:var(--void);color:var(--text);
@@ -87,6 +87,15 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
 .reveal b{color:var(--warn);font-weight:600}
 .reveal .a{color:var(--rim);font-weight:600}
 .note{font-size:10.5px;line-height:1.5;color:#4a5c68}
+.optimizeABP{width:100%;padding:12px 11px;border:1px solid #6cf0aa;background:linear-gradient(180deg,var(--green),var(--green2));color:#03120a;border-radius:7px;cursor:pointer;font-weight:850;font-size:14px;box-shadow:0 7px 20px rgba(34,184,109,.18)}
+.optimizeABP:hover{filter:brightness(1.05)}
+.optResult{margin-top:9px;padding:10px 12px;border-left:3px solid var(--rim);background:#061719;border-radius:4px}
+.optResult .route{font-size:15px;font-weight:800;color:#eafffb;margin-bottom:3px}
+.optResult .levels{font-size:11.5px;color:#9ec5c6;line-height:1.5}
+.rankRoutes{font-size:10.5px;color:#738d98;line-height:1.55;margin-top:7px}
+.harmLegend{margin-top:6px;font-size:10px;color:#92a7b1}.harmLegend b{color:#ff6b5e}
+@media(max-width:820px) and (orientation:portrait){body> .accessLink{position:static!important;margin:12px 16px 20px!important}.side{padding-bottom:18px!important}}
+
 @media(max-width:820px){
   html,body{height:auto;min-height:100%;overflow:auto}
   #app{position:static;display:flex;flex-direction:column;min-height:100vh}
@@ -161,7 +170,15 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
     </section>
 
     <section>
-      <h2>Intervention</h2>
+      <h2>Intervention coordinates</h2>
+      <label>
+        <span class="row"><span class="n">Cytoreduction / resection level</span><span class="v" id="vSurg">Biopsy only</span></span>
+        <select id="surg" style="width:100%;background:#08131b;color:#c8dce6;border:1px solid #1d2b38;border-radius:4px;padding:8px">
+          <option value="0">Biopsy only / no cytoreduction</option>
+          <option value="0.55">Partial resection</option>
+          <option value="0.90">Gross / near-total resection</option>
+        </select>
+      </label>
       <label>
         <span class="row"><span class="n">Radiation</span><span class="v" id="vRt">0.0 Gy-eq</span></span>
         <input type="range" id="rt" min="0" max="84" step="1" value="0">
@@ -175,22 +192,29 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
         <span class="row"><span class="n">Weeks since start</span><span class="v" id="vWk">12</span></span>
         <input type="range" id="wk" min="0" max="24" step="1" value="12">
       </label>
+      <div class="harmLegend">Cyan = enhancing tumour · purple = infiltrative margin · orange = necrotic core · <b>red glow = treatment injury / necrosis risk</b>.</div>
     </section>
 
     <section id="inverseSection">
-      <h2>Inverse target search</h2>
-      <select id="inverseObjective" style="width:100%;background:#08131b;color:#c8dce6;border:1px solid #1d2b38;border-radius:4px;padding:8px">
+      <h2>Target-directed inverse interrogation</h2>
+      <select id="inverseObjective" style="width:100%;background:#08131b;color:#c8dce6;border:1px solid #1d2b38;border-radius:4px;padding:8px;margin-bottom:9px">
+        <option value="balanced">Best supported overall control</option>
         <option value="rano">Minimise enhancing disease</option>
-        <option value="inf">Protect infiltrative margin</option>
+        <option value="inf">Protect infiltrative margin / limit treatment harm</option>
       </select>
-      <div class="ground" style="margin-top:10px;border-left-color:#ffb03a">
+      <button id="optimizeIntervention" class="optimizeABP">OPTIMIZE INTERVENTION</button>
+      <div class="optResult">
+        <div class="route" id="bestRoute">No optimized intervention selected yet.</div>
+        <div class="levels" id="bestLevels">Press Optimize Intervention. ABP will compare supported intervention routes and return the best route and levels for the declared target.</div>
+      </div>
+      <div class="ground" style="margin-top:9px;border-left-color:#ffb03a">
         <div class="g1">Unconstrained numerical optimum</div><div class="g2" id="globalOpt">—</div>
       </div>
       <div class="ground" style="margin-top:8px;border-left-color:#2fe3d6">
         <div class="g1">ABP supported optimum</div><div class="g2" id="supportedOpt">—</div>
       </div>
-      <p class="note" id="supportWhy" style="margin-top:8px">—</p>
-      <button id="useSupportedOpt" style="width:100%;padding:9px;border:1px solid var(--rim);background:#07131b;color:#dff;border-radius:4px;cursor:pointer">Use ABP supported optimum</button>
+      <div class="rankRoutes" id="rankedRoutes">Route comparison will appear after optimization.</div>
+      <p class="note" id="supportWhy" style="margin-top:8px">The optimizer is support-constrained: numerically attractive settings outside the declared support envelope remain unresolved.</p>
     </section>
 
     <section id="designSection" style="display:none">
@@ -211,7 +235,7 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
 
     <section>
       <h2>Response</h2>
-      <div class="m"><span>Radiation kill</span><span id="mKr">\u2014</span></div>
+      <div class="m"><span>Cytoreduction effect</span><span id="mSurg">—</span></div><div class="m"><span>Radiation kill</span><span id="mKr">\u2014</span></div>
       <div class="m"><span>Agent kill</span><span id="mKt">\u2014</span></div>
       <div class="m"><span>Combined</span><span id="mKc">\u2014</span></div>
       <div class="m"><span>Enhancing volume</span><span id="mEnh">—</span></div>
@@ -254,7 +278,7 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
 const cv=document.getElementById("c"), ctx=cv.getContext("2d",{alpha:false});
 let W=0,H=0,DPR=1;
 function size(){
-  DPR=Math.min(window.devicePixelRatio||1,1.5);
+  DPR=Math.min(window.devicePixelRatio||1, window.innerWidth<700?1.2:1.5);
   const r=cv.parentElement.getBoundingClientRect();
   W=Math.max(200,r.width); H=Math.max(200,r.height);
   cv.width=W*DPR; cv.height=H*DPR;
@@ -277,7 +301,7 @@ function rad(th,z,seed,rough){
 
 // ---- pharmacology: each component responds differently ----
 const hill=(d,ec,h)=>Math.pow(d,h)/(Math.pow(ec,h)+Math.pow(d,h));
-function state(rt,tz,wk,mg){
+function state(rt,tz,wk,mg,surg=0){
   // --- Radiation: linear-quadratic kill, 2 Gy fractions, alpha/beta = 10 ---
   const alpha=0.012, beta=0.0012, dfx=2.0;
   const kR = 1-Math.exp(-(alpha*rt + beta*rt*dfx));
@@ -323,31 +347,41 @@ function state(rt,tz,wk,mg){
   const rn=re*nFrac;
   const ri=Math.max(re*1.06, 1.00*growI*(1-iEff)*(1+pseudo*0.4));
   const harm=Math.max(necrosis, invasion*Math.min(1,wk/12));
-  return {rn,re,ri,kR,kT,kC,pseudo,eEff,iEff,grow,necrosis,invasion,harm};
+  // Cytoreduction is a distinct route. The demo uses a saturating reduction of
+  // contourable bulk and a much smaller effect on diffuse infiltrative extent.
+  // This is illustrative parameterization; the route itself is grounded in the
+  // validated glioma operability/cytoreduction inversion.
+  const surgEff=1-Math.exp(-2.8*Math.max(0,surg));
+  const re2=Math.max(.09,re*(1-.66*surgEff));
+  const rn2=Math.min(re2*.82,Math.max(.035,rn*(1-.54*surgEff)));
+  const ri2=Math.max(re2*1.07,ri*(1-.12*surgEff));
+  return {rn:rn2,re:re2,ri:ri2,kR,kT,kC,pseudo,eEff,iEff,grow,necrosis,invasion,harm,surgEff};
 }
 function vol(r){return (4/3)*Math.PI*Math.pow(r,3);}
 
 // ---- grounding: what this person's record actually supports ----
-function ground(rt,tz,mg){
+function ground(rt,tz,mg,surg=0){
   const d=rt/60, t=tz;
-  if(d<0.02&&t<0.02) return {k:"base",t:"Untreated baseline",
+  if(d<0.02&&t<0.02&&surg<0.02) return {k:"base",t:"Untreated baseline",
     e:"Move a control to perturb the primitive."};
   if(d>0.85||t>0.88) return {k:"abs",t:"Insufficient support \u2014 abstain",
-    e:"This person's record contains no exposure at this intensity. The primitive declines rather than extrapolating."};
+    e:"The declared support envelope contains no comparable exposure at this intensity. The primitive declines rather than extrapolating."};
   if(!mg && t>0.45) return {k:"unf",t:"Supported, historically unfavourable",
     e:"Unmethylated MGMT. Alkylating exposure at this level appears in the record with toxicity and little response."};
   if(d>0.55&&t>0.55) return {k:"mix",t:"Supported, mixed response",
     e:"Combined exposure at this intensity appears in the record with inconsistent trajectory."};
   if(t>0.30&&d<0.20) return {k:"mix",t:"Supported, mixed response",
-    e:"Agent-dominant regimens appear in the record with inconsistent response."};
+    e:"Agent-dominant regimens appear in the support record with inconsistent response."};
+  if(surg>0.02&&d<0.20&&t<0.10) return {k:"fav",t:"Supported cytoreduction direction",
+    e:"The glioma substrate contains an operability/cytoreduction axis; this demonstrator is interrogating that supported route rather than inventing a new intervention class."};
   return {k:"fav",t:"Supported, historically favourable",
-    e:"This person has received exposure in this region and the response was favourable."};
+    e:"Comparable exposure is represented in the declared support envelope with a historically favourable response."};
 }
 const GC={base:"#6c8493",fav:"#2fe3d6",mix:"#ffb03a",unf:"#ff6b5e",abs:"#6c8493"};
-function supported(rt,tz,mg){ return ground(rt,tz,mg).k !== "abs"; }
+function supported(rt,tz,mg,surg=0){ return ground(rt,tz,mg,surg).k !== "abs"; }
 
 let rotY=0.6, rotX=0.22, drag=null, spin=true, abpDirty=false;
-let P={rt:0,tz:0,wk:12,mg:true};
+let P={surg:0,rt:0,tz:0,wk:12,mg:true};
 
 function cloud(cx,cy,scale,r0,z,alpha){
   const yy=cy - z*scale*Math.sin(rotX)*1.05;
@@ -380,14 +414,14 @@ function shell(cx,cy,scale,r0,z,col,alpha,seed,rough,glow){
 }
 
 function draw(){
-  const s=state(P.rt,P.tz,P.wk,P.mg);
+  const s=state(P.rt,P.tz,P.wk,P.mg,P.surg);
   ctx.globalCompositeOperation="source-over";
   ctx.globalAlpha=1;
   ctx.fillStyle="#03060b"; ctx.fillRect(0,0,W,H);
 
   // harm halo — the field reddens as treatment damage accumulates
-  if(state(P.rt,P.tz,P.wk,P.mg).harm>0.12){
-    const hh=Math.min(1,state(P.rt,P.tz,P.wk,P.mg).harm);
+  if(state(P.rt,P.tz,P.wk,P.mg,P.surg).harm>0.12){
+    const hh=Math.min(1,state(P.rt,P.tz,P.wk,P.mg,P.surg).harm);
     const hg=ctx.createRadialGradient(W*0.53,H*0.43,10,W*0.53,H*0.43,Math.max(W,H)*0.55);
     hg.addColorStop(0,"rgba(255,60,40,"+(0.16*hh).toFixed(3)+")");
     hg.addColorStop(1,"rgba(255,60,40,0)");
@@ -401,16 +435,15 @@ function draw(){
   ctx.globalCompositeOperation="lighter";
   const cx=W*0.53, cy=H*0.43;
   const scale=Math.min(W*0.46, H*0.46)/1.65;
-  const NS=drag?14:30;
-  const baseShow=(P.rt>0.5||P.tz>0.01||P.wk>0.5);
+  const NS=drag?(window.innerWidth<700?9:14):(window.innerWidth<700?18:30);
+  const baseShow=(P.surg>0.01||P.rt>0.5||P.tz>0.01||P.wk>0.5);
   const mix=(a,b,t)=>{const p=x=>parseInt(x,16);
     const r=Math.round(p(a.slice(1,3))*(1-t)+p(b.slice(1,3))*t),
           g=Math.round(p(a.slice(3,5))*(1-t)+p(b.slice(3,5))*t),
           bl=Math.round(p(a.slice(5,7))*(1-t)+p(b.slice(5,7))*t);
     return "#"+[r,g,bl].map(v=>v.toString(16).padStart(2,"0")).join("");};
-  const hw=Math.min(1,Math.pow(s.harm,0.7)*1.6);
-  const rimCol =mix("#2fe3d6","#ff4b3a",hw);
-  const rimCol2=mix("#1fbfd0","#d63a2c",hw);
+  const rimCol="#2fe3d6", rimCol2="#1fbfd0";
+  const coreCol=mix("#ffb03a","#ff5b4a",Math.min(1,s.necrosis*1.5));
 
   // back-to-front so nearer slices overlay
   for(let i=0;i<NS;i++){
@@ -423,14 +456,14 @@ function draw(){
     // infiltrative margin — diffuse, no boundary (glioma has no contourable edge here)
     cloud(cx,cy,scale,s.ri*env,z,0.030*depth);
 
-    // enhancing rim — shifts toward red as treatment harm accumulates
+    // enhancing rim — remains cyan; red is reserved for treatment injury
     if(s.re*env>0.02){
       shell(cx,cy,scale,s.re*env,z,rimCol,0.16*depth,1.4,0.85,true);
       shell(cx,cy,scale,s.re*env*0.93,z,rimCol2,0.09*depth,1.4,0.85,false);
     }
     // necrotic core — warm, takes a larger share of the rim under treatment
     if(s.rn*env>0.02){
-      shell(cx,cy,scale,s.rn*env,z,"#ffb03a",0.13*depth,0.6,0.55,true);
+      shell(cx,cy,scale,s.rn*env,z,coreCol,0.13*depth,0.6,0.55,true);
     }
     // untreated reference outline, every 6th slice
     if(baseShow && i%6===0){
@@ -451,7 +484,7 @@ function draw(){
   document.getElementById("mTot").textContent=(dT>=0?"+":"")+dT.toFixed(0)+"%";
   const dI=(s.ri/1.00-1)*100;
   const word=v=>Math.abs(v)<1?"did not materially move":v<0?`fell ${Math.abs(v).toFixed(0)}%`:`rose ${Math.abs(v).toFixed(0)}%`;
-  const grNow=ground(P.rt,P.tz,P.mg);
+  const grNow=ground(P.rt,P.tz,P.mg,P.surg);
   updateModeResult(s,dN,dE,dI,dT,grNow);
   document.getElementById("contrastLine").textContent=`Total volume ${word(dT)} while the infiltrative margin ${word(dI)}. Enhancing volume ${word(dE)}.`;
   let rano = dE<=-65?"partial response" : dE<=-25?"minor response" :
@@ -461,16 +494,16 @@ function draw(){
   document.getElementById("mRano").style.color=
     rano==="progression"?"#ff6b5e":rano==="pseudoprogression"?"#ffb03a":"#2fe3d6";
 
-  document.getElementById("mKr").textContent=(s.kR*100).toFixed(0)+"%";
+  document.getElementById("mSurg").textContent=(s.surgEff*100).toFixed(0)+"%";document.getElementById("mKr").textContent=(s.kR*100).toFixed(0)+"%";
   document.getElementById("mKt").textContent=(s.kT*100).toFixed(0)+"%";
   document.getElementById("mKc").textContent=(s.kC*100).toFixed(0)+"%";
   // clinical course: where on the response-nadir-regrowth curve are we?
   let nadirW=0, nadirR=Infinity;
   for(let w=0;w<=24;w+=0.5){
-    const r=state(P.rt,P.tz,w,P.mg).re;
+    const r=state(P.rt,P.tz,w,P.mg,P.surg).re;
     if(r<nadirR){nadirR=r;nadirW=w;}
   }
-  const treated=(P.rt>0.5||P.tz>0.01);
+  const treated=(P.surg>0.01||P.rt>0.5||P.tz>0.01);
   const cEl=document.getElementById("mCourse");
   if(!treated){
     cEl.textContent = P.wk<1 ? "baseline" : "untreated growth";
@@ -491,7 +524,7 @@ function draw(){
   iEl.textContent=(s.invasion*100).toFixed(0)+"%";
   iEl.style.color=s.invasion>0.30?"#ff4b3a":s.invasion>0.12?"#ffb03a":"#c8dce6";
 
-  const gr=ground(P.rt,P.tz,P.mg);
+  const gr=ground(P.rt,P.tz,P.mg,P.surg);
   document.getElementById("gT").textContent=gr.t;
   document.getElementById("gE").textContent=gr.e;
   document.getElementById("gT").style.color=GC[gr.k];
@@ -501,7 +534,7 @@ function draw(){
 let lastAnim=0;
 function loop(ts=0){
   if(abpDirty){draw();abpDirty=false;lastAnim=ts;}
-  else if(ts-lastAnim>33 && spin&&!drag&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+  else if(ts-lastAnim>(window.innerWidth<700?50:33) && spin&&!drag&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
     rotY+=0.016;draw();lastAnim=ts;
   }
   requestAnimationFrame(loop);
@@ -526,44 +559,96 @@ const bind=(id,key,fmt,el)=>{
   s.addEventListener("input",()=>{P[key]=parseFloat(s.value);o.textContent=fmt(P[key]);draw();if(key==="wk")refreshInverseComparison(true);});
   o.textContent=fmt(P[key]);
 };
+const surg=document.getElementById("surg"),vSurg=document.getElementById("vSurg");
+const surgName=v=>+v>=.85?"Gross / near-total":+v>=.30?"Partial resection":"Biopsy only";
+surg.addEventListener("change",()=>{P.surg=parseFloat(surg.value);vSurg.textContent=surgName(P.surg);draw();refreshInverseComparison(true)});
+vSurg.textContent=surgName(P.surg);
 bind("rt","rt",v=>v.toFixed(1)+" Gy-eq","vRt");
 bind("tz","tz",v=>v.toFixed(2),"vTz");
 bind("wk","wk",v=>String(v),"vWk");
 
 
-function optimise(obj){
-  let best=null;
-  for(let rt=0;rt<=84;rt+=1) for(let tz=0;tz<=1.0001;tz+=0.02){
-    if(!supported(rt,tz,P.mg)) continue;
-    const st=state(rt,tz,P.wk,P.mg);
-    const ev=vol(st.re)-vol(st.rn);
-    const score = obj==="rano" ? ev : st.ri;
-    if(!best||score<best.score) best={rt,tz,score,st,ev};
-  }
-  return best;
+function scenarioScore(st,obj,surg,rt,tz){
+  const E0=vol(.78)-vol(.44), ev=Math.max(0,vol(st.re)-vol(st.rn))/E0;
+  const inf=st.ri, harm=st.necrosis*1.15+st.invasion*.72;
+  const burden=.18*surg+.035*(rt/84)+.05*tz;
+  if(obj==="rano")return .82*ev+.13*inf+.42*harm+burden;
+  if(obj==="inf")return .18*ev+.68*inf+.86*harm+burden;
+  return .48*ev+.31*inf+.60*harm+burden;
 }
-function optimiseAny(obj){
-  let best=null;
-  for(let rt=0;rt<=84;rt+=1) for(let tz=0;tz<=1.0001;tz+=0.02){
-    const st=state(rt,tz,P.wk,P.mg),ev=vol(st.re)-vol(st.rn),score=obj==="rano"?ev:st.ri;
-    if(!best||score<best.score)best={rt,tz,score,st,ev};
-  }
-  return best;
+function routeName(surg,rt,tz){
+  const a=[];if(surg>.01)a.push("surgery / cytoreduction");if(rt>.5)a.push("radiation");if(tz>.01)a.push("alkylating drug");
+  return a.length?a.join(" + "):"no intervention";
 }
-let inverseCacheKey="", inverseSupported=null;
+function groundedCombo(surg,rt,tz,mg){
+  const g=ground(rt,tz,mg,surg);
+  if(g.k==="abs")return false;
+  // The public demonstrator keeps very aggressive three-way combinations out
+  // of the supported envelope even when each coordinate exists separately.
+  if(surg>.60 && rt>48 && tz>.68)return false;
+  return true;
+}
+function searchRoutes(obj,onlySupported){
+  const S=[0,.55,.90],R=[];for(let x=0;x<=84;x+=3)R.push(x);
+  const T=[];for(let x=0;x<=1.0001;x+=.05)T.push(+x.toFixed(2));
+  const specs=[
+    ["Surgery / cytoreduction",s=>s>.01,r=>r===0,t=>t===0],
+    ["Radiation",s=>s===0,r=>r>0,t=>t===0],
+    ["Alkylating drug",s=>s===0,r=>r===0,t=>t>0],
+    ["Surgery + radiation",s=>s>.01,r=>r>0,t=>t===0],
+    ["Surgery + drug",s=>s>.01,r=>r===0,t=>t>0],
+    ["Radiation + drug",s=>s===0,r=>r>0,t=>t>0],
+    ["Multimodal",s=>s>.01,r=>r>0,t=>t>0]
+  ];
+  const bestByRoute=[];
+  for(const spec of specs){
+    let best=null;
+    for(const s of S)if(spec[1](s))for(const r of R)if(spec[2](r))for(const t of T)if(spec[3](t)){
+      if(onlySupported&&!groundedCombo(s,r,t,P.mg))continue;
+      const st=state(r,t,P.wk,P.mg,s),score=scenarioScore(st,obj,s,r,t);
+      if(!best||score<best.score)best={surg:s,rt:r,tz:t,st,score,route:spec[0]};
+    }
+    if(best)bestByRoute.push(best);
+  }
+  bestByRoute.sort((a,b)=>a.score-b.score);
+  return {best:bestByRoute[0]||null,routes:bestByRoute};
+}
+let inverseSupported=null,inverseAll=null;
+function formatOpt(x){
+  if(!x)return "No admissible configuration.";
+  return `${x.route} · ${surgName(x.surg)} · ${x.rt} Gy-eq · agent ${x.tz.toFixed(2)}`;
+}
 function refreshInverseComparison(force=false){
-  const obj=document.getElementById("inverseObjective").value,key=obj+"|"+P.wk+"|"+(P.mg?1:0);
-  if(!force&&key===inverseCacheKey)return;inverseCacheKey=key;
-  const all=optimiseAny(obj),sup=optimise(obj);inverseSupported=sup;
-  const allGround=ground(all.rt,all.tz,P.mg),supGround=ground(sup.rt,sup.tz,P.mg);
-  document.getElementById("globalOpt").innerHTML=`${all.rt} Gy-eq + agent ${all.tz.toFixed(2)} · <b style="color:${allGround.k==='abs'?'#ffb03a':'#2fe3d6'}">${allGround.k==='abs'?'OUTSIDE PATIENT SUPPORT':'SUPPORTED'}</b>`;
-  document.getElementById("supportedOpt").innerHTML=`${sup.rt} Gy-eq + agent ${sup.tz.toFixed(2)} · <b style="color:#2fe3d6">SUPPORTED</b>`;
-  document.getElementById("supportWhy").textContent=allGround.k==='abs'?
-    "The numerically best point lies outside this patient’s observed exposure history. ABP does not extrapolate through that gap; it returns the best intervention direction the patient’s own record supports.":
-    "The unconstrained optimum is already represented in this patient’s support, so the support gate does not alter the optimum for this target.";
+  const obj=document.getElementById("inverseObjective").value;
+  const A=searchRoutes(obj,false),S=searchRoutes(obj,true);inverseAll=A.best;inverseSupported=S.best;
+  if(!A.best||!S.best)return;
+  const supportedAll=groundedCombo(A.best.surg,A.best.rt,A.best.tz,P.mg);
+  document.getElementById("globalOpt").innerHTML=`${formatOpt(A.best)} · <b style="color:${supportedAll?'#2fe3d6':'#ffb03a'}">${supportedAll?'SUPPORTED':'OUTSIDE SUPPORT'}</b>`;
+  document.getElementById("supportedOpt").innerHTML=`${formatOpt(S.best)} · <b style="color:#2fe3d6">SUPPORTED</b>`;
+  document.getElementById("supportWhy").textContent=supportedAll?
+    "The numerical optimum is inside the declared support envelope for this target.":
+    "The numerically best combination lies outside the declared support envelope. ABP returns the best supported route instead of inventing response beyond observed support.";
+}
+function applyOpt(x){
+  if(!x)return;P.surg=x.surg;P.rt=x.rt;P.tz=x.tz;
+  surg.value=String(x.surg);document.getElementById("rt").value=x.rt;document.getElementById("tz").value=x.tz;
+  vSurg.textContent=surgName(x.surg);document.getElementById("vRt").textContent=x.rt.toFixed(1)+" Gy-eq";document.getElementById("vTz").textContent=x.tz.toFixed(2);draw();
 }
 document.getElementById("inverseObjective").addEventListener("change",()=>refreshInverseComparison(true));
-document.getElementById("useSupportedOpt").addEventListener("click",()=>{refreshInverseComparison();if(!inverseSupported)return;P.rt=inverseSupported.rt;P.tz=inverseSupported.tz;document.getElementById("rt").value=P.rt;document.getElementById("tz").value=P.tz;document.getElementById("vRt").textContent=P.rt.toFixed(1)+" Gy-eq";document.getElementById("vTz").textContent=P.tz.toFixed(2);draw();});
+document.getElementById("optimizeIntervention").addEventListener("click",()=>{
+  refreshInverseComparison(true);if(!inverseSupported)return;
+  applyOpt(inverseSupported);
+  const obj=document.getElementById("inverseObjective").value;
+  document.getElementById("bestRoute").textContent="ABP supported optimum · "+inverseSupported.route;
+  document.getElementById("bestLevels").textContent=`${surgName(inverseSupported.surg)} · radiation ${inverseSupported.rt} Gy-eq · alkylating-agent intensity ${inverseSupported.tz.toFixed(2)} · week ${P.wk}.`;
+  const ranked=searchRoutes(obj,true).routes.slice(0,4);
+  document.getElementById("rankedRoutes").innerHTML="<b>Supported route ranking:</b> "+ranked.map((x,i)=>`${i+1}. ${x.route} (${surgName(x.surg)}, ${x.rt} Gy-eq, ${x.tz.toFixed(2)})`).join(" · ");
+  document.getElementById("modeResultEye").textContent="Discovery · supported inverse optimum";
+  document.getElementById("modeResultTitle").textContent="Optimal supported route: "+inverseSupported.route;
+});
+function optimise(obj){
+  const r=searchRoutes(obj==="inf"?"inf":"rano",true).best;return {rt:r.rt,tz:r.tz,st:r.st,ev:vol(r.st.re)-vol(r.st.rn)};
+}
 const optSeg=document.getElementById("opt");
 optSeg.addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b) return;
@@ -662,24 +747,12 @@ if(evSel){evSel.onchange=()=>{
   if(v==="nbl"){t.textContent="TARGET-NBL drug-regulator hypothesis screen";e.textContent="The neuroblastoma extension maps substrate-supported regulator levers to DGIdb drug-gene interactions and ranks direction-matched intervention hypotheses.";n.textContent="Exact candidate drug names are deliberately not fabricated here. They will be populated from the frozen ranked_abp_intervention_hypotheses.csv before the public package is finalized."}
 }}
 document.getElementById("downloadReport").onclick=()=>{
-  const st=state(P.rt,P.tz,P.wk,P.mg), gr=ground(P.rt,P.tz,P.mg);
-  const mode=[...document.querySelectorAll("#abpMode button")].find(b=>b.getAttribute("aria-pressed")==="true")?.textContent||"Discovery";
-  const ev=evSel?evSel.options[evSel.selectedIndex].text:"GBM";
-  const vE=vol(st.re)-vol(st.rn),vI=vol(st.ri)-vol(st.re),vT=vol(st.ri),vE0=vol(.78)-vol(.44),vT0=vol(1);
-  const dE=(vE/vE0-1)*100,dI=(st.ri-1)*100,dT=(vT/vT0-1)*100;
-  const body=`<!doctype html><meta charset="utf-8"><title>ABP current report</title><style>body{font:15px/1.55 system-ui;max-width:860px;margin:40px auto;padding:0 20px;color:#17212b}h1{font-size:28px}table{border-collapse:collapse;width:100%}td{padding:8px;border-bottom:1px solid #ddd}td:first-child{color:#667}.box{padding:14px;background:#f3f7f9;border-left:4px solid #1ebcb0}</style>
-  <h1>ABP · AI as a Biological Primitive · current report</h1><div class="box"><b>${mode}</b><br>${gr.t}: ${gr.e}</div>
-  <h2>Declared context</h2><table><tr><td>Evidence context</td><td>${ev}</td></tr><tr><td>Objective layer</td><td>${mode}</td></tr><tr><td>MGMT</td><td>${P.mg?"methylated":"unmethylated"}</td></tr><tr><td>Radiation coordinate</td><td>${P.rt.toFixed(1)} Gy-eq</td></tr><tr><td>Alkylating-agent coordinate</td><td>${P.tz.toFixed(2)}</td></tr><tr><td>Weeks</td><td>${P.wk}</td></tr></table>
-  <h2>Primitive response</h2><table><tr><td>Radiation kill</td><td>${(st.kR*100).toFixed(1)}%</td></tr><tr><td>Agent kill</td><td>${(st.kT*100).toFixed(1)}%</td></tr><tr><td>Combined response</td><td>${(st.kC*100).toFixed(1)}%</td></tr><tr><td>Enhancing-volume change</td><td>${dE.toFixed(1)}%</td></tr><tr><td>Infiltrative-extent change</td><td>${dI.toFixed(1)}%</td></tr><tr><td>Total-volume change</td><td>${dT.toFixed(1)}%</td></tr><tr><td>Radiation-necrosis state</td><td>${(st.necrosis*100).toFixed(1)}%</td></tr><tr><td>Induced-invasion state</td><td>${(st.invasion*100).toFixed(1)}%</td></tr></table>
-  <h2>Support-constrained inverse result</h2>${(()=>{const obj=document.getElementById("inverseObjective").value,all=optimiseAny(obj),sup=optimise(obj),ag=ground(all.rt,all.tz,P.mg);return `<table><tr><td>Inverse objective</td><td>${obj==="rano"?"Minimise enhancing disease":"Protect infiltrative margin"}</td></tr><tr><td>Unconstrained numerical optimum</td><td>${all.rt} Gy-eq + agent ${all.tz.toFixed(2)} · ${ag.k==="abs"?"OUTSIDE PATIENT SUPPORT":"SUPPORTED"}</td></tr><tr><td>ABP supported optimum</td><td>${sup.rt} Gy-eq + agent ${sup.tz.toFixed(2)} · SUPPORTED</td></tr></table><p>${ag.k==="abs"?"The unconstrained numerical optimum lies outside this patient’s observed exposure history. ABP therefore returns the best supported direction rather than extrapolating through an unobserved region.":"The unconstrained optimum is represented in this patient’s support for the current target."}</p>`})()}
-  <h2>ABP interpretation</h2><p>ABP treats the focal biological system as an intervention-facing primitive. Discovery asks which intervention directions move it toward a declared target; design compares compound/dose/schedule/combination constructions; development asks which biomarkers, states and contexts alter the response. Unsupported regions should remain unresolved rather than being extrapolated into recommendations.</p>
-  <p><b>Boundary:</b> this GBM geometry is an illustrative literature-grounded demonstrator. It is not a patient-specific causal treatment estimate.</p>`;
-  const blob=new Blob([body],{type:"text/html"}),url=URL.createObjectURL(blob),a=document.createElement("a");
-  a.href=url;a.download="ABP_current_report.html";a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
+  const text=`ABP demonstration report\n\nCurrent supported optimum: ${document.getElementById("bestRoute").textContent}\n${document.getElementById("bestLevels").textContent}\n\n${document.getElementById("contrastLine").textContent}\n\nThis public GBM geometry is an illustrative, literature-grounded demonstration and not a patient-specific causal treatment estimate.`;
+  const blob=new Blob([text],{type:"text/plain"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="ABP_current_report.txt";a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
 };
 
 refreshInverseComparison(true);size(); draw(); loop();
 })();
 </script>
-<div style="position:fixed;left:16px;bottom:14px;z-index:5"><a href="../Access/" style="color:#2fe3d6;text-decoration:none;font-size:11px">Request software access</a></div><script src="../cmh-patch.js"></script><script src="../cmh-session.js"></script></body>
+<div class="accessLink" style="position:fixed;left:16px;bottom:14px;z-index:5"><a href="../Access/" style="color:#2fe3d6;text-decoration:none;font-size:11px">Request software access</a></div><script src="../cmh-patch.js"></script><script src="../cmh-session.js"></script></body>
 </html>
