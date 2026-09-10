@@ -108,7 +108,7 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
 }
 @media(prefers-reduced-motion:reduce){canvas{animation:none}}
 </style>
-</head>
+<link rel="stylesheet" href="../cmh-patch.css"></head>
 <body>
 <div id="app">
   <div id="stage">
@@ -120,8 +120,8 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
       <div class="rEye" id="modeResultEye">Discovery · target-directed interrogation</div>
       <div class="rTitle" id="modeResultTitle">Interrogate the primitive, then show what moved.</div>
       <div class="resultGrid">
-        <div class="resultMetric"><span id="r1l">Support</span><b id="r1v">Untreated baseline</b></div>
-        <div class="resultMetric"><span id="r2l">Enhancing volume</span><b id="r2v">—</b></div>
+        <div class="resultMetric"><span id="r1l">Necrotic core</span><b id="r1v">—</b></div>
+        <div class="resultMetric"><span id="r2l">Enhancing rim</span><b id="r2v">—</b></div>
         <div class="resultMetric"><span id="r3l">Infiltrative margin</span><b id="r3v">—</b></div>
       </div>
       <div class="contrastLine" id="contrastLine">Move an intervention control. ABP will report the compartment-specific response instead of collapsing it to one number.</div>
@@ -175,6 +175,22 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
         <span class="row"><span class="n">Weeks since start</span><span class="v" id="vWk">12</span></span>
         <input type="range" id="wk" min="0" max="24" step="1" value="12">
       </label>
+    </section>
+
+    <section id="inverseSection">
+      <h2>Inverse target search</h2>
+      <select id="inverseObjective" style="width:100%;background:#08131b;color:#c8dce6;border:1px solid #1d2b38;border-radius:4px;padding:8px">
+        <option value="rano">Minimise enhancing disease</option>
+        <option value="inf">Protect infiltrative margin</option>
+      </select>
+      <div class="ground" style="margin-top:10px;border-left-color:#ffb03a">
+        <div class="g1">Unconstrained numerical optimum</div><div class="g2" id="globalOpt">—</div>
+      </div>
+      <div class="ground" style="margin-top:8px;border-left-color:#2fe3d6">
+        <div class="g1">ABP supported optimum</div><div class="g2" id="supportedOpt">—</div>
+      </div>
+      <p class="note" id="supportWhy" style="margin-top:8px">—</p>
+      <button id="useSupportedOpt" style="width:100%;padding:9px;border:1px solid var(--rim);background:#07131b;color:#dff;border-radius:4px;cursor:pointer">Use ABP supported optimum</button>
     </section>
 
     <section id="designSection" style="display:none">
@@ -238,7 +254,7 @@ input[type=range]:focus-visible{outline:1px solid var(--rim);outline-offset:4px}
 const cv=document.getElementById("c"), ctx=cv.getContext("2d",{alpha:false});
 let W=0,H=0,DPR=1;
 function size(){
-  DPR=Math.min(window.devicePixelRatio||1,2);
+  DPR=Math.min(window.devicePixelRatio||1,1.5);
   const r=cv.parentElement.getBoundingClientRect();
   W=Math.max(200,r.width); H=Math.max(200,r.height);
   cv.width=W*DPR; cv.height=H*DPR;
@@ -330,7 +346,7 @@ function ground(rt,tz,mg){
 const GC={base:"#6c8493",fav:"#2fe3d6",mix:"#ffb03a",unf:"#ff6b5e",abs:"#6c8493"};
 function supported(rt,tz,mg){ return ground(rt,tz,mg).k !== "abs"; }
 
-let rotY=0.6, rotX=0.22, drag=null, spin=true;
+let rotY=0.6, rotX=0.22, drag=null, spin=true, abpDirty=false;
 let P={rt:0,tz:0,wk:12,mg:true};
 
 function cloud(cx,cy,scale,r0,z,alpha){
@@ -385,7 +401,7 @@ function draw(){
   ctx.globalCompositeOperation="lighter";
   const cx=W*0.53, cy=H*0.43;
   const scale=Math.min(W*0.46, H*0.46)/1.65;
-  const NS=30;
+  const NS=drag?14:30;
   const baseShow=(P.rt>0.5||P.tz>0.01||P.wk>0.5);
   const mix=(a,b,t)=>{const p=x=>parseInt(x,16);
     const r=Math.round(p(a.slice(1,3))*(1-t)+p(b.slice(1,3))*t),
@@ -428,6 +444,7 @@ function draw(){
   const vE=vol(s.re)-vol(s.rn), vI=vol(s.ri)-vol(s.re), vT=vol(s.ri);
   const vE0=vol(0.78)-vol(0.44), vT0=vol(1.00);
   const dE=(vE/vE0-1)*100, dT=(vT/vT0-1)*100;
+  const vN0=vol(0.44), dN=(vol(s.rn)/vN0-1)*100;
   document.getElementById("mEnh").textContent=(dE>=0?"+":"")+dE.toFixed(0)+"%";
   document.getElementById("mInf").textContent=
     ((s.ri/1.00-1)>=0?"+":"")+((s.ri/1.00-1)*100).toFixed(0)+"%";
@@ -435,7 +452,7 @@ function draw(){
   const dI=(s.ri/1.00-1)*100;
   const word=v=>Math.abs(v)<1?"did not materially move":v<0?`fell ${Math.abs(v).toFixed(0)}%`:`rose ${Math.abs(v).toFixed(0)}%`;
   const grNow=ground(P.rt,P.tz,P.mg);
-  updateModeResult(s,dE,dI,dT,grNow);
+  updateModeResult(s,dN,dE,dI,dT,grNow);
   document.getElementById("contrastLine").textContent=`Total volume ${word(dT)} while the infiltrative margin ${word(dI)}. Enhancing volume ${word(dE)}.`;
   let rano = dE<=-65?"partial response" : dE<=-25?"minor response" :
              dE< 25?"stable disease" : "progression";
@@ -483,8 +500,9 @@ function draw(){
 
 let lastAnim=0;
 function loop(ts=0){
-  if(ts-lastAnim>33 && spin&&!drag&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-    rotY+=0.016; draw(); lastAnim=ts;
+  if(abpDirty){draw();abpDirty=false;lastAnim=ts;}
+  else if(ts-lastAnim>33 && spin&&!drag&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+    rotY+=0.016;draw();lastAnim=ts;
   }
   requestAnimationFrame(loop);
 }
@@ -497,15 +515,15 @@ cv.addEventListener("pointermove",e=>{
   if(!drag)return; const p=pt(e);
   rotY+=(p.x-drag.x)*0.006;
   rotX=Math.max(0.04,Math.min(1.15,rotX+(p.y-drag.y)*0.004));
-  drag=p; draw();
+  drag=p; abpDirty=true;
 });
 cv.addEventListener("pointerup",()=>{drag=null;spin=true;cv.classList.remove("drag");});
 cv.addEventListener("pointercancel",()=>{drag=null;spin=true;cv.classList.remove("drag");});
-cv.addEventListener("wheel",e=>{e.preventDefault();rotY+=Math.sign(e.deltaY)*0.18;rotX=Math.max(0.04,Math.min(1.15,rotX+Math.sign(e.deltaX||e.deltaY)*0.035));draw();},{passive:false});
+cv.addEventListener("wheel",e=>{e.preventDefault();rotY+=Math.sign(e.deltaY)*0.18;rotX=Math.max(0.04,Math.min(1.15,rotX+Math.sign(e.deltaX||e.deltaY)*0.035));abpDirty=true;},{passive:false});
 
 const bind=(id,key,fmt,el)=>{
   const s=document.getElementById(id), o=document.getElementById(el);
-  s.addEventListener("input",()=>{P[key]=parseFloat(s.value);o.textContent=fmt(P[key]);draw();});
+  s.addEventListener("input",()=>{P[key]=parseFloat(s.value);o.textContent=fmt(P[key]);draw();if(key==="wk")refreshInverseComparison(true);});
   o.textContent=fmt(P[key]);
 };
 bind("rt","rt",v=>v.toFixed(1)+" Gy-eq","vRt");
@@ -524,6 +542,28 @@ function optimise(obj){
   }
   return best;
 }
+function optimiseAny(obj){
+  let best=null;
+  for(let rt=0;rt<=84;rt+=1) for(let tz=0;tz<=1.0001;tz+=0.02){
+    const st=state(rt,tz,P.wk,P.mg),ev=vol(st.re)-vol(st.rn),score=obj==="rano"?ev:st.ri;
+    if(!best||score<best.score)best={rt,tz,score,st,ev};
+  }
+  return best;
+}
+let inverseCacheKey="", inverseSupported=null;
+function refreshInverseComparison(force=false){
+  const obj=document.getElementById("inverseObjective").value,key=obj+"|"+P.wk+"|"+(P.mg?1:0);
+  if(!force&&key===inverseCacheKey)return;inverseCacheKey=key;
+  const all=optimiseAny(obj),sup=optimise(obj);inverseSupported=sup;
+  const allGround=ground(all.rt,all.tz,P.mg),supGround=ground(sup.rt,sup.tz,P.mg);
+  document.getElementById("globalOpt").innerHTML=`${all.rt} Gy-eq + agent ${all.tz.toFixed(2)} · <b style="color:${allGround.k==='abs'?'#ffb03a':'#2fe3d6'}">${allGround.k==='abs'?'OUTSIDE PATIENT SUPPORT':'SUPPORTED'}</b>`;
+  document.getElementById("supportedOpt").innerHTML=`${sup.rt} Gy-eq + agent ${sup.tz.toFixed(2)} · <b style="color:#2fe3d6">SUPPORTED</b>`;
+  document.getElementById("supportWhy").textContent=allGround.k==='abs'?
+    "The numerically best point lies outside this patient’s observed exposure history. ABP does not extrapolate through that gap; it returns the best intervention direction the patient’s own record supports.":
+    "The unconstrained optimum is already represented in this patient’s support, so the support gate does not alter the optimum for this target.";
+}
+document.getElementById("inverseObjective").addEventListener("change",()=>refreshInverseComparison(true));
+document.getElementById("useSupportedOpt").addEventListener("click",()=>{refreshInverseComparison();if(!inverseSupported)return;P.rt=inverseSupported.rt;P.tz=inverseSupported.tz;document.getElementById("rt").value=P.rt;document.getElementById("tz").value=P.tz;document.getElementById("vRt").textContent=P.rt.toFixed(1)+" Gy-eq";document.getElementById("vTz").textContent=P.tz.toFixed(2);draw();});
 const optSeg=document.getElementById("opt");
 optSeg.addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b) return;
@@ -569,23 +609,23 @@ seg.addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b) return;
   P.mg = b.dataset.v==="1";
   [...seg.children].forEach(c=>c.setAttribute("aria-pressed", c===b));
-  draw();
+  draw();refreshInverseComparison(true);
 });
 
 
 let currentABPMode="discovery";
-function updateModeResult(st,dE,dI,dT,gr){
+function updateModeResult(st,dN,dE,dI,dT,gr){
  const eye=document.getElementById("modeResultEye"),title=document.getElementById("modeResultTitle"),txt=document.getElementById("modeResultText");
  const l1=document.getElementById("r1l"),l2=document.getElementById("r2l"),l3=document.getElementById("r3l");
  const v1=document.getElementById("r1v"),v2=document.getElementById("r2v"),v3=document.getElementById("r3v");
  const pct=v=>(v>=0?"+":"")+v.toFixed(0)+"%";
  if(currentABPMode==="discovery"){
    eye.textContent="Discovery · target-directed interrogation";
-   title.textContent="Interrogate the primitive, then show what moved.";
-   l1.textContent="Support";v1.textContent=gr.t;
-   l2.textContent="Enhancing volume";v2.textContent=pct(dE);
+   title.textContent=gr.t;
+   l1.textContent="Necrotic core";v1.textContent=pct(dN);
+   l2.textContent="Enhancing rim";v2.textContent=pct(dE);
    l3.textContent="Infiltrative margin";v3.textContent=pct(dI);
-   txt.textContent="Discovery searches admissible intervention directions against the declared target while unsupported regions remain unresolved.";
+   txt.textContent=gr.e+" ABP keeps unsupported intervention regions unresolved rather than extrapolating through them.";
  }else if(currentABPMode==="design"){
    eye.textContent="Design · objective-conditioned intervention comparison";
    title.textContent="The preferred design depends on what the intervention is asked to preserve.";
@@ -631,14 +671,15 @@ document.getElementById("downloadReport").onclick=()=>{
   <h1>ABP · AI as a Biological Primitive · current report</h1><div class="box"><b>${mode}</b><br>${gr.t}: ${gr.e}</div>
   <h2>Declared context</h2><table><tr><td>Evidence context</td><td>${ev}</td></tr><tr><td>Objective layer</td><td>${mode}</td></tr><tr><td>MGMT</td><td>${P.mg?"methylated":"unmethylated"}</td></tr><tr><td>Radiation coordinate</td><td>${P.rt.toFixed(1)} Gy-eq</td></tr><tr><td>Alkylating-agent coordinate</td><td>${P.tz.toFixed(2)}</td></tr><tr><td>Weeks</td><td>${P.wk}</td></tr></table>
   <h2>Primitive response</h2><table><tr><td>Radiation kill</td><td>${(st.kR*100).toFixed(1)}%</td></tr><tr><td>Agent kill</td><td>${(st.kT*100).toFixed(1)}%</td></tr><tr><td>Combined response</td><td>${(st.kC*100).toFixed(1)}%</td></tr><tr><td>Enhancing-volume change</td><td>${dE.toFixed(1)}%</td></tr><tr><td>Infiltrative-extent change</td><td>${dI.toFixed(1)}%</td></tr><tr><td>Total-volume change</td><td>${dT.toFixed(1)}%</td></tr><tr><td>Radiation-necrosis state</td><td>${(st.necrosis*100).toFixed(1)}%</td></tr><tr><td>Induced-invasion state</td><td>${(st.invasion*100).toFixed(1)}%</td></tr></table>
+  <h2>Support-constrained inverse result</h2>${(()=>{const obj=document.getElementById("inverseObjective").value,all=optimiseAny(obj),sup=optimise(obj),ag=ground(all.rt,all.tz,P.mg);return `<table><tr><td>Inverse objective</td><td>${obj==="rano"?"Minimise enhancing disease":"Protect infiltrative margin"}</td></tr><tr><td>Unconstrained numerical optimum</td><td>${all.rt} Gy-eq + agent ${all.tz.toFixed(2)} · ${ag.k==="abs"?"OUTSIDE PATIENT SUPPORT":"SUPPORTED"}</td></tr><tr><td>ABP supported optimum</td><td>${sup.rt} Gy-eq + agent ${sup.tz.toFixed(2)} · SUPPORTED</td></tr></table><p>${ag.k==="abs"?"The unconstrained numerical optimum lies outside this patient’s observed exposure history. ABP therefore returns the best supported direction rather than extrapolating through an unobserved region.":"The unconstrained optimum is represented in this patient’s support for the current target."}</p>`})()}
   <h2>ABP interpretation</h2><p>ABP treats the focal biological system as an intervention-facing primitive. Discovery asks which intervention directions move it toward a declared target; design compares compound/dose/schedule/combination constructions; development asks which biomarkers, states and contexts alter the response. Unsupported regions should remain unresolved rather than being extrapolated into recommendations.</p>
   <p><b>Boundary:</b> this GBM geometry is an illustrative literature-grounded demonstrator. It is not a patient-specific causal treatment estimate.</p>`;
   const blob=new Blob([body],{type:"text/html"}),url=URL.createObjectURL(blob),a=document.createElement("a");
   a.href=url;a.download="ABP_current_report.html";a.click();setTimeout(()=>URL.revokeObjectURL(url),5000);
 };
 
-size(); draw(); loop();
+refreshInverseComparison(true);size(); draw(); loop();
 })();
 </script>
-<div style="position:fixed;left:16px;bottom:14px;z-index:5"><a href="../Access/" style="color:#2fe3d6;text-decoration:none;font-size:11px">Request software access</a></div></body>
+<div style="position:fixed;left:16px;bottom:14px;z-index:5"><a href="../Access/" style="color:#2fe3d6;text-decoration:none;font-size:11px">Request software access</a></div><script src="../cmh-patch.js"></script></body>
 </html>

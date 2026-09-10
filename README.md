@@ -1,14 +1,14 @@
-# CMH Scientific public demos v2.0
+# CMH Scientific public demos v2.8
 
 Public interactive demonstrations for CMH Scientific. Production engines and credentials are not distributed in this repository. API access requires verified identity, institution/company information, intended use, product-specific approval and licensing.
 
-## v2.0 redesign
-- Deferra surgery uses a 60-second AI-generated operative simulation synchronized with the existing measurement-first and DR/CS routing logic.
-- OptiCeil is rebuilt around dynamic calcium-imaging acquisition design.
-- NPIS exposes sample/support controls and the distinct information-sufficiency metrics.
-- TotemicAI shows changing trajectories, interventions, totem placement and structural-memory comparison.
-- Acquire uses frozen COPD selective-acquisition and PRO-ACT more-same-vs-different-measurement evidence.
-- ABP restores the glioblastoma biological-primitive interface and adds Discovery / Design / Development interpretation.
-- AIO opens with frozen AI on AD results, includes AI on AI, and exposes the study-planning inputs needed for a new literature reconstruction.
-- CTF is retained unchanged.
-- The hub is reorganized into Clinical Instruments, Drug Discovery/Design/Development, Science & Biomedical Research Instruments, and System Classification.
+## v2.8 deployment notes
+
+- Deferra-Surgery requires a locally hosted `field.mp4` generated at deployment time from a cleared source video supplied to the installer with `--video PATH`.
+- The recommended source is the CC BY 2.0 laparoscopic cholecystectomy clip identified in `Deferra-Surgery/VIDEO_SOURCE.md`.
+- The installer cuts seconds 8–38, removes audio, compresses to H.264/yuv420p at 640 px wide and 24 fps, and verifies the output before committing.
+- OptiCeil mobile order is figure first, controls second, readout third.
+- ABP includes responsive volumetric interaction and support-constrained inverse optimization.
+- NPIS exposes its metric battery with spelled-out names and live interpretations.
+- CTF exposes claim-level counterfactual testing and clarified score labels.
+- All demos retain downloadable state-specific reports.

@@ -1,15 +1,16 @@
-# Deferra moving operative-field asset
+# Deferra operative video — deployment source
 
-The page prefers `field.mp4` in this directory. If that file is absent or fails, the page cycles public research clips from Zenodo record 21709853.
+The deployed page requires a local file named `field.mp4` in this directory.
 
-For a locally cleared source clip, create `field.mp4` with:
+The v2.8 installer creates that file from a source video supplied at deployment time. It accepts the downloaded Wikimedia Commons OGV, MP4, MOV, WebM, or another ffmpeg-readable source.
 
-```bash
-ffmpeg -ss 00:04:22 -i input.mp4 -t 30 \
-  -vf "scale=1280:-2,fps=30" \
-  -c:v libx264 -crf 26 -preset slow \
-  -pix_fmt yuv420p -an -movflags +faststart \
-  field.mp4
-```
+Recommended source:
 
-This strips audio and produces a web-ready H.264 asset. The canvas overlay is separate from the video: no arrows, labels, boxes or HUD need to be baked into the footage.
+- Boer J, Boerma D, de Vries Reilingh TS. *A gallbladder torsion presenting as acute cholecystitis in an elderly woman: A case report* (2011).
+- Wikimedia Commons media file: `A-gallbladder-torsion-presenting-as-acute-cholecystitis-in-an-elderly-woman-A-case-report-1752-1947-5-588-S1.ogv`
+- License: CC BY 2.0.
+- Source/license page: https://commons.wikimedia.org/wiki/File:A-gallbladder-torsion-presenting-as-acute-cholecystitis-in-an-elderly-woman-A-case-report-1752-1947-5-588-S1.ogv
+
+The installer takes seconds 8 through 38, removes audio, scales to 640 pixels wide at 24 fps, encodes H.264/yuv420p, and sets `+faststart` for web playback.
+
+The surgical footage is only the moving background field. Deferra overlays are page-rendered and scripted against playback time; they are not anatomical identification or validated tracking.
