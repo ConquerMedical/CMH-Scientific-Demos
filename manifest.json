@@ -1,31 +1,11 @@
 {
-  "version": "3.1",
+  "version": "3.3",
   "categories": {
-    "clinical": [
-      "Deferra-Surgery",
-      "Deferra-Anaesthesiology",
-      "OptiCeil-Surgical",
-      "ABP"
-    ],
-    "drug_discovery_design_development": [
-      "ABP",
-      "CTF"
-    ],
-    "science_biomedical_research": [
-      "NPIS",
-      "TotemicAI",
-      "Acquire",
-      "AIO",
-      "TopolAI"
-    ],
-    "system_classification": [
-      "System-Classification"
-    ]
+    "clinical": ["Deferra-Surgery","Deferra-Anaesthesiology","OptiCeil-Surgical","ABP"],
+    "drug_discovery_design_development": ["ABP","CTF"],
+    "science_biomedical_research": ["NPIS","TotemicAI","Acquire","AIO","TopolAI"],
+    "system_classification": ["System-Classification"]
   },
   "access": "Access",
-  "support": [
-    "CMH-Interface",
-    "CMH-Authenticated-Gateway",
-    "CMH-Guard"
-  ]
+  "support": ["CMH-Interface","CMH-Authenticated-Gateway","CMH-Guard"]
 }

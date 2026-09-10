@@ -1,0 +1,20 @@
+/* CMH Scientific corrective interaction layer v3.3
+   Portrait phones: natural document flow; no pinned figures over text.
+   Phone landscape: cmh-patch.js requests the desktop/iPad-width composition.
+*/
+html,body{max-width:100%;overflow-x:hidden}
+.cmh-sticky{position:static!important;inset:auto!important;height:auto!important;max-height:none!important;min-height:0!important;box-shadow:none!important;border-bottom:0!important}
+.cmh-spacer{display:none!important;height:0!important}
+.cmh-rotate-hint{display:none}
+@media(max-width:900px) and (orientation:portrait){
+  html,body{height:auto!important;min-height:100%!important;overflow-y:auto!important}
+  .cmh-report-dock{position:relative!important;z-index:2!important}
+}
+@media(max-width:600px) and (orientation:portrait){
+  .cmh-rotate-hint{display:block;position:fixed;left:50%;top:2px;transform:translateX(-50%);z-index:2147483000;
+    width:max-content;max-width:94vw;padding:2px 7px;border-radius:5px;background:rgba(3,6,11,.72);
+    color:#ff675f;font:700 9.5px/1.25 system-ui,-apple-system,"Segoe UI",sans-serif;letter-spacing:.025em;
+    text-align:center;pointer-events:none;box-shadow:0 1px 6px rgba(0,0,0,.28)}
+}
+.cmh-vidfail{position:absolute;inset:0;display:none;place-items:center;text-align:center;background:repeating-linear-gradient(45deg,#0a1620,#0a1620 12px,#0c1a26 12px,#0c1a26 24px);color:#8aa4b6;font:13px/1.5 Inter,system-ui,sans-serif;padding:22px;z-index:3}
+.cmh-vidfail b{display:block;color:#ffc857;margin-bottom:5px;font-size:14px}.cmh-vidfail code{color:#cfe0e8}.cmh-vidfail.on{display:grid}
