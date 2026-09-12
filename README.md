@@ -1,23 +1,14 @@
-# CMH Scientific public demos v2.9 — Visual Hardshell
+# CMH Scientific public demos v2.8
 
-Public interactive presentation shell for CMH Scientific. This release is derived from the genuine v2.8 demonstration suite while separating visual explanation from protected scientific implementation.
+Public interactive demonstrations for CMH Scientific. Production engines and credentials are not distributed in this repository. API access requires verified identity, institution/company information, intended use, product-specific approval and licensing.
 
-## Public-shell rule
+## v2.8 deployment notes
 
-The public site may contain ordinary UI/rendering JavaScript and frozen/coarse demonstration states so the software remains visually understandable. It must not contain production estimators, primitive compilers, candidate-grid generation, inverse optimization/search, support calibration, private thresholds, proprietary ranking/scoring logic, production computer-vision analysis, private endpoints, API keys, credentials, or protected engine code.
-
-The genuine v2.8 suite must remain in a private archive/repository and must never be copied into this public repository.
-
-## Major v2.9 hardening
-
-- ABP: retains the rotating biological primitive and controls; production response operator and inverse search replaced by coarse frozen display states and recalled supported examples.
-- NPIS: retains branching visualization and stress controls; production partition/estimator/calibration machinery absent.
-- CTF: retains trial/cohort visualization and claim ladder; production falsification metrics/calibration absent.
-- Deferra: retains surgical video overlays, view repair, waveform and route transitions; production DR/CS computation, vision estimators, persistence and routing thresholds absent.
-- OptiCeil: retains envelope/radar/timing visualizations; production recoverability estimator, geometry search and inverse acquisition optimization absent.
-- TotemicAI: retains trajectory, totem markers, challenge/reacquisition behavior; production landmark scoring/admission/reconstruction logic absent.
-- Acquire, AIO, TopolAI and governance/interface pages remain public conceptual/frozen-result demonstrations.
-
-## Deployment
-
-Use `install_visual_hardshell.sh` from a clean `main` checkout of `ConquerMedical/CMH-Scientific-Demos`. The installer snapshots the currently committed public repository outside the repo, replaces the public site, runs audits, commits and pushes.
+- Deferra-Surgery requires a locally hosted `field.mp4` generated at deployment time from a cleared source video supplied to the installer with `--video PATH`.
+- The recommended source is the CC BY 2.0 laparoscopic cholecystectomy clip identified in `Deferra-Surgery/VIDEO_SOURCE.md`.
+- The installer cuts seconds 8–38, removes audio, compresses to H.264/yuv420p at 640 px wide and 24 fps, and verifies the output before committing.
+- OptiCeil mobile order is figure first, controls second, readout third.
+- ABP includes responsive volumetric interaction and support-constrained inverse optimization.
+- NPIS exposes its metric battery with spelled-out names and live interpretations.
+- CTF exposes claim-level counterfactual testing and clarified score labels.
+- All demos retain downloadable state-specific reports.
