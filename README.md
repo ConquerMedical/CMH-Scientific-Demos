@@ -1,6 +1,6 @@
-# CMH Scientific public demos v2.8
+# CMH Scientific interactive demonstrations v2.8
 
-Public interactive demonstrations for CMH Scientific. Production engines and credentials are not distributed in this repository. API access requires verified identity, institution/company information, intended use, product-specific approval and licensing.
+Interactive scientific demonstrations for CMH Scientific, pairing each instrument with the empirical or validated basis used to interpret it.
 
 ## v2.8 deployment notes
 
