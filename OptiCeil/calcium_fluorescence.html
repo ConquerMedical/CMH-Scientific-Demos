@@ -139,7 +139,7 @@ details.method ul{margin:8px 0 0;padding-left:18px}details.method li{margin:4px 
   <div>
     <p class="kicker"><span class="pill">Study-derived stop points</span>OptiCeil on paired fluorescence and electrophysiology</p>
     <h1>Calcium fluorescence</h1>
-    <p class="lede">Watch a compressed neuron-development visualization, then rotate a stable 3-D neuron as it fires. GCaMP makes that firing visible. OptiCeil decides how long you need to keep watching after each spike.</p>
+    <p class="lede">A compressed neuron-development visualization, followed by a 3-D neuron with illustrative firing. GCaMP fluorescence reports each spike; OptiCeil determines the post-spike acquisition window required for a stated accuracy.</p>
   </div>
   <div class="pinwrap"><div class="pin">
     <div class="neuron" id="nwrap">
@@ -154,7 +154,7 @@ details.method ul{margin:8px 0 0;padding-left:18px}details.method li{margin:4px 
   <div class="legend"><span><i class="sw" style="background:var(--glow)"></i>Calcium fluorescence (what the microscope sees)</span><span><i class="sw" style="background:var(--spike)"></i>True spikes (electrode)</span><span><i class="sw" style="background:rgba(66,245,167,.35)"></i>Kept and needed</span><span><i class="sw" style="background:rgba(147,170,183,.45)"></i>Kept, not needed</span><span><i class="sw" style="background:rgba(255,176,58,.5)"></i>Needed, not kept</span></div>
   <div class="controls">
     <button class="btn primary" id="play"><svg viewBox="0 0 10 10" id="pi"><path d="M2 1h2v8H2zM6 1h2v8H6z"/></svg><span id="pt">Pause</span></button>
-    <div class="ctlgroup"><span class="lab">Firing</span><div class="seg fire" id="fmode"><button data-f="calm" aria-pressed="false">Calm</button><button data-f="burst" aria-pressed="false">Bursting</button><button data-f="intense" aria-pressed="true">Intense</button></div></div>
+    <div class="ctlgroup"><span class="lab">Firing pattern</span><div class="seg fire" id="fmode"><button data-f="calm" aria-pressed="false">Quiescent</button><button data-f="burst" aria-pressed="false">Bursting</button><button data-f="intense" aria-pressed="true">High-frequency</button></div></div>
     <button class="btn" id="regrow">Grow again</button>
     <button class="btn" id="rotbtn" aria-pressed="true">Auto-rotate on</button>
     <button class="btn" id="labbtn" aria-pressed="true">Labels on</button>
@@ -164,7 +164,7 @@ details.method ul{margin:8px 0 0;padding-left:18px}details.method li{margin:4px 
 
 <aside class="side">
   <section>
-    <h2>What you're seeing</h2>
+    <h2>Legend</h2>
     <ul class="key">
       <li><i style="background:#eaf4f8"></i><b>Bright dot at the center: cell body (soma).</b> The neuron's core, where inputs are added up and a spike is triggered.</li>
       <li><i style="background:#42f5a7"></i><b>Thick line upward: trunk (apical dendrite).</b> The main cable collecting input from far away.</li>
@@ -182,20 +182,20 @@ details.method ul{margin:8px 0 0;padding-left:18px}details.method li{margin:4px 
     <p class="small" id="regnote" style="margin-top:8px"></p>
   </section>
   <section>
-    <h2>2 · How much of the attainable signal do you need?</h2>
+    <h2>2 · Required fraction of attainable performance</h2>
     <div class="seg" id="tgt"><button data-t="90" aria-pressed="false">90%</button><button data-t="95" aria-pressed="false">95%</button><button data-t="99" aria-pressed="true">99%</button></div>
     <p class="small" style="margin-top:8px">A fraction of the best performance this recording can reach, as in the study.</p>
   </section>
   <section>
-    <h2>3 · Your imaging window after each spike</h2>
-    <label class="uctl"><span class="urow"><span>Keep imaging for</span><b class="num" id="uval">—</b></span><input type="range" id="uwin" min="0" max="60" step="1" value="30" aria-label="Imaging window in volumes"></label>
+    <h2>3 · Post-spike acquisition window</h2>
+    <label class="uctl"><span class="urow"><span>Acquisition window</span><b class="num" id="uval">—</b></span><input type="range" id="uwin" min="0" max="60" step="1" value="30" aria-label="Imaging window in volumes"></label>
     <div class="ubanner" id="uverdict"></div>
     <div class="metric"><span class="k">Recoverability at your window (approx.)</span><span class="v" id="uidx">—</span></div>
     <div class="metric"><span class="k">Accuracy at your window (approx.)</span><span class="v" id="uba">—</span></div>
     <button class="btn primary" id="uopt" style="width:100%;margin-top:8px">Optimize: back out the stop point</button>
   </section>
   <section>
-    <h2>4 · OptiCeil's answer</h2>
+    <h2>4 · OptiCeil output</h2>
     <div class="verdict">
       <div class="code">STOP_TEMPORAL_ACQUISITION</div>
       <div class="stop num" id="vstop">—</div>
@@ -213,16 +213,16 @@ details.method ul{margin:8px 0 0;padding-left:18px}details.method li{margin:4px 
     <p class="small" style="margin-top:6px">The marker follows the latest spike. Green: information still arriving. Grey: beyond what your target needs. Red: past peak accuracy, where longer imaging made the answer worse.</p>
   </section>
   <section>
-    <div class="over"><b id="otitle">More light, worse answer</b><span id="otext"></span></div>
+    <div class="over"><b id="otitle">Longer acquisition, lower held-out accuracy</b><span id="otext"></span></div>
   </section>
   <section id="ocReport"></section>
   <section>
-    <h2>The glow behind it</h2>
+    <h2>Background: GFP and GCaMP</h2>
     <ol class="timeline">
       <li><span class="y">1962</span>Osamu Shimomura isolates green fluorescent protein (GFP) from the jellyfish <i>Aequorea victoria</i>.</li>
       <li><span class="y">2001</span>Junichi Nakai and colleagues fuse a rearranged GFP to calmodulin and M13, creating GCaMP: it glows when calcium binds.</li>
       <li><span class="y">2008</span>Nobel Prize in Chemistry to Shimomura, Martin Chalfie and Roger Tsien for the discovery and development of GFP.</li>
-      <li class="now"><span class="y">2026</span>OptiCeil asks the next question: once you can see the firing, how long do you actually need to look?</li>
+      <li class="now"><span class="y">2026</span>OptiCeil: the minimum post-spike acquisition window required for a stated inference.</li>
     </ol>
   </section>
   <section>
@@ -231,7 +231,7 @@ details.method ul{margin:8px 0 0;padding-left:18px}details.method li{margin:4px 
       <ul>
         <li><b>Measured values</b> (dots, stop points, retained fractions, residual ambiguity, accuracy drops) come from Ewing, "Information arrival sets the minimum acquisition time in calcium imaging," Research Square, 2026 (doi:10.21203/rs.3.rs-10898326/v1): 914 CASCADE segments, 312 neurons, neuron-disjoint discovery and held-out validation, 30 Hz (one volume ≈ 33 ms).</li>
         <li><b>Curves between measured points</b> are shape-preserving interpolations to show direction. The recoverability index after its peak is drawn declining in proportion to the reported accuracy drop; the study reports that it declined but not by how much. Early accuracy for the two GCaMP6s regimes follows the index shape.</li>
-        <li><b>The neuron, spike trains and traces are illustrative</b>, not CASCADE recordings. Indicator rise and decay times are approximate, chosen to show that GCaMP6s is slower than GCaMP8m. "Intense" is a dramatized burst pattern.</li>
+        <li><b>The neuron, spike trains and traces are illustrative</b>, not CASCADE recordings. Indicator rise and decay times are approximate, chosen to show that GCaMP6s is slower than GCaMP8m. "High-frequency" is an illustrative burst pattern.</li>
         <li><b>Growth</b> is a compressed time-lapse. In the developing brain, calcium signalling triggered by activity helps regulate dendritic growth and branching over days, alongside activity-independent cues such as neurotrophins (e.g. Wong &amp; Ghosh, <i>Nat Rev Neurosci</i> 2002). The OptiCeil results concern spike detection, not growth.</li>
         <li><b>Flashing</b> is limited to at most three flashes per second, and motion is reduced when the device requests it.</li>
         <li>The spinal regime is shown with lower signal-to-noise for illustration. The study found that the spinal label itself did not explain lower recoverability; a matched residual difference remained and is described there as observational.</li>
@@ -394,7 +394,7 @@ const ocMs=v=>v==null?'—':v<1000?Math.round(v)+' ms':(v/1000).toFixed(2)+' s';
 function ocSecDesign(d){let h='<p>A parametric sandbox: indicator ceilings, noise, depth blur and the observer model are illustrative, not measured values. It shows the logic of OptiCeil: state the accuracy you need, and read the minimum acquisition off the ceiling curve.</p>';
   if(!d||(!d.trials.length&&!d.opts.length))return h+'<p class="muted">Not explored in this session.</p>';
   h+='<h3>What you did</h3>'+ocEvents(d);
-  if(d.trials.length){h+='<h3>How your settings worked</h3>'+ocTable(['Time','Indicator','Target','Window','Photons','Depth','Capacity','Ceiling','Observer','Target met?','Minimum window'],
+  if(d.trials.length){h+='<h3>Evaluation of your settings</h3>'+ocTable(['Time','Indicator','Target','Window','Photons','Depth','Capacity','Ceiling','Observer','Target met?','Minimum window'],
     d.trials.map(t=>[ocTm(t.t),ocEsc(t.indName)+(t.prep==='sc'?' (observer from cortex)':''),ocPct(t.tgt),ocMs(t.win*1000),t.ph.toFixed(2),t.dp+' µm',t.cx.toFixed(1),ocPct(t.ceil),ocPct(t.obs),t.ceil>=t.tgt?'Yes':'<b>No</b>',t.minWin==null?'not reachable':ocMs(t.minWin*1000)]));
     const met=d.trials.filter(t=>t.ceil>=t.tgt).length;h+='<p>'+met+' of '+d.trials.length+' settings reached the stated accuracy.</p>'}
   if(d.opts.length){h+='<h3>What optimization backed out</h3>';for(const o of d.opts){h+='<p><b>'+ocTm(o.t)+' · target '+ocPct(o.tgt)+'.</b> '+ocEsc(o.summary)+'</p>'+ocTable(['','Indicator','Window','Photons','Depth','Capacity','Ceiling','Observer'],[
@@ -406,7 +406,7 @@ function ocSecDesign(d){let h='<p>A parametric sandbox: indicator ceilings, nois
 function ocSecFiring(d){let h='<p>Stop points, retained fractions, residual ambiguity and accuracy drops are the published values (Supplementary Table S1). The neuron, spike trains and traces are illustrative; values between measured windows are interpolated.</p>';
   if(d&&(d.trials.length||d.opts.length)){const optCombos=new Set(d.opts.map(o=>o.reg+'|'+o.tgt));
     h+='<h3>What you did</h3>'+ocEvents(d);
-    if(d.trials.length){h+='<h3>How your imaging windows compared</h3>'+ocTable(['Time','Regime','Target','Your window','OptiCeil stop','Verdict','Recoverability (approx.)','Accuracy (approx.)'],
+    if(d.trials.length){h+='<h3>Comparison of acquisition windows</h3>'+ocTable(['Time','Regime','Target','Your window','OptiCeil stop','Verdict','Recoverability (approx.)','Accuracy (approx.)'],
       d.trials.map(t=>{const r=OC_PUB[t.reg].rows[t.tgt];return [ocTm(t.t),OC_PUB[t.reg].name,t.tgt+'%',ocMs(t.win)+' · '+Math.round(t.win/33.33)+' vol',ocMs(r[0])+' · '+r[1]+' vol',ocEsc(t.verdict),ocPct(t.idxFrac)+' of max',ocPct(t.baFrac)+' of max']}));
       const combos=[...new Set(d.trials.map(t=>t.reg+'|'+t.tgt).concat([...optCombos]))];
       for(const c of combos){const [reg,tg]=c.split('|'),r=OC_PUB[reg].rows[tg],mine=d.trials.filter(t=>t.reg===reg&&String(t.tgt)===tg);
@@ -434,7 +434,7 @@ figure{margin:12px 0 0}figure img{max-width:100%;width:420px;border-radius:10px;
 .note{background:#fff8e1;border-color:#f0dfa0}button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid #b9c7cf;background:#fff;cursor:pointer}
 @media print{body{background:#fff}section{border:0;padding:0;margin:14px 0}.print{display:none}.tw{overflow:visible}tr{break-inside:avoid}}</style></head><body><main>
 <h1>OptiCeil session report</h1>
-<div class="meta">CMH Scientific · OptiCeil imaging-design and calcium-fluorescence demonstrations<br>Session started ${ocEsc(new Date(S.started).toLocaleString())} · report generated ${ocEsc(now.toLocaleString())}</div>
+<div class="meta">CMH Scientific · OptiCeil calcium-imaging demonstrations<br>Session started ${ocEsc(new Date(S.started).toLocaleString())} · report generated ${ocEsc(now.toLocaleString())}</div>
 <p>${vis.length?'Demos explored: '+vis.map(k=>OC_DEMOS[k].n+'. '+OC_DEMOS[k].title).join('; ')+'.':'No interactions recorded yet; published reference values are shown.'}</p><div class="print"><button onclick="print()">Print or save as PDF</button></div>
 <section class="note"><b>How to read this report.</b> OptiCeil asks how long to keep imaging after a spike to reach a stated share of the best attainable performance, and flags when imaging longer makes the answer worse. Demo 2 uses the reported stop points; demo 1 is a parametric sandbox. The recoverability index is comparative, not an absolute physical ceiling (CEILING_UNRESOLVED).</section>
 ${sec('design',ocSecDesign(S.demos.design))}${sec('firing',ocSecFiring(S.demos.firing))}
@@ -589,7 +589,7 @@ function uEval(){const Rg=REG[reg],P=PROT[reg][tgt],w=uwin,pk=Math.max(P[0],Rg.b
   if(w<P[0]-1){st='short';title='Too short';text='You stop before the information needed for '+tgt+'% has arrived. OptiCeil keeps '+P[1]+' volume'+(P[1]>1?'s':'')+'.'}
   else if(w<=P[0]+1){st='meets';title='Matches OptiCeil';text='This is the shortest window that reaches '+tgt+'% of attainable performance on held-out neurons.'}
   else if(w<=pk+1){st='extra';title='Longer than needed';text='The target was already met at '+P[0]+' ms. The extra imaging adds light exposure for this target.'}
-  else{st='past';title='Past peak accuracy';text='Beyond '+pk+' ms, held-out accuracy fell in the study: longer imaging returned a worse answer.'}
+  else{st='past';title='Past peak accuracy';text='Beyond '+pk+' ms, held-out accuracy fell in the study: longer acquisition lowered held-out accuracy.'}
   return {w,idxFrac,baFrac,st,title,text,P}}
 function updateUser(){const u=uEval(),v=Math.round(uwin/33.333);
   $('uval').textContent=v+' vol · '+(uwin<1000?Math.round(uwin)+' ms':(uwin/1000).toFixed(2)+' s');
@@ -605,17 +605,17 @@ function panel(){const Rg=REG[reg],P=PROT[reg][tgt];updateUser();
   $('vstop').innerHTML=P[0]+' ms <small>· '+P[1]+' volume'+(P[1]>1?'s':'')+'</small>';
   $('vtext').textContent='For '+Rg.name+' at '+tgt+'% of attainable performance, keep '+P[1]+' image volume'+(P[1]>1?'s':'')+' after each spike, then stop. Frozen on discovery neurons, then tested on unseen neurons.';
   $('vidx').textContent=pct(P[2]);$('vba').textContent=pct(P[3]);$('vnid').textContent=P[4].toFixed(3);
-  $('otitle').textContent='More light, worse answer';
+  $('otitle').textContent='Longer acquisition, lower held-out accuracy';
   $('otext').textContent=' For '+Rg.name+', imaging past the stop point cost '+Rg.drop.toFixed(3)+' in held-out balanced accuracy by 2 s, the longest window tested. Longer acquisition admits later spikes that blur the answer and costs photons.';
   chartStatic=null;
 }
 const CAPS=[
-  ()=>'Watch the neuron <b>take shape</b>. During development, firing and the calcium it lets in help steer how dendrites grow. Days are compressed into seconds here.',
-  ()=>'A neuron fires in <b>milliseconds</b>. The electrical spike itself is invisible to the microscope.',
-  ()=>'Calcium rushes in behind each spike. <b>GCaMP</b>, built from jellyfish GFP, glows when calcium binds.',
+  ()=>'The neuron is shown <b>developing</b>. During development, firing and the calcium it lets in help steer how dendrites grow. Days are compressed into seconds here.',
+  ()=>'A spike lasts <b>milliseconds</b> and is not directly visible to the microscope.',
+  ()=>'Calcium enters after each spike. <b>GCaMP</b>, built from jellyfish GFP, glows when calcium binds.',
   ()=>'GFP was found in <i>Aequorea victoria</i> in 1962 and won the <b>2008 Nobel Prize in Chemistry</b>.',
-  ()=>'But the glow <b>lags and blurs</b> the spikes, especially in slower sensors and hard bursts.',
-  ()=>{const P=PROT[reg][tgt];return 'OptiCeil reads the data: for '+REG[reg].name.split(' ·')[0]+', stop after <b>'+P[0]+' ms</b> ('+P[1]+' vol). Longer looking makes the answer worse.'}
+  ()=>'The fluorescence signal <b>lags and smooths</b> the spikes, especially for slower indicators and dense bursts.',
+  ()=>{const P=PROT[reg][tgt];return 'OptiCeil reads the data: for '+REG[reg].name.split(' ·')[0]+', stop after <b>'+P[0]+' ms</b> ('+P[1]+' vol). Longer acquisition lowered held-out accuracy.'}
 ];
 let capI=0,capT=0;const capEl=$('cap');
 function setCap(){capEl.innerHTML=CAPS[capI]()}

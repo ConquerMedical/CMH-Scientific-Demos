@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#03060b"><meta name="color-scheme" content="dark">
-<title>Two tumors that looked alike · ABP · CMH Scientific</title>
+<title>Matched clinical states, divergent courses · ABP · CMH Scientific</title>
 <meta name="description" content="AI as a Biological Primitive (ABP) demonstration 5 of 5 on real longitudinal glioblastoma records (LUMIERE).">
 <style>:root{
   --bg:#03060b;--panel:#060e17;--panel2:#0a1621;--line:#1a2a39;--line2:#27394a;
@@ -162,18 +162,20 @@ details.method li{margin:4px 0}
 .t3d-tools.compact{top:6px;right:5px;transform:none;padding:2px;gap:2px}
 .t3d-tools.compact [data-a=in],.t3d-tools.compact [data-a=out],.t3d-tools.compact .t3d-z{display:none}
 .t3d-tools.compact button{width:26px;height:26px;font-size:14px}
+.t3d-tools.compact .hide-compact{display:none}
+.t3d-tools.compact button{width:24px;height:24px;font-size:13px}
 </style></head><body>
-<header class="bar"><a class="brand" href="index.html" style="text-decoration:none"><b>CMH Scientific</b> · ABP · LUMIERE Patients 071 · 072 · 019 <span style="opacity:.7">· all demos</span></a><nav class="steps" aria-label="Demos"><a href="01_tumor_dynamics.html"><span class="n">1</span><span class="l">Tumor dynamics</span><span class="s">Dynamics</span></a><a href="02_pharmacological_intervention.html"><span class="n">2</span><span class="l">Pharmacological</span><span class="s">Pharma</span></a><a href="03_surgical_intervention.html"><span class="n">3</span><span class="l">Surgical</span><span class="s">Surgery</span></a><a href="04_optimal_intervention.html"><span class="n">4</span><span class="l">Optimal intervention</span><span class="s">Optimal</span></a><a href="05_matched_divergence.html" aria-current="page"><span class="n">5</span><span class="l">Look-alike tumors</span><span class="s">Diverge</span></a></nav></header>
+<header class="bar"><a class="brand" href="index.html" style="text-decoration:none"><b>CMH Scientific</b> · ABP · LUMIERE Patients 071 · 072 · 019 <span style="opacity:.7">· all demos</span></a><nav class="steps" aria-label="Demos"><a href="01_tumor_dynamics.html"><span class="n">1</span><span class="l">Observed dynamics</span><span class="s">Observed</span></a><a href="02_pharmacological_intervention.html"><span class="n">2</span><span class="l">Pharmacological exploration</span><span class="s">Pharmacological</span></a><a href="03_surgical_intervention.html"><span class="n">3</span><span class="l">Surgical exploration</span><span class="s">Surgical</span></a><a href="04_optimal_intervention.html"><span class="n">4</span><span class="l">Comparative analysis</span><span class="s">Comparative</span></a><a href="05_matched_divergence.html" aria-current="page"><span class="n">5</span><span class="l">Matched states</span><span class="s">Matched</span></a></nav></header>
 <div class="layout">
 <main class="stage">
   <div>
-    <p class="kicker"><span class="pill obs">Observed data</span>Observed patient data · measured longitudinal courses</p>
-    <h1>Two tumors that looked alike</h1>
-    <p class="lede">At one scan, these two glioblastomas were exceptionally similar in tumor burden and in the observed radiomic representation. Follow both full courses and watch how differently they unfolded.</p>
+    <p class="kicker"><span class="pill obs">Observed data</span>Two real patients · no model is applied here</p>
+    <h1>Matched clinical states, divergent courses</h1>
+    <p class="lede">At one scan, these two glioblastomas were closely matched in volume, imaging features and RANO rating. Their subsequent observed courses diverged.</p>
   </div>
   <div class="ctlrow">
     <div class="seg" id="pairSel" role="group" aria-label="Patient pair"></div>
-    <div class="seg" id="modeSel" role="group" aria-label="Time axis"><button data-m="align" aria-pressed="true">Aligned at the match</button><button data-m="abs" aria-pressed="false">Weeks since surgery</button></div>
+    <div class="seg" id="modeSel" role="group" aria-label="Time axis"><button data-m="align" aria-pressed="true">Aligned at matched state</button><button data-m="abs" aria-pressed="false">Weeks since surgery</button></div>
   </div>
   <div class="guess" id="guess"></div>
   <div class="pin">
@@ -197,11 +199,11 @@ details.method li{margin:4px 0}
       <div class="ticks num" id="ticks"></div>
       <div class="controls">
         <button class="btn" id="prev" aria-label="Previous scan"><svg viewBox="0 0 10 10"><path d="M1 1h1.6v8H1zM9 1v8L3.2 5z"/></svg></button>
-        <button class="btn primary" id="play"><svg viewBox="0 0 10 10" id="pi"><path d="M2 1l7 4-7 4z"/></svg><span id="pt">Play forward</span></button>
+        <button class="btn primary" id="play"><svg viewBox="0 0 10 10" id="pi"><path d="M2 1l7 4-7 4z"/></svg><span id="pt">Play course</span></button>
         <button class="btn" id="next" aria-label="Next scan"><svg viewBox="0 0 10 10"><path d="M7.4 1H9v8H7.4zM1 1v8l5.8-4z"/></svg></button>
-        <button class="btn" id="toMatch">The match</button>
-        <button class="btn" id="toStart">From diagnosis</button>
-        <button class="btn inside" id="insideBtn" aria-pressed="false">Look inside</button>
+        <button class="btn" id="toMatch">Matched state</button>
+        <button class="btn" id="toStart">From first scan</button>
+        <button class="btn inside" id="insideBtn" aria-pressed="false">Compartment view</button>
       </div>
     </div>
   </div>
@@ -215,15 +217,15 @@ details.method li{margin:4px 0}
 </main>
 <aside class="side">
   <section>
-    <h2>The match</h2>
+    <h2>Matched state</h2>
     <div id="matchBox"></div>
   </section>
   <section>
-    <h2>How the two courses unfolded</h2>
+    <h2>Observed courses</h2>
     <div class="courses" id="courses"></div>
   </section>
   <section>
-    <h2>How often does this happen?</h2>
+    <h2>Divergence among matched scan pairs</h2>
     <div id="rates"></div>
   </section>
   <section id="report" class="report"></section>
@@ -231,10 +233,11 @@ details.method li{margin:4px 0}
     <details class="method">
       <summary>Method and provenance</summary>
       <ul>
-        <li><b>Zoom and cut-away</b> (pinch, the + and − buttons, or the mouse wheel after clicking the view; ◐ slices the tumor open) enlarge the equivalent-volume view to show how its compartments nest. They do not reveal detail finer than the MRI, whose resolution is on the millimetre scale.</li>
+        <li><b>Zoom and cut-away</b> (pinch, the + and − buttons, or the mouse wheel after clicking the view; ◐ slices the tumor open) enlarge the equivalent-volume model to show how its compartments nest. They do not reveal detail finer than the MRI, whose resolution is on the millimetre scale.</li>
+        <li><b>Cells</b> (✺ switches between cells and the original measurement dots) are illustrative renderings in the style of fluorescence microscopy, not imaged cells. Each compartment's cells sit within its measured boundary, so they grow and shrink with the measured volumes, and the number shown in each compartment scales with its share of the tumor. Shapes, motion and colors are illustrative. At normal view the measured compartments and their outlines dominate; zooming in brings the cells forward. The outlines follow each compartment's measured shape and break where tissue is removed.</li>
         <li><b>Data:</b> LUMIERE longitudinal glioblastoma dataset (Suter et al., <i>Scientific Data</i> 9:768, 2022): DeepBraTumIA compartment volumes, expert RANO ratings with written rationale, demographics, MGMT/IDH status and overall survival as provided.</li>
         <li><b>Matching:</b> a search over <span id="mN1"></span> rated scans from <span id="mN2"></span> patients represented each scan by <span id="mN3"></span> radiomic features reduced to <span id="mN4"></span> principal components, and paired scans with similar states whose next expert ratings went opposite ways. "Closer than X% of scan pairs" refers to that representation. It does not establish identical biology.</li>
-        <li><b>Look inside</b> shows illustrative cells, not imaged cells: the MRI cannot resolve individual cells. The animation rate is driven by each patient's measured compartment-level rate of change (enhancing volume for the rim, necrotic volume for the core boundary, edema/FLAIR volume for the infiltrating edge). It is not a measurement or estimate of cellular division, death or migration rates. Cell appearance and the zone layout follow published glioblastoma histology (pseudopalisading cells around necrosis, microvascular proliferation near the enhancing rim, tumor cells infiltrating the non-enhancing region); cell counts are not calibrated to a density.</li>
+        <li><b>Compartment view</b> shows illustrative cells, not imaged cells: the MRI cannot resolve individual cells. What is patient-specific is the pace: in each zone, the rates of division, death and migration follow that patient's measured rate of change in the matching compartment (enhancing volume for the rim, necrotic volume for the core boundary, edema/FLAIR volume for the infiltrating edge) at the current point in the course. Cell appearance and the zone layout follow published glioblastoma histology (pseudopalisading cells around necrosis, microvascular proliferation near the enhancing rim, tumor cells infiltrating the non-enhancing region); cell counts are not calibrated to a density.</li>
         <li><b>Between scans</b> the volumes follow shape-preserving interpolation; only the dots are measurements. Shapes are equivalent-volume spheres sized by each compartment, identical in texture for both patients so only size differs.</li>
         <li><b>Not in these data:</b> treatment details after surgery. Differences in treatment, timing since surgery, age or earlier history could explain the divergence; this demo shows that the matched snapshot alone did not predict it.</li>
         <li><b>Expert ratings</b> can be driven by findings that total volume does not capture, such as T2 progression or new non-target lesions. Rationale text is shown as provided.</li>
@@ -358,10 +361,69 @@ function drawChart(cs,o){const c=cs.ctx,W=cs.W,H=cs.H;c.clearRect(0,0,W,H);if(W<
    so on-screen size changes are in true proportion. The surface texture is
    a fixed, smooth stylization (not a voxel reconstruction). */
 function shapeNoise(x,y,z,seed){return .085*Math.sin(2.1*x+1.3*y+.7*z+seed)+.06*Math.sin(-1.2*x+2.6*z+.4*y+seed*1.9)+.045*Math.sin(3.4*y-1.7*x+seed*2.7)+.03*Math.sin(4.3*z+2.2*x-1.1*y+seed*.6)}
+
+/* ---------- fluorescence-style cell sprites (illustrative) ---------- */
+const CELL_ATLAS={};
+function cellRand(seed){let x=seed>>>0||1;return()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return ((x>>>0)%100000)/100000}}
+function buildCellAtlas(px){
+  if(CELL_ATLAS[px])return CELL_ATLAS[px];
+  const KINDS={enh:{mem:'64,236,222',fil:'255,122,40',hot:'255,226,140',elong:1.0},
+               ede:{mem:'176,122,255',fil:'255,140,70',hot:'255,210,170',elong:2.1},
+               nec:{mem:'255,170,70',fil:'170,90,40',hot:'255,200,120',elong:1.0}};
+  const V=6,F=8,out={};
+  for(const k in KINDS){const K=KINDS[k];out[k]=[];
+    for(let v=0;v<V;v++){const R=cellRand(97+v*131+k.length*977),frames=[];
+      const harm=[0,0,0,0].map((_,i)=>({f:2+i+Math.floor(R()*2),a:(.05+R()*.08)/(1+i*.5),p:R()*TAU}));
+      const fils=Array.from({length:k==='nec'?7:18},()=>({a:R()*TAU,r0:R()*.35,len:.35+R()*.55,bend:(R()-.5)*1.4,w:.6+R()*1.2}));
+      const lam=Array.from({length:k==='ede'?1:2+Math.floor(R()*2)},()=>({a:R()*TAU,w:.5+R()*.5}));
+      const nuc={x:(R()-.5)*.25,y:(R()-.5)*.25,r:.28+R()*.08};
+      for(let f=0;f<F;f++){
+        const ph=f/F*TAU,cv=document.createElement('canvas');cv.width=cv.height=px;const g=cv.getContext('2d');
+        const C=px/2,base=px*(k==='ede'?.19:.29);g.translate(C,C);g.globalCompositeOperation='lighter';
+        const rad=a=>{let r=1;for(const h of harm)r+=h.a*Math.sin(h.f*a+h.p+ph);
+          for(const L of lam){const d=Math.atan2(Math.sin(a-L.a),Math.cos(a-L.a));r+=(.18+.12*Math.sin(ph+L.w*3))*Math.exp(-d*d/(.12*L.w))}
+          if(k==='nec')r*=1-.25*Math.max(0,Math.sin(7*a+ph*2));
+          return r};
+        const pts=[];const N=40;
+        for(let i=0;i<=N;i++){const a=i/N*TAU,r=rad(a)*base;pts.push([Math.cos(a)*r*K.elong,Math.sin(a)*r/Math.sqrt(K.elong)])}
+        const path=()=>{g.beginPath();pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.closePath()};
+        // cytoplasm
+        path();const fillA=k==='nec'?.07:.12;g.fillStyle=`rgba(${K.mem},${fillA})`;g.fill();
+        g.save();path();g.clip();
+        try{g.filter=`blur(${Math.max(.4,px/110)}px)`}catch(e){}
+        // cortical actin band just inside the membrane
+        path();g.strokeStyle=`rgba(${K.fil},${k==='nec'?.18:.42})`;g.lineWidth=px*.11;g.stroke();
+        // actin meshwork: many short random filaments, plus stress fibres along the long axis
+        const nm=k==='nec'?14:k==='ede'?34:52;
+        for(let m=0;m<nm;m++){const t=(m*0.618+v*.13)%1,a=t*TAU+Math.sin(ph+m)*.08,rr=Math.sqrt((m*0.377+.11)%1)*base*.85,
+            x=Math.cos(a)*rr*K.elong,y=Math.sin(a)*rr,o=((m*2.39)%TAU)+Math.sin(ph*.5+m)*.2,L=base*(.10+.18*((m*0.71)%1));
+          g.strokeStyle=`rgba(${K.fil},${k==='nec'?.22:.45})`;g.lineWidth=Math.max(.5,px/100);g.beginPath();g.moveTo(x-Math.cos(o)*L,y-Math.sin(o)*L);g.lineTo(x+Math.cos(o)*L,y+Math.sin(o)*L);g.stroke()}
+        if(k==='ede')for(let m=0;m<5;m++){const y=(m/4-.5)*base*.5+Math.sin(ph+m)*base*.03;g.strokeStyle=`rgba(${K.hot},.35)`;g.lineWidth=Math.max(.6,px/80);g.beginPath();g.moveTo(-base*K.elong*.9,y*.6);g.quadraticCurveTo(0,y+Math.sin(ph+m)*base*.08,base*K.elong*.9,y*.6);g.stroke()}
+        // bright cortical hot spots (ruffles)
+        for(let i=0;i<N;i+=2){const w=.5+.5*Math.sin(i*.7+ph*1.5+v);if(w<.6)continue;const q=pts[i];
+          g.fillStyle=`rgba(${K.hot},${(k==='nec'?.2:.5)*w})`;g.beginPath();g.arc(q[0]*.9,q[1]*.9,px*.022*(1+w),0,TAU);g.fill()}
+        try{g.filter='none'}catch(e){}
+        g.restore();
+        // membrane with glow
+        path();g.shadowColor=`rgba(${K.mem},1)`;g.shadowBlur=px*.07;g.strokeStyle=`rgba(${K.mem},${k==='nec'?.38:.85})`;g.lineWidth=Math.max(1,px*.028);g.stroke();g.shadowBlur=0;
+        if(k==='nec'){g.fillStyle=`rgba(${K.mem},.3)`;for(let i=0;i<N;i++){if(((i*7+v*3)%11)>2)continue;const q=pts[i],bl=px*(.018+.03*((i*0.37+v*.21)%1))*(1+.3*Math.sin(i+ph*2));g.beginPath();g.arc(q[0]*1.06,q[1]*1.06,bl,0,TAU);g.fill()}}
+        // nucleus: darker hollow
+        g.globalCompositeOperation='destination-out';g.fillStyle='rgba(0,0,0,.55)';g.beginPath();
+        g.ellipse(nuc.x*base,nuc.y*base,nuc.r*base*(k==='ede'?1.4:1),nuc.r*base*(k==='ede'?.7:.9),0,0,TAU);g.fill();
+        g.globalCompositeOperation='lighter';g.strokeStyle=`rgba(${K.mem},.35)`;g.lineWidth=Math.max(.6,px*.015);g.stroke();
+        if(k==='nec'){g.fillStyle=`rgba(${K.hot},.35)`;for(let d=0;d<5;d++){const a=d*1.3+ph*.3,r=base*(1.05+.12*Math.sin(ph+d));g.beginPath();g.arc(Math.cos(a)*r,Math.sin(a)*r,px*.02,0,TAU);g.fill()}}
+        frames.push(cv)}
+      out[k].push(frames)}}
+  CELL_ATLAS[px]=out;return out}
+
 function Tumor3D(cv,opts={}){
   const cs=fitCanvas(cv,()=>this.dirty=true);this.cs=cs;
   this.yaw=opts.yaw??.6;this.pitch=opts.pitch??.38;this.auto=!REDUCED;this.dirty=true;this.state=null;this.onTap=null;
-  this.zoom=1;this.panX=0;this.panY=0;this.cutaway=false;
+  this.zoom=1;this.panX=0;this.panY=0;this.cutaway=false;this.style=opts.style||'cells';this.time=0;
+  // population of illustrative cells; positions are fractions of each compartment's radius, so they follow the measured volumes
+  const CELLS=(()=>{const R=cellRand(opts.cellSeed||4242),L=[];const sphere=()=>{const u=R()*2-1,t=R()*TAU,r=Math.sqrt(1-u*u);return [r*Math.cos(t),u,r*Math.sin(t)]};
+    const add=(kind,n,fr)=>{for(let i=0;i<n;i++)L.push({kind,h:R(),dir:sphere(),frac:fr(),v:Math.floor(R()*6),off:R()*8,spd:3+R()*4,size:.75+R()*.5,spin:R()*TAU,spinV:(R()-.5)*.4,wob:R()*TAU,wobV:.3+R()*.5})};
+    add('enh',340,()=>.25+.75*Math.sqrt(R()));add('ede',300,()=>Math.pow(R(),.8));add('nec',130,()=>.2+.75*Math.cbrt(R()));return L})();
   function fib(n){const P=[],g=Math.PI*(3-Math.sqrt(5));for(let i=0;i<n;i++){const y=1-2*(i+.5)/n,r=Math.sqrt(1-y*y),t=g*i;P.push([Math.cos(t)*r,y,Math.sin(t)*r])}return P}
   const SHELL={ede:fib(1500),enh:fib(1300),nec:fib(900)};let DENSE=null;const shells=z=>{if(z<2.2)return SHELL;if(!DENSE)DENSE={ede:fib(6000),enh:fib(5200),nec:fib(3600)};return DENSE};
   const LAT=[];for(let i=0;i<5;i++){const phi=-1.0+2.0*i/4,ring=[];for(let j=0;j<=72;j++){const th=j/72*TAU;ring.push([Math.cos(phi)*Math.cos(th),Math.sin(phi),Math.cos(phi)*Math.sin(th)])}LAT.push(ring)}
@@ -377,20 +439,57 @@ function Tumor3D(cv,opts={}){
     c.strokeStyle=color;c.lineWidth=1;c.globalAlpha=alpha*.3;c.stroke(b);c.globalAlpha=alpha;c.stroke(f);c.globalAlpha=1}
   function glow(c,cx,cy,r,rgb,a){if(r<1)return;const g=c.createRadialGradient(cx,cy,r*.05,cx,cy,r);g.addColorStop(0,`rgba(${rgb},${a})`);g.addColorStop(.6,`rgba(${rgb},${a*.5})`);g.addColorStop(1,`rgba(${rgb},0)`);c.fillStyle=g;c.beginPath();c.arc(cx,cy,r,0,TAU);c.fill()}
   this.draw=function(){const st=this.state;if(!st)return;const c=cs.ctx,W=cs.W,H=cs.H;c.clearRect(0,0,W,H);if(W<10)return;
-    const Z=this.zoom,cx=W/2+this.panX,cy=H*(st.cyFrac??.5)+this.panY,s=Z*Math.min(W,H)*(st.fill??.30)/Math.cbrt(Math.max(st.refV,.01));const SH=shells(Z);
+    const Z=this.zoom,shiftX=(tools&&W<560&&W>=260)?-Math.min(22,W*.055):0,cx=W/2+this.panX+shiftX,cy=H*(st.cyFrac??.5)+this.panY,s=Z*Math.min(W,H)*(st.fill??.30)*(st.boost??(W<560?1.22:1.12))/Math.cbrt(Math.max(st.refV,.01));const SH=shells(Z);
     const v=st.vols,Rn=Math.cbrt(Math.max(v.n,0)),Re=Math.cbrt(Math.max(v.n+v.e,0)),Rt=Math.cbrt(Math.max(v.t,0));
     let cut=st.cut?{ax:st.cut.ax,cos:Math.cos(st.cut.h)}:null,dep=st.cut?st.cut.depth:0;
     if(this.cutaway){const cp=Math.cos(this.pitch),sp=Math.sin(this.pitch);cut={ax:[-cp*Math.sin(this.yaw),sp,cp*Math.cos(this.yaw)],cos:0.12};dep=0.5}
     const sz=clamp(Math.min(W,H)/320,1.1,2.2)*Math.min(1.8,Math.pow(Z,.35));
     c.globalCompositeOperation='lighter';
-    glow(c,cx,cy,Rt*s*1.1,'150,100,255',.13);
+    const CM=this.style==='cells',inside=clamp((Z-1.2)/1.8,0,1),DA=CM?1-.72*inside:1,GA=CM?1-.5*inside:1;const SHD=CM?SHELL:SH;
+    glow(c,cx,cy,Rt*s*1.1,'150,100,255',.13*GA);
     rings(c,Rt*1.01,s,cx,cy,COL.ede,.22,1.3,1,cut);
-    dots(c,SH.ede,Rt,s,cx,cy,COL.ede,.75,sz,1.3,1,cut);
-    if(v.e>.02){glow(c,cx,cy,Re*s*1.02,'47,227,214',.10);dots(c,SH.enh,Re,s,cx,cy,COL.enh,.95,sz*1.05,2.4,.9,dep>=.35?cut:null)}
-    if(Rn>.02){glow(c,cx,cy,Rn*s*1.1,'255,176,58',.40);dots(c,SH.nec,Rn,s,cx,cy,COL.nec,.9,sz,3.7,.7,dep>=.65?cut:null)}
+    dots(c,SHD.ede,Rt,s,cx,cy,COL.ede,.75*DA,sz,1.3,1,cut);
+    if(v.e>.02){glow(c,cx,cy,Re*s*1.02,'47,227,214',.10*GA);dots(c,SHD.enh,Re,s,cx,cy,COL.enh,.95*DA,sz*1.05,2.4,.9,dep>=.35?cut:null)}
+    if(Rn>.02){glow(c,cx,cy,Rn*s*1.1,'255,176,58',.40*GA);dots(c,SHD.nec,Rn,s,cx,cy,COL.nec,.9*DA,sz,3.7,.7,dep>=.65?cut:null)}
+    if(CM&&Rt>.02){
+      const D=cs.D||1,small=W<500,keepEvery=small?3:1;
+      const cellPx=clamp(Rt*s*(.085+.055*inside),2,520),cellA=.5+.5*inside,px=cellPx*D>90?160:64,ATL=buildCellAtlas(px);
+      const T=this.time,list=[];
+      const bounds={enh:[Rn,Re],ede:[Re,Rt],nec:[0,Rn]},seeds={enh:[2.4,.9],ede:[1.3,1],nec:[3.7,.7]},amp={enh:.5,ede:.62,nec:.4};
+      const cutOK={ede:true,enh:dep>=.35,nec:dep>=.65};const VT=Math.max(v.t,1e-6),share={enh:clamp(3.2*v.e/VT,.08,1),nec:clamp(3*v.n/VT,.08,1),ede:clamp(1.6*Math.max(v.t-v.e-v.n,0)/VT,.15,1)};
+      for(let i=0;i<CELLS.length;i+=keepEvery){const C=CELLS[i],[r0,r1]=bounds[C.kind];if(r1-r0<=.005&&C.kind!=='ede')continue;if(C.kind==='enh'&&v.e<=.02)continue;if(C.kind==='nec'&&Rn<=.02)continue;
+        if(C.h>share[C.kind])continue;const d=C.dir;if(cut&&cutOK[C.kind]&&d[0]*cut.ax[0]+d[1]*cut.ax[1]+d[2]*cut.ax[2]>cut.cos)continue;
+        const drift=C.kind==='ede'?.06*Math.sin(T*.25*C.wobV+C.wob):.025*Math.sin(T*C.wobV+C.wob);
+        const fr=clamp(C.frac+drift,0,1),[sd,rg]=seeds[C.kind],R=(r0+(r1-r0)*fr)*disp(d,sd,rg)*(C.kind==='ede'?1:.985);
+        const w=.012*Math.sin(T*C.wobV*1.3+C.wob*2);
+        const q=this.project([d[0]*R+w,d[1]*R-w,d[2]*R+w*.5],s,cx,cy);
+        if(q[0]<-cellPx||q[1]<-cellPx||q[0]>W+cellPx||q[1]>H+cellPx)continue;
+        list.push([q,C,R])}
+      list.sort((a,b)=>a[0][2]-b[0][2]);
+      for(const [q,C,R] of list){const depth=clamp((q[2]/Math.max(R,1e-3)+1)/2),k=1/(1-q[2]*.05);
+        const size=cellPx*C.size*k*(C.kind==='nec'?.8:1)*(.8+.35*depth);if(size<1.5)continue;
+        const frames=ATL[C.kind][C.v],fi=Math.floor(((REDUCED?0:T*C.spd)+C.off)%frames.length);
+        const ang=C.spin+(REDUCED?0:T*C.spinV),co=Math.cos(ang),si=Math.sin(ang);
+        c.globalAlpha=cellA*amp[C.kind]*(.25+.75*depth*depth);
+        c.setTransform(D*co,D*si,-D*si,D*co,D*q[0],D*q[1]);
+        c.drawImage(frames[fi],-size/2,-size/2,size,size)}
+      c.setTransform(D,0,0,D,0,0);c.globalAlpha=1}
+    {const cp=Math.cos(this.pitch),sp=Math.sin(this.pitch),vd=[-cp*Math.sin(this.yaw),sp,cp*Math.cos(this.yaw)];
+      let u=Math.abs(vd[1])<.9?[vd[2],0,-vd[0]]:[1,0,0];const un=Math.hypot(...u);u=u.map(x=>x/un);
+      const w=[vd[1]*u[2]-vd[2]*u[1],vd[2]*u[0]-vd[0]*u[2],vd[0]*u[1]-vd[1]*u[0]];
+      const outline=(R,seed,rough,rgb,a,lw,cutIt)=>{if(R*s<3)return;
+        c.beginPath();let pen=false;const N=160;
+        for(let i=0;i<=N;i++){const th=i/N*TAU,d=[Math.cos(th)*u[0]+Math.sin(th)*w[0],Math.cos(th)*u[1]+Math.sin(th)*w[1],Math.cos(th)*u[2]+Math.sin(th)*w[2]];
+          if(cutIt&&cut&&d[0]*cut.ax[0]+d[1]*cut.ax[1]+d[2]*cut.ax[2]>cut.cos){pen=false;continue}
+          const k=disp(d,seed,rough)*R,q=this.project([d[0]*k,d[1]*k,d[2]*k],s,cx,cy);pen?c.lineTo(q[0],q[1]):c.moveTo(q[0],q[1]);pen=true}
+        c.strokeStyle=`rgba(${rgb},${a*.22})`;c.lineWidth=lw*4.5;c.stroke();c.strokeStyle=`rgba(${rgb},${a})`;c.lineWidth=lw;c.stroke()};
+      const OL=this.cutaway?.55:1;
+      outline(Rt,1.3,1,'190,150,255',.75*OL,1.4,true);
+      if(v.e>.02)outline(Re,2.4,.9,'90,245,232',.95*OL,2.2,dep>=.35);
+      if(Rn>.02)outline(Rn,3.7,.7,'255,190,90',.7*OL,1.4,dep>=.65)}
     c.globalCompositeOperation='source-over';
     if(this.cutaway&&Rt>.02){const face=(R,rgb,a)=>{if(R<=.01)return;c.fillStyle=`rgba(${rgb},${a})`;c.beginPath();c.arc(cx,cy,R*s*.97,0,TAU);c.fill()};
-      face(Rt,'168,107,255',.10);if(v.e>.02)face(Re,'47,227,214',.16);if(Rn>.02)face(Rn,'255,176,58',.22);
+      const FA=this.style==='cells'?.45:1;face(Rt,'168,107,255',.10*FA);if(v.e>.02)face(Re,'47,227,214',.16*FA);if(Rn>.02)face(Rn,'255,176,58',.22*FA);
       const small=W<420,fs=small?10:11.5,RM=tools?52:6;c.font=`600 ${fs}px system-ui,sans-serif`;c.textBaseline='middle';
       const lab=(txt,r0,r1,ang,col)=>{if(W<260||r1<=.01||(r1-r0)*s<3)return;const rm=((r0+r1)/2)*s,x=cx+Math.cos(ang)*rm,y=cy-Math.sin(ang)*rm,lx=cx+Math.cos(ang)*(Rt*s*1.08+10),ly=cy-Math.sin(ang)*(Rt*s*1.08+10);
         if(ly<8||ly>H-8)return;c.strokeStyle='rgba(234,244,248,.6)';c.lineWidth=1;c.beginPath();c.moveTo(x,y);c.lineTo(lx,ly);c.stroke();c.fillStyle=col;c.beginPath();c.arc(x,y,2.2,0,TAU);c.fill();
@@ -416,7 +515,7 @@ function Tumor3D(cv,opts={}){
   cv.style.touchAction='pan-y';let down=null,moved=false,lastInteract=-1e9,armed=false;const ptrs=new Map();let pinch=null;
   const ZMAX=10,wrap=cv.parentElement;
   const clampPan=()=>{const W=cs.W,H=cs.H,lim=Math.max(0,(this.zoom-1))*.5;this.panX=clamp(this.panX,-W*lim-W*.25*(this.zoom>1),W*lim+W*.25*(this.zoom>1));this.panY=clamp(this.panY,-H*lim-H*.25*(this.zoom>1),H*lim+H*.25*(this.zoom>1));if(this.zoom<=1.0001){this.panX=0;this.panY=0}};
-  let zlog=null;const logView=()=>{clearTimeout(zlog);zlog=setTimeout(()=>{try{if(typeof Session!=='undefined'&&window.__demoKey)Session.event(window.__demoKey,'3-D view: zoom '+this.zoom.toFixed(1)+'×'+(this.cutaway?', cut-away on':''))}catch(_){}},900)};
+  let zlog=null;const logView=()=>{clearTimeout(zlog);zlog=setTimeout(()=>{try{if(typeof Session!=='undefined'&&window.__demoKey)Session.event(window.__demoKey,'3-D view: zoom '+this.zoom.toFixed(1)+'×'+(this.cutaway?', cut-away on':'')+(this.style==='cells'?', cells':', dots'))}catch(_){}},900)};
   this.setZoom=(z,px,py)=>{const W=cs.W,H=cs.H,st=this.state||{};z=clamp(z,1,ZMAX);if(px==null){px=W/2;py=H*(st.cyFrac??.5)}
     const cx=W/2+this.panX,cy=H*(st.cyFrac??.5)+this.panY,k=z/this.zoom;this.panX+=(px-cx)*(1-k);this.panY+=(py-cy)*(1-k);this.zoom=z;clampPan();
     cv.style.touchAction=z>1.001?'none':'pan-y';this.dirty=true;lastInteract=performance.now();syncTools();logView()};
@@ -425,13 +524,13 @@ function Tumor3D(cv,opts={}){
   // toolbar
   let tools=null;
   if(wrap&&opts.tools!==false){tools=document.createElement('div');tools.className='t3d-tools';
-    tools.innerHTML='<button type="button" data-a="in" aria-label="Zoom in" title="Zoom in">+</button><span class="t3d-z" aria-live="polite">1×</span><button type="button" data-a="out" aria-label="Zoom out" title="Zoom out">−</button><button type="button" data-a="reset" aria-label="Reset view" title="Reset view">⟲</button><button type="button" data-a="cut" aria-pressed="false" aria-label="Cut-away view" title="Cut-away: slice the tumor open to see its layers">◐</button>';
+    tools.innerHTML='<button type="button" data-a="in" aria-label="Zoom in" title="Zoom in">+</button><span class="t3d-z" aria-live="polite">1×</span><button type="button" data-a="out" aria-label="Zoom out" title="Zoom out">−</button><button type="button" data-a="reset" aria-label="Reset view" title="Reset view">⟲</button><button type="button" data-a="cut" aria-pressed="false" aria-label="Cut-away view" title="Cut-away: slice the tumor open to see its layers">◐</button><button type="button" data-a="style" aria-pressed="true" aria-label="Show cells or dots" title="Illustrative cells or measurement dots">✺</button><button type="button" data-a="spin" aria-pressed="true" aria-label="Automatic rotation" title="Turn automatic rotation on or off">↻</button>';
     wrap.appendChild(tools);
     tools.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a;
-      if(a==='in')this.setZoom(this.zoom*1.5);if(a==='out')this.setZoom(this.zoom/1.5);if(a==='reset')this.resetView();if(a==='cut')this.setCutaway(!this.cutaway)});
+      if(a==='in')this.setZoom(this.zoom*1.5);if(a==='out')this.setZoom(this.zoom/1.5);if(a==='reset')this.resetView();if(a==='cut')this.setCutaway(!this.cutaway);if(a==='style'){this.style=this.style==='cells'?'dots':'cells';this.dirty=true;syncTools();logView()}if(a==='spin'){this.auto=!this.auto;lastInteract=-1e9;this.dirty=true;syncTools()}});
     tools.addEventListener('pointerdown',e=>e.stopPropagation())}
   function syncTools(){if(!tools)return;tools.classList.toggle('compact',cs.W>0&&cs.W<260);tools.querySelector('.t3d-z').textContent=(self.zoom<9.95?self.zoom.toFixed(self.zoom<1.95?1:1):Math.round(self.zoom))+'×';
-    tools.querySelector('[data-a=cut]').setAttribute('aria-pressed',String(self.cutaway));tools.querySelector('[data-a=out]').disabled=self.zoom<=1.001;tools.querySelector('[data-a=reset]').disabled=self.zoom<=1.001&&!self.cutaway}
+    tools.querySelector('[data-a=cut]').setAttribute('aria-pressed',String(self.cutaway));tools.querySelector('[data-a=style]').setAttribute('aria-pressed',String(self.style==='cells'));tools.querySelector('[data-a=spin]').setAttribute('aria-pressed',String(!!self.auto));tools.querySelector('[data-a=reset]').classList.toggle('hide-compact',self.zoom<=1.001&&!self.cutaway);tools.querySelector('[data-a=out]').disabled=self.zoom<=1.001;tools.querySelector('[data-a=reset]').disabled=self.zoom<=1.001&&!self.cutaway}
   syncTools();
   const local=e=>{const r=cv.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top]};
   cv.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});armed=true;lastInteract=performance.now();try{cv.setPointerCapture(e.pointerId)}catch(_){}
@@ -452,7 +551,7 @@ function Tumor3D(cv,opts={}){
   new ResizeObserver(()=>{clampPan();syncTools();this.dirty=true}).observe(cv);
   let visible=true,lastTs=0;new IntersectionObserver(es=>{visible=es[0].isIntersecting}).observe(cv);
   const loop=ts=>{const dt=lastTs?Math.min(.05,(ts-lastTs)/1000):0;lastTs=ts;
-    if(visible&&!document.hidden){if(this.auto&&!down&&ts-lastInteract>2500){this.yaw+=dt*.22;this.dirty=true}if(this.tick)this.tick(dt);if(this.dirty)this.draw()}
+    if(visible&&!document.hidden){this.time+=dt;if(this.style==='cells'&&!REDUCED&&(cs.W>=500||ts-(this._lastCellDraw||0)>=32)){this.dirty=true;this._lastCellDraw=ts}if(this.auto&&!down&&ts-lastInteract>2500){this.yaw+=dt*.22;this.dirty=true}if(this.tick)this.tick(dt);if(this.dirty)this.draw()}
     requestAnimationFrame(loop)};
   requestAnimationFrame(loop);
 }
@@ -460,7 +559,7 @@ function Tumor3D(cv,opts={}){
 /* ===== ABP demonstrator model (shared by demos 2-4; formulas unchanged from v4 demos 2 and 3) ===== */
 function response(base,rt,tz,w){const v=vols(base),alpha=.012,beta=.0012,kR=1-Math.exp(-(alpha*rt+beta*rt*2)),kT=.55*hill(tz,.45,2),kappa=.85,kC=1-(1-kR)*(1-kT)*Math.exp(-kappa*kR*kT),nec=hill(rt,62,7)*(1-Math.exp(-Math.max(0,w-8)/9)),inv=.55*hill(rt,54,4),onE=.10+.90*(1-Math.exp(-w/4)),onD=.06+.94*(1-Math.exp(-w/7));const drift=Math.pow(2,w/(3*17.5));let e=v.e*drift*(1-.80*kC*onE)*(1+.18*nec),d=v.d*Math.pow(2,w*(1+.35*inv)/(3*17.5))*(1-.32*(kR*.62+kT*.38)*onD),n=Math.max(v.n*.9,(v.n+v.e*.40*kC)+v.t*.10*nec);return {e:Math.max(.001,e),d:Math.max(.001,d),n:Math.max(.001,n),t:Math.max(.003,e+d+n),kR,kT,kC,nec,inv}}
 function supp(rt,tz){const conventional=rt<=66,tmod=tz<=.80;if(rt>72||tz>.90)return 'outside';if(conventional&&tmod)return 'supported';return 'boundary'}
-const APP={partial:{f:.45,w:.30,name:'Partial'},gtr:{f:.82,w:.52,name:'Near-total'},supra:{f:.93,w:.78,name:'Supramarginal'}};
+const APP={partial:{f:.45,w:.30,name:'Subtotal'},gtr:{f:.82,w:.52,name:'Near-total'},supra:{f:.93,w:.78,name:'Supramarginal'}};
 function burden(th){const g=(c,w)=>Math.exp(-Math.pow(Math.atan2(Math.sin(th-c),Math.cos(th-c))/w,2));return clamp(.88*g(.70,.55)+.76*g(3.52,.62))}
 function guardState(th,a,d){const b=burden(th),width=APP[a].w*(.55+.45*d),cyt=APP[a].f*d,activation=.42*width*d,score=.58*activation+.42*b*width;return {b,width,cyt,activation,score,k:score<.22?'clear':score<.36?'limit':'breach'}}
 function surgeryVols(base,g,t){const v=vols(base),on=1-Math.exp(-t/3),remote=1-Math.exp(-t/8);const e=v.e*(1-g.cyt)*(1+.42*g.activation*on),n=v.n*(1-.55*g.cyt)*(1+.10*on),d=v.d*(1-.20*g.cyt)*(1+.25*g.activation*on+.08*g.cyt*remote);return {e:Math.max(.01,e),n:Math.max(.01,n),d:Math.max(.01,d),t:Math.max(.03,e+n+d)}}
@@ -606,7 +705,7 @@ function CellView(cv,seed){
 }
 
 /* ===== Session recorder + downloadable play-by-play report ===== */
-const DEMOS={dyn:{n:1,title:'Tumor dynamics (observed)',file:'01_tumor_dynamics.html'},pharm:{n:2,title:'Pharmacological what-if',file:'02_pharmacological_intervention.html'},surg:{n:3,title:'Surgical what-if',file:'03_surgical_intervention.html'},opt:{n:4,title:'Optimal intervention',file:'04_optimal_intervention.html'},div:{n:5,title:'Two tumors that looked alike (observed)',file:'05_matched_divergence.html'}};
+const DEMOS={dyn:{n:1,title:'Tumor dynamics (observed)',file:'01_tumor_dynamics.html'},pharm:{n:2,title:'Pharmacological exploration',file:'02_pharmacological_intervention.html'},surg:{n:3,title:'Surgical exploration',file:'03_surgical_intervention.html'},opt:{n:4,title:'Comparative intervention analysis',file:'04_optimal_intervention.html'},div:{n:5,title:'Matched clinical states, divergent courses (observed)',file:'05_matched_divergence.html'}};
 function debounce(fn,ms){let h;return (...a)=>{clearTimeout(h);h=setTimeout(()=>fn(...a),ms)}}
 const Session=(()=>{const KEY='abp_lumiere_067_session_v1';let mem=null;
   function load(){if(mem)return mem;try{mem=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!mem||!mem.started)mem={started:new Date().toISOString(),demos:{}};return mem}
@@ -646,78 +745,78 @@ function secObserved(d){const f=observedFacts(),S=STATES;
 function secPharm(d){let h='';const W=12;
   if(d&&d.trials.length){
     h+='<h3>What you did</h3>'+eventsList(d);
-    h+='<h3>How your adjustments worked</h3><p>Every plan you settled on, re-evaluated at a common week '+W+' so plans can be compared fairly.</p>';
+    h+='<h3>Evaluation of your settings</h3><p>Every setting you settled on, re-evaluated at a common week '+W+' so settings can be compared fairly.</p>';
     const rows=d.trials.map(t=>{const b=STATES[t.start],bv=vols(b),r=response(b,t.rt,t.tz,W),u=response(b,0,0,W),k=supp(t.rt,t.tz);return {t,b,bv,r,u,k}});
     h+=table(['Time','Start','Radiation','Chemo','Range','Enhancing wk '+W,'Total wk '+W,'Untreated total','vs untreated'],rows.map(x=>[tm(x.t.t),'Wk '+weekNum(x.b)+' ('+esc(ranoText(x.b))+')',x.t.rt+' Gy',x.t.tz.toFixed(2),kLab[x.k],x.k==='outside'?'—':fv(x.r.e),x.k==='outside'?'—':fv(x.r.t),fv(x.u.t),x.k==='outside'?'abstained':pct(x.r.t/x.u.t-1)]));
     const starts=[...new Set(d.trials.map(t=>t.start))];
     for(const si of starts){const b=STATES[si],mine=rows.filter(x=>x.t.start===si&&x.k!=='outside');
       const opt=bestPharm(b,W,'e',false),optB=bestPharm(b,W,'e',true),optD=bestPharm(b,W,'d',false),conv=response(b,60,.7,W),u=response(b,0,0,W);
       h+='<h3>What would have been optimal · start '+esc(stateLabel(b))+'</h3>';
-      h+=table(['Plan','Radiation','Chemo','Enhancing wk '+W,'Edema wk '+W,'Total wk '+W],[
+      h+=table(['Regimen','Radiation','Chemo','Enhancing wk '+W,'Edema wk '+W,'Total wk '+W],[
         ['No treatment','0 Gy','0.00',fv(u.e),fv(u.d),fv(u.t)],
         ['Conventional reference','60 Gy','0.70',fv(conv.e),fv(conv.d),fv(conv.t)],
-        ['<b>Best for enhancing tumor, strictly supported</b>',opt.R+' Gy',opt.Z.toFixed(2),'<b>'+fv(opt.r.e)+'</b>',fv(opt.r.d),fv(opt.r.t)],
-        ['Best for enhancing, including boundary region',optB.R+' Gy',optB.Z.toFixed(2),fv(optB.r.e),fv(optB.r.d),fv(optB.r.t)],
-        ['Best for edema, strictly supported',optD.R+' Gy',optD.Z.toFixed(2),fv(optD.r.e),'<b>'+fv(optD.r.d)+'</b>',fv(optD.r.t)]]);
+        ['<b>Optimal for enhancing volume, supported range</b>',opt.R+' Gy',opt.Z.toFixed(2),'<b>'+fv(opt.r.e)+'</b>',fv(opt.r.d),fv(opt.r.t)],
+        ['Optimal for enhancing volume, including boundary range',optB.R+' Gy',optB.Z.toFixed(2),fv(optB.r.e),fv(optB.r.d),fv(optB.r.t)],
+        ['Optimal for edema volume, supported range',optD.R+' Gy',optD.Z.toFixed(2),fv(optD.r.e),'<b>'+fv(optD.r.d)+'</b>',fv(optD.r.t)]]);
       const sup=mine.filter(x=>x.k==='supported'),bnd=mine.filter(x=>x.k==='boundary');
       if(sup.length){const my=sup.reduce((a,x)=>x.r.e<a.r.e?x:a),gap=my.r.e/opt.r.e-1;
-        h+='<p><b>Your best supported plan</b> for enhancing tumor was '+my.t.rt+' Gy with chemo '+my.t.tz.toFixed(2)+': '+fcc(my.r.e)+' at week '+W+'. '+(gap<=.005?'That matches the best strictly supported plan.':'The best strictly supported plan ('+opt.R+' Gy, '+opt.Z.toFixed(2)+') reaches '+fcc(opt.r.e)+', which is '+Math.round(gap/(1+gap)*100)+'% lower.')+'</p>'}
-      else if(mine.length)h+='<p><b>None of your plans were in the strictly supported range</b> for this start. The best strictly supported plan is '+opt.R+' Gy with chemo '+opt.Z.toFixed(2)+' ('+fcc(opt.r.e)+').</p>';
-      if(bnd.length){const mb=bnd.reduce((a,x)=>x.r.e<a.r.e?x:a);h+='<p>Your lowest boundary-range plan was '+mb.t.rt+' Gy with chemo '+mb.t.tz.toFixed(2)+' ('+fcc(mb.r.e)+'). Plans in this range sit above conventional dosing, so they are flagged as boundary-range'+(mb.r.e<opt.r.e-1e-6?', even though the modeled value is lower than the supported optimum':'')+'.</p>'}
-      const nOut=rows.filter(x=>x.t.start===si&&x.k==='outside').length;if(nOut)h+='<p>'+nOut+(nOut===1?' plan was':' plans were')+' outside the supported range; ABP abstained on '+(nOut===1?'it':'them')+'.</p>';
-      h+='<p class="muted">In this demonstrator the declared response rises steadily with dose, so the best plan always sits at the upper edge of the permitted range. That is a property of the declared response function, not a dosing recommendation.</p>'}
+        h+='<p><b>Your optimal supported regimen</b> for enhancing tumor was '+my.t.rt+' Gy with chemo '+my.t.tz.toFixed(2)+': '+fcc(my.r.e)+' at week '+W+'. '+(gap<=.005?'That matches the best strictly supported plan.':'The optimal regimen within the supported range ('+opt.R+' Gy, '+opt.Z.toFixed(2)+') reaches '+fcc(opt.r.e)+', which is '+Math.round(gap/(1+gap)*100)+'% lower.')+'</p>'}
+      else if(mine.length)h+='<p><b>None of your regimens were in the supported range</b> for this start. The optimal regimen within the supported range is '+opt.R+' Gy with chemo '+opt.Z.toFixed(2)+' ('+fcc(opt.r.e)+').</p>';
+      if(bnd.length){const mb=bnd.reduce((a,x)=>x.r.e<a.r.e?x:a);h+='<p>Your lowest boundary-range regimen was '+mb.t.rt+' Gy with chemo '+mb.t.tz.toFixed(2)+' ('+fcc(mb.r.e)+'). Regimens in this range sit above conventional dosing, so the model flags them for caution'+(mb.r.e<opt.r.e-1e-6?', even though the modeled value is lower than the supported optimum':'')+'.</p>'}
+      const nOut=rows.filter(x=>x.t.start===si&&x.k==='outside').length;if(nOut)h+='<p>'+nOut+(nOut===1?' plan was':' plans were')+' outside the model\u2019s range; ABP abstained on '+(nOut===1?'it':'them')+'.</p>';
+      h+='<p class="muted">In this demonstrator the modeled effect rises steadily with dose, so the optimum always sits at the upper edge of the permitted range. That is a property of the declared model, not a dosing recommendation.</p>'}
     h+=snapImg(d)}
-  else{const b=STATES[1],opt=bestPharm(b,W,'e',false);h+='<p class="muted">Not explored in this session.</p><p>Reference: from '+esc(stateLabel(b))+', the best strictly supported plan for enhancing tumor at week '+W+' is '+opt.R+' Gy with chemo '+opt.Z.toFixed(2)+' ('+fcc(opt.r.e)+').</p>'}
+  else{const b=STATES[1],opt=bestPharm(b,W,'e',false);h+='<p class="muted">Not explored in this session.</p><p>Reference: from '+esc(stateLabel(b))+', the optimal supported regimen for enhancing volume at week '+W+' is '+opt.R+' Gy with chemo '+opt.Z.toFixed(2)+' ('+fcc(opt.r.e)+').</p>'}
   return h}
 
 function secSurg(d){const B=stateByWeek('week-156'),P=stateByWeek('week-157'),BV=vols(B),PV=vols(P),best=bestSurg(),W=12;
   const bo=surgeryVols(B,best.g,0),b12=surgeryVols(B,best.g,W);let h='';
   if(d&&d.trials.length){
-    h+='<h3>What you did</h3>'+eventsList(d)+'<h3>How your adjustments worked</h3><p>Starting state: week 156, progressive disease, '+fcc(BV.t)+'. Each plan you settled on:</p>';
+    h+='<h3>What you did</h3>'+eventsList(d)+'<h3>Evaluation of your settings</h3><p>Starting state: week 156, progressive disease, '+fcc(BV.t)+'. Each configuration you settled on:</p>';
     const rows=d.trials.map(t=>{const g=guardState(t.ang*Math.PI/180,t.app,t.dep);return {t,g,r0:surgeryVols(B,g,0),r12:surgeryVols(B,g,W)}});
     h+=table(['Time','Extent','Depth','Approach','Path','Removed','Enhancing after','Total after','Total wk '+W],rows.map(x=>[tm(x.t.t),APP[x.t.app].name,x.t.dep.toFixed(2),x.t.ang+'°',kLab[x.g.k],Math.round(x.g.cyt*100)+'%',fv(x.r0.e),fv(x.r0.t),fv(x.r12.t)]));
     const safe=rows.filter(x=>x.g.k==='clear'),risky=rows.length-safe.length;
-    if(safe.length){const my=safe.reduce((a,x)=>x.g.cyt>a.g.cyt?x:a);h+='<p><b>Your largest safe removal</b> was '+APP[my.t.app].name.toLowerCase()+' at depth '+my.t.dep.toFixed(2)+' via '+my.t.ang+'°: '+Math.round(my.g.cyt*100)+'% removed. '+(my.g.cyt>=best.g.cyt-.005?'That matches the demonstrator\u2019s largest safe removal.':'The demonstrator\u2019s largest safe removal is '+Math.round(best.g.cyt*100)+'%.')+'</p>'}
-    else h+='<p><b>None of your plans stayed clear</b> on the demonstration risk map.</p>';
+    if(safe.length){const my=safe.reduce((a,x)=>x.g.cyt>a.g.cyt?x:a);h+='<p><b>Your largest configuration outside high-risk zones</b> was '+APP[my.t.app].name.toLowerCase()+' at depth '+my.t.dep.toFixed(2)+' via '+my.t.ang+'°: '+Math.round(my.g.cyt*100)+'% removed. '+(my.g.cyt>=best.g.cyt-.005?'That matches the model\u2019s maximal configuration.':'The model\u2019s maximal configuration is '+Math.round(best.g.cyt*100)+'%.')+'</p>'}
+    else h+='<p><b>None of your configurations stayed outside high-risk zones</b> on the demonstration risk map.</p>';
     if(risky)h+='<p>'+risky+' of your '+rows.length+' plans '+(risky===1?'was':'were')+' borderline or crossed high-risk tissue.</p>';
     h+=snapImg(d)}
   else h+='<p class="muted">Not explored in this session.</p>';
   h+='<h3>What would have been optimal</h3>'+table(['','Extent','Depth','Approach','Removed','Enhancing','Total','Total wk '+W],[
     ['Before surgery (observed, wk 156)','—','—','—','—',fv(BV.e),fv(BV.t),'—'],
-    ['<b>Largest safe removal (demonstrator)</b>',APP[best.a].name,best.d.toFixed(2),best.A+'°',Math.round(best.g.cyt*100)+'%',fv(bo.e),fv(bo.t),fv(b12.t)],
-    ['What actually happened (observed, wk 157)','—','—','—','—',fv(PV.e),fv(PV.t),'—']]);
+    ['<b>Maximal modeled resection outside high-risk zones</b>',APP[best.a].name,best.d.toFixed(2),best.A+'°',Math.round(best.g.cyt*100)+'%',fv(bo.e),fv(bo.t),fv(b12.t)],
+    ['Observed (wk 157)','—','—','—','—',fv(PV.e),fv(PV.t),'—']]);
   h+='<p class="muted">The risk ring is a demonstration map standing in for patient-specific eloquent-cortex and tract mapping, which LUMIERE does not provide. The week 157 scan counts the cavity and blood products as necrotic.</p>';
   return h}
 
-function secOpt(d){const B=stateByWeek('week-156'),HS=[4,8,12,16,24],OBJ={enh:'Least enhancing tumor',total:'Least total burden',harm:'Burden and harm'};let h='';
-  if(d&&d.trials.length){h+='<h3>What you did</h3>'+eventsList(d)+'<h3>Verdicts you saw</h3>'+table(['Time','Goal','Look ahead','Verdict','Margin'],d.trials.map(t=>{const z=compareFamilies(B,t.h,t.obj);return [tm(t.t),OBJ[t.obj],t.h+' weeks',z.winner?'<b>'+z.winner+'</b>':'No clear winner',Math.round(z.sep*100)+'%']}))+snapImg(d)}
+function secOpt(d){const B=stateByWeek('week-156'),HS=[4,8,12,16,24],OBJ={enh:'Enhancing volume',total:'Total tumor burden',harm:'Burden adjusted for morbidity'};let h='';
+  if(d&&d.trials.length){h+='<h3>What you did</h3>'+eventsList(d)+'<h3>Assessments viewed</h3>'+table(['Time','Objective','Horizon','Assessment','Margin'],d.trials.map(t=>{const z=compareFamilies(B,t.h,t.obj);return [tm(t.t),OBJ[t.obj],t.h+' weeks',z.winner?'<b>'+z.winner+'</b>':'No separable option',Math.round(z.sep*100)+'%']}))+snapImg(d)}
   else h+='<p class="muted">Not explored in this session.</p>';
-  h+='<h3>Full verdict map</h3><p>ABP\u2019s verdict for every goal and look-ahead, from week 156.</p>';
-  h+=table(['Goal'].concat(HS.map(x=>x+' wk')),Object.keys(OBJ).map(o=>[OBJ[o]].concat(HS.map(x=>{const z=compareFamilies(B,x,o);return z.winner?'<b>'+z.winner+'</b> ('+Math.round(z.sep*100)+'%)':'No clear winner'}))));
+  h+='<h3>Assessment map</h3><p>ABP\u2019s assessment for every objective and horizon, from week 156.</p>';
+  h+=table(['Objective'].concat(HS.map(x=>x+' wk')),Object.keys(OBJ).map(o=>[OBJ[o]].concat(HS.map(x=>{const z=compareFamilies(B,x,o);return z.winner?'<b>'+z.winner+'</b> ('+Math.round(z.sep*100)+'%)':'No separable option'}))));
   const z=compareFamilies(B,12,'enh');
-  h+='<h3>Option details at 12 weeks</h3>'+table(['Option','Enhancing','Necrotic','Edema','Total','Harm index','Support'],z.A.map(x=>[x.label,fv(x.e),fv(x.n),fv(x.d),fv(x.t),x.harm.toFixed(2),Math.round(x.support*100)+'%']));
-  const o=observedFacts();h+='<p>For context, the observed course: week 156 '+fcc(vols(B).t)+' → operation → week 157 '+fcc(vols(stateByWeek('week-157')).t)+' → week 167 '+fcc(o.last.t)+' (progressive disease). The options above are counterfactual alternatives, not a re-creation of that course.</p>';
+  h+='<h3>Option details at 12 weeks</h3>'+table(['Option','Enhancing','Necrotic','Edema','Total','Morbidity index','Support'],z.A.map(x=>[x.label,fv(x.e),fv(x.n),fv(x.d),fv(x.t),x.harm.toFixed(2),Math.round(x.support*100)+'%']));
+  const o=observedFacts();h+='<p>For context, the observed course: week 156 '+fcc(vols(B).t)+' → resection → week 157 '+fcc(vols(stateByWeek('week-157')).t)+' → week 167 '+fcc(o.last.t)+' (progressive disease). The options above are modeled alternatives, not a re-creation of that course.</p>';
   return h}
 
 function secDiv(d){if(typeof DIV_DATA==='undefined')return '<p class="muted">Data unavailable.</p>';const DD=DIV_DATA,C=DD.ctx;let h='';
   const rt=r=>({'PD':'progressive disease','SD':'stable disease','PR':'partial response','CR':'complete response','PRE-OP':'before surgery','POST-OP':'after surgery'}[r]||'not rated');
   const courseTable=p=>table(['Week','Rating','Total','Enhancing','Necrotic','Edema','Rater\u2019s rationale'],p.scans.map(s=>[Math.round(s.w),esc(rt(s.rano)),'<b>'+fv(s.t)+'</b>',fv(s.e),fv(s.n),fv(s.d),esc(s.why||'')]))+(p.os?'<p class="muted">Overall survival (dataset): '+Math.round(p.os)+' weeks.</p>':'');
   const pairBlock=pr=>{const A=DD.patients[pr.A],B=DD.patients[pr.B],a=A.scans.find(x=>x.week===pr.wA),b=B.scans.find(x=>x.week===pr.wB),ia=A.scans.indexOf(a),ib=B.scans.indexOf(b),na=A.scans[ia+1],nb=B.scans[ib+1];
-    let o='<h3>Pair '+pr.label+': '+A.id+' at week '+Math.round(a.w)+' and '+B.id+' at week '+Math.round(b.w)+'</h3><p>At the match the two scans were closer on imaging features than '+(100-pr.pct).toFixed(pr.pct<.1?2:1)+'% of scan pairs, with total volumes of '+fcc(a.t)+' and '+fcc(b.t)+' ('+(pr.voldiff*100).toFixed(1)+'% apart), both rated '+rt(a.rano)+(a.rano===b.rano?'':' / '+rt(b.rano))+'.</p>';
+    let o='<h3>Pair '+pr.label+': '+A.id+' at week '+Math.round(a.w)+' and '+B.id+' at week '+Math.round(b.w)+'</h3><p>At the matched state the two scans were closer on imaging features than '+(100-pr.pct).toFixed(pr.pct<.1?2:1)+'% of scan pairs, with total volumes of '+fcc(a.t)+' and '+fcc(b.t)+' ('+(pr.voldiff*100).toFixed(1)+'% apart), both rated '+rt(a.rano)+(a.rano===b.rano?'':' / '+rt(b.rano))+'.</p>';
     o+=table(['','Next scan','Rating','Volume change','Survival after match'],[[A.id,na?'+'+Math.round(na.w-a.w)+' weeks':'—',na?'<b>'+esc(rt(na.rano))+'</b>':'—',na?pct(na.t/a.t-1):'—',A.os?Math.round(A.os-a.w)+' weeks':'—'],[B.id,nb?'+'+Math.round(nb.w-b.w)+' weeks':'—',nb?'<b>'+esc(rt(nb.rano))+'</b>':'—',nb?pct(nb.t/b.t-1):'—',B.os?Math.round(B.os-b.w)+' weeks':'—']]);
     o+='<h3>'+A.id+' · full course</h3>'+courseTable(A)+'<h3>'+B.id+' · full course</h3>'+courseTable(B);return o};
   if(d&&(d.events.length||d.trials.length)){h+='<h3>What you did</h3>'+eventsList(d);
-    const g=d.trials.filter(t=>t.guess);if(g.length)h+='<h3>Your predictions at the match</h3>'+table(['Time','Pair','Your call','Rated progressive next','Result'],g.map(t=>{const pr=DD.pairs.find(p=>p.key===t.pair);const nm=w=>w==='A'?pr.A:w==='B'?pr.B:'can\u2019t tell';return [tm(t.t),pr.label,nm(t.guess),nm(t.answer),t.guess==='X'?'declined to call':t.guess===t.answer?'correct':'incorrect']}));
+    const g=d.trials.filter(t=>t.guess);if(g.length)h+='<h3>Assessments at the matched state</h3>'+table(['Time','Pair','Assessment','Rated progressive next','Result'],g.map(t=>{const pr=DD.pairs.find(p=>p.key===t.pair);const nm=w=>w==='A'?pr.A:w==='B'?pr.B:'indeterminate';return [tm(t.t),pr.label,nm(t.guess),nm(t.answer),t.guess==='X'?'indeterminate':t.guess===t.answer?'correct':'incorrect']}));
     h+=snapImg(d)}else h+='<p class="muted">Not explored in this session.</p>';
   const viewed=d?[...new Set(d.events.map(e=>(DD.pairs.find(p=>e.text.includes(p.label))||{}).key).filter(Boolean))]:[];
   for(const pr of DD.pairs)if(!d||viewed.includes(pr.key)||pr.key===DD.pairs[0].key)h+=pairBlock(pr);
-  h+='<h3>How often similar scans diverge</h3>'+table(['Nearest share of scan pairs','Pairs','Opposite next ratings','Share'],C.sens.map(r=>[r.distance_percentile+'%',r.close_pairs,r.opposed_future_pairs,Math.round(r.opposed_future_fraction*100)+'%']))+'<p>For two randomly chosen scans the expected share is about '+Math.round(C.randomOpposed*100)+'%, since '+Math.round(C.pProg*100)+'% of next ratings were progressive. Similarity on these features narrowed the future only slightly. Descriptive counts from '+C.nStates+' rated scans in '+C.nPatients+' patients; the search does not establish identical biology or a causal effect, and treatment after surgery is not recorded in these data.</p>';
+  h+='<h3>Divergence among matched scan pairs</h3>'+table(['Nearest share of scan pairs','Pairs','Opposite next ratings','Share'],C.sens.map(r=>[r.distance_percentile+'%',r.close_pairs,r.opposed_future_pairs,Math.round(r.opposed_future_fraction*100)+'%']))+'<p>For two randomly chosen scans the expected share is about '+Math.round(C.randomOpposed*100)+'%, since '+Math.round(C.pProg*100)+'% of next ratings were progressive. Similarity on these features narrowed the future only slightly. Descriptive counts from '+C.nStates+' rated scans in '+C.nPatients+' patients; the search does not establish identical biology or a causal effect, and treatment after surgery is not recorded in these data.</p>';
   return h}
 
 function buildReport(){const S=Session.data(),now=new Date(),vis=Object.keys(DEMOS).filter(k=>S.demos[k]);
   const sec=(k,body)=>'<section><h2>'+DEMOS[k].n+'. '+DEMOS[k].title+'</h2>'+body+'</section>';
   const summary=vis.length?'Demos explored: '+vis.map(k=>DEMOS[k].n+'. '+DEMOS[k].title).join('; ')+'.':'No interactions recorded yet; reference analyses are shown.';
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ABP session report · LUMIERE</title>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ABP session report · Patient-067</title>
 <style>body{margin:0;background:#f6f8f9;color:#14212b;font:15px/1.55 "Avenir Next","Segoe UI",system-ui,sans-serif}main{max-width:900px;margin:0 auto;padding:28px 20px 60px}
 h1{font-size:26px;margin:0 0 4px;line-height:1.2}h2{font-size:20px;margin:0 0 10px;padding-top:6px}h3{font-size:15.5px;margin:22px 0 8px}
 section{background:#fff;border:1px solid #dde5ea;border-radius:12px;padding:18px 20px;margin:18px 0;break-inside:auto}
@@ -728,12 +827,12 @@ ol.log{padding-left:22px;margin:6px 0;font-size:13.5px}ol.log li{margin:3px 0}.t
 figure{margin:12px 0 0}figure img{max-width:100%;width:420px;border-radius:10px;display:block}figcaption{font-size:12px;color:#6b808c;margin-top:4px}
 .note{background:#fff8e1;border-color:#f0dfa0}.print{margin-top:10px}button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid #b9c7cf;background:#fff;cursor:pointer}
 @media print{body{background:#fff}section{border:0;padding:0;margin:14px 0}.print{display:none}.tw{overflow:visible}tr{break-inside:avoid}}</style></head><body><main>
-<h1>ABP session report · LUMIERE</h1>
+<h1>ABP session report · LUMIERE Patient-067</h1>
 <div class="meta">CMH Scientific · AI as a Biological Primitive demonstration<br>Session started ${esc(new Date(S.started).toLocaleString())} · report generated ${esc(now.toLocaleString())}</div>
 <p>${esc(summary)}</p><div class="print"><button onclick="print()">Print or save as PDF</button></div>
-<section class="note"><b>How to read this report.</b> Sections 1 and 5 are observed data. Sections 2–4 are counterfactual intervention comparisons using declared, literature-informed response functions and support limits; they are not fitted to this patient's treatment history and are not treatment recommendations. "Optimal" means best within the declared response functions, goal and support region.</section>
+<section class="note"><b>How to read this report.</b> Sections 1 and 5 are observed data. Sections 2–4 are modeled counterfactuals from a demonstrator with declared, literature-informed response functions and support limits; they are not fitted to this patient's treatment history and are not treatment recommendations. "Optimal" means best within the declared model, objective and support region.</section>
 ${sec('dyn',secObserved(S.demos.dyn))}${sec('pharm',secPharm(S.demos.pharm))}${sec('surg',secSurg(S.demos.surg))}${sec('opt',secOpt(S.demos.opt))}${sec('div',secDiv(S.demos.div))}
-<section><h2>Provenance</h2><p class="muted">Data: LUMIERE longitudinal glioblastoma dataset (Suter et al., Scientific Data 9:768, 2022). Demos 1–4 use Patient-067; Demo 5 uses Patients 071, 072 and 019. DeepBraTumIA segmentation; expert RANO ratings. 3-D views use equivalent-volume geometry (radii proportional to the cube root of each compartment volume). Research demonstration, not for clinical use.</p></section>
+<section><h2>Provenance</h2><p class="muted">Data: LUMIERE longitudinal glioblastoma dataset (Suter et al., Scientific Data 9:768, 2022), Patient-067; DeepBraTumIA segmentation; expert RANO ratings. 3-D views use equivalent-volume geometry (radii proportional to the cube root of each compartment volume). Research demonstration, not for clinical use.</p></section>
 </main></body></html>`}
 
 function csvReport(){const S=Session.data(),rows=[['time','demo','kind','description']];
@@ -742,10 +841,10 @@ function csvReport(){const S=Session.data(),rows=[['time','demo','kind','descrip
 function saveFile(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
 function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())}
 function mountReport(demo,canvas,beforeSnap){window.__demoKey=demo;const box=$('report');if(!box)return;
-  box.innerHTML='<h2>Session report</h2><p class="small">Everything you try in the intervention demos is recorded in this browser. The report explains what the observed data show, what you changed, and what is favored under the declared response functions.</p><button class="btn primary block" id="rep_html" style="margin-top:10px">Download report</button><div class="reprow"><button class="btn" id="rep_csv">Download data (CSV)</button><button class="btn" id="rep_new">Start new session</button></div><p class="small" id="rep_count" style="margin-top:8px"></p>';
+  box.innerHTML='<h2>Session report</h2><p class="small">Everything you try in the four demos is recorded in this browser. The report explains what the data shows, what you did, how each change worked, and what the model rates as optimal.</p><button class="btn primary block" id="rep_html" style="margin-top:10px">Download report</button><div class="reprow"><button class="btn" id="rep_csv">Download data (CSV)</button><button class="btn" id="rep_new">Start new session</button></div><p class="small" id="rep_count" style="margin-top:8px"></p>';
   const count=()=>{const S=Session.data();let a=0,t=0;for(const k in S.demos){a+=S.demos[k].events.length;t+=S.demos[k].trials.length}setText($('rep_count'),a+t?a+(a===1?' action':' actions')+' and '+t+(t===1?' setting':' settings')+' recorded so far.':'Nothing recorded yet.')};
-  $('rep_html').onclick=()=>{if(beforeSnap)beforeSnap();if(canvas)Session.snap(demo,canvas);saveFile('ABP_LUMIERE_report_'+stamp()+'.html',buildReport(),'text/html')};
-  $('rep_csv').onclick=()=>saveFile('ABP_LUMIERE_session_'+stamp()+'.csv',csvReport(),'text/csv');
+  $('rep_html').onclick=()=>{if(beforeSnap)beforeSnap();if(canvas)Session.snap(demo,canvas);saveFile('ABP_Patient-067_report_'+stamp()+'.html',buildReport(),'text/html')};
+  $('rep_csv').onclick=()=>saveFile('ABP_Patient-067_session_'+stamp()+'.csv',csvReport(),'text/csv');
   $('rep_new').onclick=()=>{if(confirm('Clear everything recorded so far and start a new session?')){Session.reset();count()}};
   count();setInterval(count,2000)}
 
@@ -784,14 +883,14 @@ function panel(which){const s=stateOf(which,x),p=s.p,id=which,cov=$('x'+id);
   const mch=$('m'+id);
   setText($('w'+id),fmtW(Math.max(0,s.wk))+(narrow?'':' after first scan'));
   const chip=$('r'+id);
-  if(s.st==='before'){cov.classList.add('on');setHTML(cov,'<div>No scans yet for '+p.id+'.<br><span class="small">Its first scan comes '+Math.round(p.w0-s.wk)+' weeks later.</span></div>');setText(chip,'—');chip.className='chip NA';setText(mch,'no scans yet');mch.className='chip mchip NA';setText($('t'+id),'—');setText($('s'+id),'');(which==='A'?T3A:T3B).set({vols:{e:0,n:0,d:0,t:0},refV:refV(),fill:.34});return s}
-  if(s.st==='ended'){cov.classList.add('on');setHTML(cov,'<div><b>Overall survival ended</b><br>week '+Math.round(p.os)+' ('+(mode==='align'?Math.round(p.os-off(which))+' weeks after the match':'')+')</div>')}
+  if(s.st==='before'){cov.classList.add('on');setHTML(cov,'<div>No scans yet for '+p.id+'.<br><span class="small">Its first scan comes '+Math.round(p.w0-s.wk)+' weeks later.</span></div>');setText(chip,'—');chip.className='chip NA';setText(mch,'no scans yet');mch.className='chip mchip NA';setText($('t'+id),'—');setText($('s'+id),'');(which==='A'?T3A:T3B).set({vols:{e:0,n:0,d:0,t:0},refV:refV(),fill:.34,boost:1.15});return s}
+  if(s.st==='ended'){cov.classList.add('on');setHTML(cov,'<div><b>Overall survival ended</b><br>week '+Math.round(p.os)+' ('+(mode==='align'?Math.round(p.os-off(which))+' weeks after matched state':'')+')</div>')}
   else cov.classList.remove('on');
   const last=p.scans[Math.min(p.scans.length-1,s.i??p.scans.length-1)],r=s.st==='scan'?p.scans[s.exact].rano:(s.st==='between'?p.scans[s.i].rano:last.rano);
   setText(chip,narrow?((s.st==='scan'?'':'last: ')+(r||'not rated')):(s.st==='scan'?'':'last: ')+rtxt(r));chip.className='chip '+RCLS(r);setText(mch,(s.st==='scan'?'':'last: ')+(r||'not rated'));mch.className='chip mchip '+RCLS(r);
   setText($('t'+id),fcc(s.v.t));
   setText($('s'+id),s.st==='scan'?'Scan '+(s.exact+1)+' of '+p.scans.length+' · measured':s.st==='between'?'Between scans · estimated':s.st==='after'?'After last scan · no further imaging':'');
-  (which==='A'?T3A:T3B).set({vols:{e:s.v.e,n:s.v.n,d:s.v.d,t:s.v.t},refV:refV(),fill:.34,scaleBar:!narrow});
+  (which==='A'?T3A:T3B).set({vols:{e:s.v.e,n:s.v.n,d:s.v.d,t:s.v.t},refV:refV(),fill:.34,boost:narrow?1.04:1.15,scaleBar:!narrow});
   return s}
 
 /* timeline, schedule */
@@ -832,31 +931,31 @@ function matchBox(){const A=PA(),B=PB(),a=mw(A,pair.wA),b=mw(B,pair.wB),na=nextA
   setHTML($('matchBox'),'<p class="small" style="margin-bottom:8px">On imaging features, these two scans were closer than '+(100-pair.pct).toFixed(pair.pct<.1?2:1)+'% of all scan pairs in the dataset, and their total volumes differed by only '+(pair.voldiff*100).toFixed(1)+'%.</p>'+
    '<table class="mt"><tr><th></th><th style="color:var(--pa)">'+short(A.id)+' · '+a.week.replace('week-','wk ')+'</th><th style="color:var(--pb)">'+short(B.id)+' · '+b.week.replace('week-','wk ')+'</th></tr>'+
    row('Total volume',fcc(a.t),fcc(b.t),'same')+row('Enhancing',fcc(a.e),fcc(b.e),'')+row('Edema',fcc(a.d),fcc(b.d),'')+
-   row('Rating at the match',rtxt(a.rano),rtxt(b.rano),a.rano===b.rano?'same':'diff')+row('MGMT',A.mgmt.replace(' (na)',' (percentage not reported)'),B.mgmt.replace(' (na)',' (percentage not reported)'),'')+row('IDH',A.idh,B.idh,'')+
+   row('RANO rating at matched state',rtxt(a.rano),rtxt(b.rano),a.rano===b.rano?'same':'diff')+row('MGMT',A.mgmt.replace(' (na)',' (percentage not reported)'),B.mgmt.replace(' (na)',' (percentage not reported)'),'')+row('IDH',A.idh,B.idh,'')+
    row('Age · sex',A.age+' · '+A.sex,B.age+' · '+B.sex,'diff')+row('Weeks since first scan',Math.round(a.w),Math.round(b.w),'diff')+
    row('Tumor at diagnosis',pre(A),pre(B),'diff')+row('Surgery',whyResection(A),whyResection(B),'diff')+
    '<tr><td colspan="3" style="text-align:left;color:var(--text);padding-top:10px"><b>What came next</b></td></tr>'+
    row('Next scan',na?'+'+Math.round(na.w-a.w)+' wk · <b>'+rtxt(na.rano)+'</b>':'—',nb?'+'+Math.round(nb.w-b.w)+' wk · <b>'+rtxt(nb.rano)+'</b>':'—','diff')+
    row('Volume change',na?ch(na,a):'—',nb?ch(nb,b):'—','')+
-   row('Overall survival after the match',A.os?Math.round(A.os-a.w)+' weeks':'—',B.os?Math.round(B.os-b.w)+' weeks':'—','diff')+'</table>')}
+   row('Overall survival after matched state',A.os?Math.round(A.os-a.w)+' weeks':'—',B.os?Math.round(B.os-b.w)+' weeks':'—','diff')+'</table>')}
 function courses(){const html=w=>{const p=w==='A'?PA():PB(),mwk=w==='A'?pair.wA:pair.wB;return '<div class="course"><h3 style="color:var(--'+(w==='A'?'pa':'pb')+')">'+p.id+'</h3><ol id="list'+w+'">'+
   p.scans.map((s,i)=>'<li data-i="'+i+'" class="'+(s.week===mwk?'match':'')+'"><span class="num">wk '+Math.round(s.w)+'</span><span class="chip '+RCLS(s.rano)+'" style="font-size:11px;padding:0 6px">'+(s.rano||'—')+'</span><span class="num">'+fcc(s.t)+(s.week===mwk?' · <b style="color:var(--edge)">match</b>':'')+'</span>'+(s.why?'<span class="why">'+s.why.replace(/</g,'&lt;')+'</span>':'')+'</li>').join('')+
   (p.os?'<li class="os"><span class="num">wk '+Math.round(p.os)+'</span><span></span><span>Overall survival ends</span></li>':'')+'</ol></div>'};
   setHTML($('courses'),html('A')+html('B'))}
 function markCourse(sA,sB){for(const [w,s] of [['A',sA],['B',sB]]){const L=$('list'+w);if(!L)continue;const cur=s&&s.st==='scan'?s.exact:-1;[...L.children].forEach(li=>li.classList.toggle('cur',+li.dataset.i===cur))}}
 function rates(){const C=D.ctx,bars=C.sens.map(r=>'<div class="rbar"><span>nearest '+r.distance_percentile+'%</span><span class="tr"><span class="fl" style="width:'+(r.opposed_future_fraction*100/0.5).toFixed(1)+'%"></span><span class="ref" style="left:'+(C.randomOpposed*100/0.5).toFixed(1)+'%"></span></span><span class="num">'+Math.round(r.opposed_future_fraction*100)+'%</span></div>').join('');
-  setHTML($('rates'),'<p class="small">Among the most similar scan pairs, how often did the next rating go opposite ways (progressive vs not)? The grey tick marks about '+Math.round(C.randomOpposed*100)+'%, the rate expected for two random scans, since '+Math.round(C.pProg*100)+'% of next ratings were progressive.</p>'+bars+
-  '<p class="small" style="margin-top:8px">Even among the closest 1% of pairs ('+C.sens[0].close_pairs+' pairs), '+C.sens[0].opposed_future_pairs+' went opposite ways. Being similar on these features narrowed the future only slightly. Small numbers; these are descriptive counts.</p>');
+  setHTML($('rates'),'<p class="small">Among the most similar scan pairs, the proportion whose next RANO ratings diverged (progressive vs not). The grey tick marks about '+Math.round(C.randomOpposed*100)+'%, the rate expected for two random scans, since '+Math.round(C.pProg*100)+'% of next ratings were progressive.</p>'+bars+
+  '<p class="small" style="margin-top:8px">Even among the closest 1% of pairs ('+C.sens[0].close_pairs+' pairs), '+C.sens[0].opposed_future_pairs+' went opposite ways. Similarity on these features constrained the subsequent course only slightly. Small numbers; these are descriptive counts.</p>');
   setText($('mN1'),String(C.nStates));setText($('mN2'),String(C.nPatients));setText($('mN3'),C.features.toLocaleString());setText($('mN4'),String(C.pcaDims))}
 
 /* guess */
 function answer(){const A=PA(),B=PB(),na=nextAfter(A,pair.wA),nb=nextAfter(B,pair.wB);return na&&na.rano==='PD'?'A':nb&&nb.rano==='PD'?'B':null}
 function drawGuess(){const g=$('guess'),A=PA(),B=PB(),k=pair.key;
-  if(!guessed[k]){g.className='guess';setHTML(g,'<b class="q">At the match, which tumor will be rated progressive at its next scan?</b><div class="gb"><button class="btn" data-g="A">'+A.id+'</button><button class="btn" data-g="B">'+B.id+'</button><button class="btn" data-g="X">Can\u2019t tell</button></div>');return}
+  if(!guessed[k]){g.className='guess';setHTML(g,'<b class="q">Assessment at the matched state: which tumor is rated progressive at its next scan?</b><div class="gb"><button class="btn" data-g="A">'+A.id+'</button><button class="btn" data-g="B">'+B.id+'</button><button class="btn" data-g="X">Indeterminate</button></div>');return}
   const ans=answer(),gv=guessed[k],right=gv===ans,na=nextAfter(A,pair.wA),nb=nextAfter(B,pair.wB);
-  g.className='guess done';setHTML(g,'<b class="q">'+(gv==='X'?'Fair call.':right?'Correct.':'Not this time.')+' '+(ans==='A'?A.id:B.id)+' was rated progressive next.</b><p class="small" style="color:var(--text)">'+A.id+': '+rtxt(na&&na.rano)+(na&&na.why?' — '+na.why:'')+'<br>'+B.id+': '+rtxt(nb&&nb.rano)+(nb&&nb.why?' — '+nb.why:'')+'</p><p class="small">The matched scans did not give a reliable basis to tell. Press <b>Play forward</b> to follow both courses.</p>')}
+  g.className='guess done';setHTML(g,'<b class="q">'+(gv==='X'?'Recorded.':right?'Consistent with the observed rating.':'Not consistent with the observed rating.')+' '+(ans==='A'?A.id:B.id)+' was rated progressive next.</b><p class="small" style="color:var(--text)">'+A.id+': '+rtxt(na&&na.rano)+(na&&na.why?' — '+na.why:'')+'<br>'+B.id+': '+rtxt(nb&&nb.rano)+(nb&&nb.why?' — '+nb.why:'')+'</p><p class="small">The matched scans did not provide a reliable basis for this assessment. Press <b>Play course</b> to follow both courses.</p>')}
 $('guess').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=pair.key;guessed[k]=b.dataset.g;const ans=answer();
-  Session.trial('div',k+'|guess',{pair:k,guess:b.dataset.g,answer:ans});Session.event('div','Guessed '+(b.dataset.g==='X'?'"can\u2019t tell"':(b.dataset.g==='A'?PA().id:PB().id))+' for '+pair.label+'; '+(ans==='A'?PA().id:PB().id)+' was rated progressive next');drawGuess();Session.snap('div',$('cA'))});
+  Session.trial('div',k+'|guess',{pair:k,guess:b.dataset.g,answer:ans});Session.event('div','Assessment recorded: '+(b.dataset.g==='X'?'indeterminate':(b.dataset.g==='A'?PA().id:PB().id))+' for '+pair.label+'; '+(ans==='A'?PA().id:PB().id)+' was rated progressive next');drawGuess();Session.snap('div',$('cA'))});
 
 /* inside view */
 const CVA=new CellView($('kA'),11),CVB=new CellView($('kB'),29);
@@ -873,27 +972,27 @@ function cellUpdate(){const out=[];
     CV.set(zone,r,act);
     const key=zone==='rim'?'e':zone==='core'?'n':'d',lab=zone==='rim'?'enhancing':zone==='core'?'necrotic':'edema';
     out.push('<div><b style="color:var(--'+(w==='A'?'pa':'pb')+')">'+short(p.id)+'</b> <span class="cnt" id="cnt'+w+'"></span><br>'+(st.st==='before'?'not yet scanned':st.st==='ended'?'survival ended':st.st==='after'?'no further scans (resting rate)':['e','n','d'].map(q=>{const t={e:'enhancing',n:'necrotic',d:'edema'}[q]+' '+fr(r[q]);return q===key?'<b>'+t+'</b>':'<span class="small">'+t+'</span>'}).join(' · '))+'</div>')}
-  if(inside)setHTML($('insideBody'),'<b>Inside the tumor · '+ZNAME[zone]+'.</b> '+ZTXT[zone]+'<div class="rates">'+out.join('')+'</div>'+
+  if(inside)setHTML($('insideBody'),'<b>Compartment view · '+ZNAME[zone]+'.</b> '+ZTXT[zone]+'<div class="rates">'+out.join('')+'</div>'+
     '<div class="cellkey"><span><i style="background:#ff8fc7"></i>tumor cell</span><span><i style="background:#6e96ff"></i>nucleus</span>'+(zone==='rim'?'<span><i style="background:#eb4646"></i>blood vessel</span>':'')+(zone==='core'?'<span><i style="background:#c8965a"></i>necrotic debris</span>':'')+(zone==='edge'?'<span><i style="background:#aab9d2"></i>normal brain cells</span>':'')+'</div>'+
     '<p class="small">Illustrative cells: the MRI cannot see individual cells. The pace of division, death and migration comes from each patient\u2019s own measured volume changes at this point in the course; it is not a cell count.</p>')}
-function setInside(v,why){inside=v;$('vA').classList.toggle('inside',v);$('vB').classList.toggle('inside',v);const b=$('insideBtn');b.setAttribute('aria-pressed',String(v));b.textContent=v?'Back to the 3-D tumor':'Look inside';
-  $('insideNote').style.display=v?'':'none';cellUpdate();Session.event('div',v?'Looked inside the tumors ('+ZNAME[zone].toLowerCase()+')'+(why?' '+why:''):'Returned to the 3-D tumors')}
+function setInside(v,why){inside=v;$('vA').classList.toggle('inside',v);$('vB').classList.toggle('inside',v);const b=$('insideBtn');b.setAttribute('aria-pressed',String(v));b.textContent=v?'Return to 3-D view':'Compartment view';
+  $('insideNote').style.display=v?'':'none';cellUpdate();Session.event('div',v?'Opened compartment view ('+ZNAME[zone].toLowerCase()+')'+(why?' '+why:''):'Returned to 3-D view')}
 $('insideBtn').onclick=()=>setInside(!inside);
 setInterval(()=>{if(!inside)return;for(const [w,CV] of [['A',CVA],['B',CVB]]){const el=$('cnt'+w);if(el)setText(el,zone==='edge'?'· '+CV.counts.mig+' invading · '+CV.counts.div+' divisions':'· '+CV.counts.div+' divisions · '+CV.counts.die+' deaths')}},400);
-$('zoneSel').onclick=e=>{const b=e.target.closest('button');if(!b)return;zone=b.dataset.z;pressSeg($('zoneSel'),b);cellUpdate();Session.event('div','Inside view: '+ZNAME[zone].toLowerCase())};
+$('zoneSel').onclick=e=>{const b=e.target.closest('button');if(!b)return;zone=b.dataset.z;pressSeg($('zoneSel'),b);cellUpdate();Session.event('div','Compartment view: '+ZNAME[zone].toLowerCase())};
 for(const T of [T3A,T3B]){const orig=T.setZoom;T.setZoom=(...a)=>{orig(...a);if(T.zoom>=8&&!inside){setInside(true,'by zooming in');T.resetView()}}}
 
 /* render + transport */
 let lastUI='';
 function render(){const sA=panel('A'),sB=panel('B');if(!(document.activeElement===$('scrub')))$('scrub').value=toS(x);
   const exact=EV.some(e=>Math.abs(e.x-x)<.05);
-  setText($('clk'),mode==='align'?(Math.abs(x)<.05?'At the match':(x>0?Math.round(x)+' weeks after the match':Math.round(-x)+' weeks before the match')):'Week '+Math.round(x)+' since first scan');
+  setText($('clk'),mode==='align'?(Math.abs(x)<.05?'At matched state':(x>0?Math.round(x)+' weeks after matched state':Math.round(-x)+' weeks before matched state')):'Week '+Math.round(x)+' since first scan');
   setText($('clkSub'),exact?'':'between scans');
   const key=(sA.st==='scan'?sA.exact:'-')+'|'+(sB.st==='scan'?sB.exact:'-');if(key!==lastUI){lastUI=key;markCourse(sA,sB)}
   cellUpdate();
   drawCh()}
 function go(xx){x=clamp(xx,R[0],R[1]);clock=clockAt(x);render()}
-function setPlay(){setText($('pt'),playing?'Pause':x>=R[1]-.01?'Replay':'Play forward');$('pi').innerHTML=playing?'<path d="M2 1h2v8H2zM6 1h2v8H6z"/>':'<path d="M2 1l7 4-7 4z"/>'}
+function setPlay(){setText($('pt'),playing?'Pause':x>=R[1]-.01?'Replay':'Play course');$('pi').innerHTML=playing?'<path d="M2 1h2v8H2zM6 1h2v8H6z"/>':'<path d="M2 1l7 4-7 4z"/>'}
 let lt=0;function loop(ts){const dt=lt?Math.min(.05,(ts-lt)/1000):0;lt=ts;if(playing){clock+=dt;if(clock>=SCH.total){clock=SCH.total;playing=false;setPlay();Session.event('div','Watched both courses to the end ('+pair.label+')')}const nx=xAt(clock);if(nx!==x){x=nx;render()}}requestAnimationFrame(loop)}
 function play(){if(x>=R[1]-.01){go(mode==='align'?0:R[0])}playing=true;clock=clockAt(x);setPlay();Session.event('div','Played '+pair.label+' from '+$('clk').textContent.toLowerCase())}
 function pause(){if(playing)Session.event('div','Paused '+pair.label+' at '+$('clk').textContent.toLowerCase());playing=false;setPlay()}
@@ -912,6 +1011,6 @@ function setPair(p){pair=p;pressSeg($('pairSel'),[...$('pairSel').children].find
 D.pairs.forEach(p=>{const b=document.createElement('button');b.dataset.k=p.key;b.textContent=p.label;b.setAttribute('aria-pressed','false');$('pairSel').appendChild(b)});
 $('pairSel').onclick=e=>{const b=e.target.closest('button');if(!b)return;pause();setPair(D.pairs.find(p=>p.key===b.dataset.k));Session.event('div','Opened pair '+pair.label)};
 $('modeSel').onclick=e=>{const b=e.target.closest('button');if(!b)return;pause();const keepA=own('A',x);mode=b.dataset.m;pressSeg($('modeSel'),b);$('toMatch').style.display=mode==='align'?'':'none';CURV=null;buildTrack();SCH=schedule();go(keepA-off('A'));Session.event('div','Time axis: '+b.textContent.toLowerCase())};
-rates();setPair(D.pairs[0]);setPlay();Session.event('div','Opened demo 5 (two tumors that looked alike)');mountReport('div',$('cA'),()=>{T3A.draw();T3B.draw()});
+rates();setPair(D.pairs[0]);setPlay();Session.event('div','Opened demo 5 (matched clinical states)');mountReport('div',$('cA'),()=>{T3A.draw();T3B.draw()});
 requestAnimationFrame(loop);
 </script></body></html>
