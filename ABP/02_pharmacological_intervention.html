@@ -167,16 +167,16 @@ details.method li{margin:4px 0}
 <div class="layout">
 <main class="stage">
   <div>
-    <p class="kicker"><span class="pill model">Modeled what-if</span>Radiation and chemotherapy</p>
+    <p class="kicker"><span class="pill model">Counterfactual intervention</span>Radiation and chemotherapy</p>
     <h1>What if we change the drug and radiation plan?</h1>
-    <p class="lede">A 3-D model of the same patient, sized from her measured tumor volumes. Adjust radiation dose and chemotherapy exposure, then play the treatment course to see how the modeled tumor responds.</p>
+    <p class="lede">A 3-D representation of the same patient, sized directly from her measured tumor volumes. Adjust radiation dose and chemotherapy exposure, then play the counterfactual course.</p>
   </div>
   <div class="pin"><div class="viz tumor" id="vizwrap">
     <canvas id="c" aria-label="3-D tumor model"></canvas>
     <div class="ov tl"><div class="big num" id="ovw">Week 0 of treatment</div><div class="num" id="ovv">—</div></div>
-    <div class="ov tr"><span class="chip est" id="ovs">Modeled</span></div>
+    <div class="ov tr"><span class="chip est" id="ovs">Counterfactual</span></div>
     <div class="ov bl small ovhide-m">Drag sideways to rotate</div>
-    <div class="abstain" id="abstain"><div><b>Outside the model’s range</b>This dose combination is beyond what the model was built to evaluate, so ABP declines to predict.</div></div>
+    <div class="abstain" id="abstain"><div><b>Outside the supported range</b>This dose combination is beyond the declared response range, so ABP declines to extrapolate.</div></div>
   </div></div>
   <div class="legend"><span><i class="sw enh"></i>Enhancing tumor</span><span><i class="sw nec"></i>Necrotic core</span><span><i class="sw ede"></i>Edema / FLAIR</span><span>Dashed circle: size reference</span></div>
   <div class="playbar">
@@ -188,7 +188,7 @@ details.method li{margin:4px 0}
   <section>
     <h2>1 · Starting point</h2>
     <select class="sel" id="start" aria-label="Observed starting scan"></select>
-    <p class="small" style="margin-top:6px">The model starts from a real scan of this patient. The default is the scan taken just after her first operation.</p>
+    <p class="small" style="margin-top:6px">The starting state is a real scan of this patient. The default is the scan taken just after her first operation.</p>
   </section>
   <section>
     <h2>2 · Treatment plan</h2>
@@ -196,10 +196,10 @@ details.method li{margin:4px 0}
     <label class="ctl"><span class="row"><span class="lab">Chemotherapy exposure</span><span class="val" id="vtz">0.70</span></span><input type="range" id="tz" min="0" max="1" step="0.02" value="0.70"><span class="help">Alkylating agent (temozolomide-class), relative scale 0–1.</span></label>
   </section>
   <section>
-    <h2>3 · Is this plan inside the model’s range?</h2>
+    <h2>3 · Is this plan inside the supported range?</h2>
     <div class="banner" id="support"></div>
     <canvas id="map" class="map" aria-label="Map of supported dose combinations"></canvas>
-    <p class="small">Each point is a dose combination. Green: inside the range the model is built for. Yellow: at the edge. Red: outside, where ABP abstains. Tap the map to choose a plan.</p>
+    <p class="small">Each point is a dose combination. Green: inside the declared range. Yellow: at the edge. Red: outside, where ABP abstains. Tap the map to choose a plan.</p>
   </section>
   <section>
     <h2>4 · Result at this week</h2>
@@ -221,7 +221,7 @@ details.method li{margin:4px 0}
   <section>
     <h2>5 · Let ABP search</h2>
     <div class="seg" id="obj" role="group" aria-label="Goal"><button data-o="enh" aria-pressed="true">Shrink enhancing tumor</button><button data-o="margin" aria-pressed="false">Shrink edema</button></div>
-    <button class="btn block" id="opt" style="margin-top:8px">Find the best plan inside the model’s range</button>
+    <button class="btn block" id="opt" style="margin-top:8px">Find the best plan inside the supported range</button>
     <div id="optout" style="margin-top:8px"></div>
   </section>
   <section id="report" class="report"></section>
@@ -229,12 +229,12 @@ details.method li{margin:4px 0}
     <details class="method">
       <summary>Method and provenance</summary>
       <ul>
-        <li><b>Zoom and cut-away</b> (pinch, the + and − buttons, or the mouse wheel after clicking the view; ◐ slices the tumor open) enlarge the equivalent-volume model to show how its compartments nest. They do not reveal detail finer than the MRI, whose resolution is on the millimetre scale.</li>
+        <li><b>Zoom and cut-away</b> (pinch, the + and − buttons, or the mouse wheel after clicking the view; ◐ slices the tumor open) enlarge the equivalent-volume view to show how its compartments nest. They do not reveal detail finer than the MRI, whose resolution is on the millimetre scale.</li>
         <li>Starting volumes are the measured LUMIERE Patient-067 compartments at the chosen scan (Suter et al., <i>Scientific Data</i> 9:768, 2022).</li>
         <li>The 3-D body is equivalent-volume geometry: each shell's radius is proportional to the cube root of its compartment volume, so size changes are shown in true proportion. Surface shape is a fixed stylization, not a voxel reconstruction.</li>
         <li>Radiation effect uses a linear-quadratic kill term; chemotherapy uses a Hill exposure–response; the two combine with a synergy term. Untreated growth assumes a fixed doubling rate. Response parameters are illustrative and literature-informed, not fitted to this patient's treatment history.</li>
         <li>The support map is the declared validity region: ≤66 Gy and exposure ≤0.80 is supported; up to 72 Gy and 0.90 is boundary; beyond that ABP abstains.</li>
-        <li>The best-plan search scans a dose grid inside the supported and boundary regions. It is a modeled optimum, not a treatment recommendation.</li>
+        <li>The best-plan search scans a dose grid inside the supported and boundary regions. It is an optimum within the declared response function and support region, not a treatment recommendation.</li>
       </ul>
     </details>
   </section>
@@ -602,9 +602,9 @@ function secPharm(d){let h='';const W=12;
       if(sup.length){const my=sup.reduce((a,x)=>x.r.e<a.r.e?x:a),gap=my.r.e/opt.r.e-1;
         h+='<p><b>Your best supported plan</b> for enhancing tumor was '+my.t.rt+' Gy with chemo '+my.t.tz.toFixed(2)+': '+fcc(my.r.e)+' at week '+W+'. '+(gap<=.005?'That matches the best strictly supported plan.':'The best strictly supported plan ('+opt.R+' Gy, '+opt.Z.toFixed(2)+') reaches '+fcc(opt.r.e)+', which is '+Math.round(gap/(1+gap)*100)+'% lower.')+'</p>'}
       else if(mine.length)h+='<p><b>None of your plans were in the strictly supported range</b> for this start. The best strictly supported plan is '+opt.R+' Gy with chemo '+opt.Z.toFixed(2)+' ('+fcc(opt.r.e)+').</p>';
-      if(bnd.length){const mb=bnd.reduce((a,x)=>x.r.e<a.r.e?x:a);h+='<p>Your lowest boundary-range plan was '+mb.t.rt+' Gy with chemo '+mb.t.tz.toFixed(2)+' ('+fcc(mb.r.e)+'). Plans in this range sit above conventional dosing, so the model flags them for caution'+(mb.r.e<opt.r.e-1e-6?', even though the modeled value is lower than the supported optimum':'')+'.</p>'}
-      const nOut=rows.filter(x=>x.t.start===si&&x.k==='outside').length;if(nOut)h+='<p>'+nOut+(nOut===1?' plan was':' plans were')+' outside the model\u2019s range; ABP abstained on '+(nOut===1?'it':'them')+'.</p>';
-      h+='<p class="muted">In this demonstrator the modeled effect rises steadily with dose, so the best plan always sits at the upper edge of the permitted range. That is a property of the declared model, not a dosing recommendation.</p>'}
+      if(bnd.length){const mb=bnd.reduce((a,x)=>x.r.e<a.r.e?x:a);h+='<p>Your lowest boundary-range plan was '+mb.t.rt+' Gy with chemo '+mb.t.tz.toFixed(2)+' ('+fcc(mb.r.e)+'). Plans in this range sit above conventional dosing, so they are flagged as boundary-range'+(mb.r.e<opt.r.e-1e-6?', even though the modeled value is lower than the supported optimum':'')+'.</p>'}
+      const nOut=rows.filter(x=>x.t.start===si&&x.k==='outside').length;if(nOut)h+='<p>'+nOut+(nOut===1?' plan was':' plans were')+' outside the supported range; ABP abstained on '+(nOut===1?'it':'them')+'.</p>';
+      h+='<p class="muted">In this demonstrator the declared response rises steadily with dose, so the best plan always sits at the upper edge of the permitted range. That is a property of the declared response function, not a dosing recommendation.</p>'}
     h+=snapImg(d)}
   else{const b=STATES[1],opt=bestPharm(b,W,'e',false);h+='<p class="muted">Not explored in this session.</p><p>Reference: from '+esc(stateLabel(b))+', the best strictly supported plan for enhancing tumor at week '+W+' is '+opt.R+' Gy with chemo '+opt.Z.toFixed(2)+' ('+fcc(opt.r.e)+').</p>'}
   return h}
@@ -616,14 +616,14 @@ function secSurg(d){const B=stateByWeek('week-156'),P=stateByWeek('week-157'),BV
     const rows=d.trials.map(t=>{const g=guardState(t.ang*Math.PI/180,t.app,t.dep);return {t,g,r0:surgeryVols(B,g,0),r12:surgeryVols(B,g,W)}});
     h+=table(['Time','Extent','Depth','Approach','Path','Removed','Enhancing after','Total after','Total wk '+W],rows.map(x=>[tm(x.t.t),APP[x.t.app].name,x.t.dep.toFixed(2),x.t.ang+'°',kLab[x.g.k],Math.round(x.g.cyt*100)+'%',fv(x.r0.e),fv(x.r0.t),fv(x.r12.t)]));
     const safe=rows.filter(x=>x.g.k==='clear'),risky=rows.length-safe.length;
-    if(safe.length){const my=safe.reduce((a,x)=>x.g.cyt>a.g.cyt?x:a);h+='<p><b>Your largest safe removal</b> was '+APP[my.t.app].name.toLowerCase()+' at depth '+my.t.dep.toFixed(2)+' via '+my.t.ang+'°: '+Math.round(my.g.cyt*100)+'% removed. '+(my.g.cyt>=best.g.cyt-.005?'That matches the model\u2019s largest safe removal.':'The model\u2019s largest safe removal is '+Math.round(best.g.cyt*100)+'%.')+'</p>'}
+    if(safe.length){const my=safe.reduce((a,x)=>x.g.cyt>a.g.cyt?x:a);h+='<p><b>Your largest safe removal</b> was '+APP[my.t.app].name.toLowerCase()+' at depth '+my.t.dep.toFixed(2)+' via '+my.t.ang+'°: '+Math.round(my.g.cyt*100)+'% removed. '+(my.g.cyt>=best.g.cyt-.005?'That matches the demonstrator\u2019s largest safe removal.':'The demonstrator\u2019s largest safe removal is '+Math.round(best.g.cyt*100)+'%.')+'</p>'}
     else h+='<p><b>None of your plans stayed clear</b> on the demonstration risk map.</p>';
     if(risky)h+='<p>'+risky+' of your '+rows.length+' plans '+(risky===1?'was':'were')+' borderline or crossed high-risk tissue.</p>';
     h+=snapImg(d)}
   else h+='<p class="muted">Not explored in this session.</p>';
   h+='<h3>What would have been optimal</h3>'+table(['','Extent','Depth','Approach','Removed','Enhancing','Total','Total wk '+W],[
     ['Before surgery (observed, wk 156)','—','—','—','—',fv(BV.e),fv(BV.t),'—'],
-    ['<b>Largest safe removal (model)</b>',APP[best.a].name,best.d.toFixed(2),best.A+'°',Math.round(best.g.cyt*100)+'%',fv(bo.e),fv(bo.t),fv(b12.t)],
+    ['<b>Largest safe removal (demonstrator)</b>',APP[best.a].name,best.d.toFixed(2),best.A+'°',Math.round(best.g.cyt*100)+'%',fv(bo.e),fv(bo.t),fv(b12.t)],
     ['What actually happened (observed, wk 157)','—','—','—','—',fv(PV.e),fv(PV.t),'—']]);
   h+='<p class="muted">The risk ring is a demonstration map standing in for patient-specific eloquent-cortex and tract mapping, which LUMIERE does not provide. The week 157 scan counts the cavity and blood products as necrotic.</p>';
   return h}
@@ -635,7 +635,7 @@ function secOpt(d){const B=stateByWeek('week-156'),HS=[4,8,12,16,24],OBJ={enh:'L
   h+=table(['Goal'].concat(HS.map(x=>x+' wk')),Object.keys(OBJ).map(o=>[OBJ[o]].concat(HS.map(x=>{const z=compareFamilies(B,x,o);return z.winner?'<b>'+z.winner+'</b> ('+Math.round(z.sep*100)+'%)':'No clear winner'}))));
   const z=compareFamilies(B,12,'enh');
   h+='<h3>Option details at 12 weeks</h3>'+table(['Option','Enhancing','Necrotic','Edema','Total','Harm index','Support'],z.A.map(x=>[x.label,fv(x.e),fv(x.n),fv(x.d),fv(x.t),x.harm.toFixed(2),Math.round(x.support*100)+'%']));
-  const o=observedFacts();h+='<p>For context, the observed course: week 156 '+fcc(vols(B).t)+' → operation → week 157 '+fcc(vols(stateByWeek('week-157')).t)+' → week 167 '+fcc(o.last.t)+' (progressive disease). The options above are modeled alternatives, not a re-creation of that course.</p>';
+  const o=observedFacts();h+='<p>For context, the observed course: week 156 '+fcc(vols(B).t)+' → operation → week 157 '+fcc(vols(stateByWeek('week-157')).t)+' → week 167 '+fcc(o.last.t)+' (progressive disease). The options above are counterfactual alternatives, not a re-creation of that course.</p>';
   return h}
 
 function secDiv(d){if(typeof DIV_DATA==='undefined')return '<p class="muted">Data unavailable.</p>';const DD=DIV_DATA,C=DD.ctx;let h='';
@@ -656,7 +656,7 @@ function secDiv(d){if(typeof DIV_DATA==='undefined')return '<p class="muted">Dat
 function buildReport(){const S=Session.data(),now=new Date(),vis=Object.keys(DEMOS).filter(k=>S.demos[k]);
   const sec=(k,body)=>'<section><h2>'+DEMOS[k].n+'. '+DEMOS[k].title+'</h2>'+body+'</section>';
   const summary=vis.length?'Demos explored: '+vis.map(k=>DEMOS[k].n+'. '+DEMOS[k].title).join('; ')+'.':'No interactions recorded yet; reference analyses are shown.';
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ABP session report · LUMIERE suite</title>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ABP session report · LUMIERE</title>
 <style>body{margin:0;background:#f6f8f9;color:#14212b;font:15px/1.55 "Avenir Next","Segoe UI",system-ui,sans-serif}main{max-width:900px;margin:0 auto;padding:28px 20px 60px}
 h1{font-size:26px;margin:0 0 4px;line-height:1.2}h2{font-size:20px;margin:0 0 10px;padding-top:6px}h3{font-size:15.5px;margin:22px 0 8px}
 section{background:#fff;border:1px solid #dde5ea;border-radius:12px;padding:18px 20px;margin:18px 0;break-inside:auto}
@@ -667,12 +667,12 @@ ol.log{padding-left:22px;margin:6px 0;font-size:13.5px}ol.log li{margin:3px 0}.t
 figure{margin:12px 0 0}figure img{max-width:100%;width:420px;border-radius:10px;display:block}figcaption{font-size:12px;color:#6b808c;margin-top:4px}
 .note{background:#fff8e1;border-color:#f0dfa0}.print{margin-top:10px}button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid #b9c7cf;background:#fff;cursor:pointer}
 @media print{body{background:#fff}section{border:0;padding:0;margin:14px 0}.print{display:none}.tw{overflow:visible}tr{break-inside:avoid}}</style></head><body><main>
-<h1>ABP session report · LUMIERE suite</h1>
+<h1>ABP session report · LUMIERE</h1>
 <div class="meta">CMH Scientific · AI as a Biological Primitive demonstration<br>Session started ${esc(new Date(S.started).toLocaleString())} · report generated ${esc(now.toLocaleString())}</div>
 <p>${esc(summary)}</p><div class="print"><button onclick="print()">Print or save as PDF</button></div>
-<section class="note"><b>How to read this report.</b> Sections 1 and 5 are observed data. Sections 2–4 are modeled counterfactuals from a demonstrator with declared, literature-informed response functions and support limits; they are not fitted to this patient's treatment history and are not treatment recommendations. "Optimal" means best within the declared model, goal and support region.</section>
+<section class="note"><b>How to read this report.</b> Sections 1 and 5 are observed data. Sections 2–4 are counterfactual intervention comparisons using declared, literature-informed response functions and support limits; they are not fitted to this patient's treatment history and are not treatment recommendations. "Optimal" means best within the declared response functions, goal and support region.</section>
 ${sec('dyn',secObserved(S.demos.dyn))}${sec('pharm',secPharm(S.demos.pharm))}${sec('surg',secSurg(S.demos.surg))}${sec('opt',secOpt(S.demos.opt))}${sec('div',secDiv(S.demos.div))}
-<section><h2>Provenance</h2><p class="muted">Data: LUMIERE longitudinal glioblastoma dataset (Suter et al., Scientific Data 9:768, 2022), Patient-067; DeepBraTumIA segmentation; expert RANO ratings. 3-D views use equivalent-volume geometry (radii proportional to the cube root of each compartment volume). Research demonstration, not for clinical use.</p></section>
+<section><h2>Provenance</h2><p class="muted">Data: LUMIERE longitudinal glioblastoma dataset (Suter et al., Scientific Data 9:768, 2022). Demos 1–4 use Patient-067; Demo 5 uses Patients 071, 072 and 019. DeepBraTumIA segmentation; expert RANO ratings. 3-D views use equivalent-volume geometry (radii proportional to the cube root of each compartment volume). Research demonstration, not for clinical use.</p></section>
 </main></body></html>`}
 
 function csvReport(){const S=Session.data(),rows=[['time','demo','kind','description']];
@@ -681,10 +681,10 @@ function csvReport(){const S=Session.data(),rows=[['time','demo','kind','descrip
 function saveFile(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
 function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())}
 function mountReport(demo,canvas,beforeSnap){window.__demoKey=demo;const box=$('report');if(!box)return;
-  box.innerHTML='<h2>Session report</h2><p class="small">Everything you try in the four demos is recorded in this browser. The report explains what the data shows, what you did, how each change worked, and what the model rates as optimal.</p><button class="btn primary block" id="rep_html" style="margin-top:10px">Download report</button><div class="reprow"><button class="btn" id="rep_csv">Download data (CSV)</button><button class="btn" id="rep_new">Start new session</button></div><p class="small" id="rep_count" style="margin-top:8px"></p>';
+  box.innerHTML='<h2>Session report</h2><p class="small">Everything you try in the intervention demos is recorded in this browser. The report explains what the observed data show, what you changed, and what is favored under the declared response functions.</p><button class="btn primary block" id="rep_html" style="margin-top:10px">Download report</button><div class="reprow"><button class="btn" id="rep_csv">Download data (CSV)</button><button class="btn" id="rep_new">Start new session</button></div><p class="small" id="rep_count" style="margin-top:8px"></p>';
   const count=()=>{const S=Session.data();let a=0,t=0;for(const k in S.demos){a+=S.demos[k].events.length;t+=S.demos[k].trials.length}setText($('rep_count'),a+t?a+(a===1?' action':' actions')+' and '+t+(t===1?' setting':' settings')+' recorded so far.':'Nothing recorded yet.')};
-  $('rep_html').onclick=()=>{if(beforeSnap)beforeSnap();if(canvas)Session.snap(demo,canvas);saveFile('ABP_Patient-067_report_'+stamp()+'.html',buildReport(),'text/html')};
-  $('rep_csv').onclick=()=>saveFile('ABP_Patient-067_session_'+stamp()+'.csv',csvReport(),'text/csv');
+  $('rep_html').onclick=()=>{if(beforeSnap)beforeSnap();if(canvas)Session.snap(demo,canvas);saveFile('ABP_LUMIERE_report_'+stamp()+'.html',buildReport(),'text/html')};
+  $('rep_csv').onclick=()=>saveFile('ABP_LUMIERE_session_'+stamp()+'.csv',csvReport(),'text/csv');
   $('rep_new').onclick=()=>{if(confirm('Clear everything recorded so far and start a new session?')){Session.reset();count()}};
   count();setInterval(count,2000)}
 
