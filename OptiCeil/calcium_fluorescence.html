@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#03060b">
+<title>Calcium fluorescence · OptiCeil · CMH Scientific</title>
+<meta name="description" content="A neuron fires. GFP-based calcium fluorescence reveals it. OptiCeil decides how long to keep looking.">
+<style>
+:root{
+  --bg:#03060b;--panel:#060e17;--panel2:#0a1621;--line:#1a2a39;--line2:#27394a;
+  --text:#dce9ef;--dim:#93aab7;--faint:#5f7988;
+  --glow:#42f5a7;--spike:#ffb03a;--hot:#fff4d6;--idx:#ff6b8a;--ba:#7ea6ff;--bad:#ff5d5d;--ok:#6fe08c;
+  --ui:#eaf4f8;--uitext:#04121a;
+  --font:"Avenir Next","Segoe UI Variable","Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+.num{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--ui);outline-offset:2px;border-radius:6px}
+.bar{position:sticky;top:0;z-index:20;height:58px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 20px;background:rgba(3,6,11,.94);border-bottom:1px solid var(--line);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.brand{font-size:13px;color:var(--dim);white-space:nowrap}.brand b{color:var(--text);font-weight:600}
+.steps{display:flex;gap:4px}
+.steps a{display:flex;align-items:center;gap:8px;min-height:38px;padding:0 14px 0 8px;border-radius:999px;color:var(--dim);text-decoration:none;font-size:13.5px;white-space:nowrap}
+.steps a:hover{color:var(--text);background:var(--panel2)}
+.steps .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1px solid var(--line2);font-size:11.5px}
+.steps a[aria-current="page"]{background:var(--ui);color:var(--uitext)}
+.steps a[aria-current="page"] .n{border-color:var(--uitext)}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 390px;align-items:start}
+.stage{min-width:0;padding:20px 26px 26px;display:flex;flex-direction:column;gap:12px}
+.side{position:sticky;top:58px;height:calc(100svh - 58px);overflow-y:auto;overscroll-behavior:contain;background:var(--panel);border-left:1px solid var(--line);padding:4px 22px 32px}
+.side section{padding:16px 0;border-bottom:1px solid var(--line)}
+.side section:last-child{border-bottom:0}
+h1{margin:0;font-size:clamp(24px,2.5vw,32px);line-height:1.1;font-weight:650;letter-spacing:-.015em}
+h2{margin:0 0 10px;font-size:13.5px;font-weight:650}
+.kicker{margin:0 0 6px;font-size:13px;color:var(--dim)}
+.pill{display:inline-block;margin-right:6px;padding:1px 9px;border-radius:999px;border:1px solid rgba(66,245,167,.5);color:var(--glow);font-size:12px}
+.lede{margin:8px 0 0;max-width:64ch;color:#c4d6de}
+.small{font-size:13px;color:var(--dim);margin:0}
+.pin{position:relative;display:flex;flex-direction:column;gap:0;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:#010306}
+.neuron{position:relative;height:min(58svh,560px);min-height:300px}
+.neuron canvas,.trace canvas{display:block;width:100%;height:100%}
+.trace{position:relative;height:118px;border-top:1px solid var(--line);background:#050a10}
+.ov{position:absolute;pointer-events:none;text-shadow:0 1px 4px #000}
+.ov.tl{left:14px;top:12px}.ov.br{position:absolute}.ov.tr{right:14px;top:12px;text-align:right}.ov.bl{left:14px;bottom:12px;right:14px}
+.big{font-size:17px;font-weight:650}
+.chip{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;background:rgba(3,6,11,.8);border:1px solid var(--line2)}
+.chip.fire{color:var(--hot);border-color:var(--spike);background:rgba(255,176,58,.25);opacity:0;transition:opacity .08s}
+.chip.fire.on{opacity:1}
+.capwrap{position:absolute;left:14px;right:14px;bottom:130px;pointer-events:none}
+.caption{display:inline-block;max-width:46ch;font-size:14.5px;line-height:1.4;padding:9px 12px;border-radius:10px;background:rgba(3,6,11,.72);border:1px solid var(--line2);transition:opacity .45s}
+.caption b{color:var(--glow);font-weight:600}
+.caption.fade{opacity:0}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{min-height:42px;padding:8px 16px;border-radius:10px;border:1px solid var(--line2);background:var(--panel2);color:var(--text);cursor:pointer;font-size:14px;display:inline-flex;align-items:center;gap:8px}
+.btn.primary{background:var(--ui);color:var(--uitext);border-color:var(--ui);font-weight:600;min-width:112px;justify-content:center}
+.btn svg{width:13px;height:13px;fill:currentColor}
+.seg{display:flex;gap:3px;padding:3px;border:1px solid var(--line2);border-radius:12px;background:var(--panel)}
+.seg button{flex:1 1 0;min-height:38px;padding:5px 10px;border:0;border-radius:9px;background:none;color:var(--dim);cursor:pointer;font-size:13.5px;line-height:1.15;white-space:nowrap}
+.seg button[aria-pressed="true"]{background:var(--ui);color:var(--uitext);font-weight:600}
+.seg.fire button[aria-pressed="true"][data-f="intense"]{background:var(--spike);color:#1a0d00}
+.ctlgroup{display:flex;align-items:center;gap:8px}
+.ctlgroup .lab{font-size:12.5px;color:var(--dim)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--dim)}
+.sw{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:baseline}
+.verdict{border-radius:12px;padding:12px 14px;border:1px solid rgba(255,107,138,.5);background:linear-gradient(180deg,rgba(255,107,138,.10),rgba(255,107,138,.02))}
+.verdict .code{font:600 11.5px/1.3 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.02em;color:var(--idx)}
+.verdict .stop{font-size:26px;font-weight:700;line-height:1.1;margin:4px 0 2px}
+.verdict .stop small{font-size:14px;font-weight:500;color:var(--dim)}
+.metric{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-size:13.5px}
+.metric .k{color:var(--dim)}.metric .v{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+.unres{margin-top:10px;padding:8px 10px;border-radius:8px;border:1px dashed var(--line2);font-size:12.5px;color:var(--dim)}
+.unres b{font:600 11.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--text)}
+.chart{display:block;width:100%;height:230px}
+.over{border-radius:12px;padding:10px 12px;border:1px solid rgba(255,93,93,.5);background:rgba(255,93,93,.06);font-size:13.5px}
+.over b{color:var(--bad);display:block;font-size:14.5px}
+.key{list-style:none;margin:0;padding:0}.key li{position:relative;padding:0 0 9px 20px;font-size:13px;line-height:1.4;color:var(--dim)}.key li b{color:var(--text);font-weight:600}.key li i{position:absolute;left:0;top:5px;width:10px;height:10px;border-radius:50%}
+.uctl{display:block}.urow{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:2px}
+.uctl input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:32px;background:none;margin:0;cursor:pointer;touch-action:pan-y}
+.uctl input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:var(--line2)}
+.uctl input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:var(--line2)}
+.uctl input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:var(--ui);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--dim)}
+.uctl input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--ui);border:3px solid var(--bg)}
+.ubanner{margin:6px 0 4px;padding:9px 11px;border-radius:10px;border:1px solid var(--line2);font-size:13px;line-height:1.4}
+.ubanner b{display:block;font-size:14px}
+.ubanner.short{border-color:rgba(255,176,58,.6)}.ubanner.short b{color:var(--spike)}
+.ubanner.meets{border-color:rgba(111,224,140,.6)}.ubanner.meets b{color:var(--ok)}
+.ubanner.extra{border-color:rgba(147,170,183,.6)}.ubanner.extra b{color:var(--text)}
+.ubanner.past{border-color:rgba(255,93,93,.6)}.ubanner.past b{color:var(--bad)}
+.timeline{list-style:none;margin:0;padding:0;position:relative}
+.timeline li{position:relative;padding:0 0 12px 58px;font-size:13.5px;line-height:1.4}
+.timeline li::before{content:"";position:absolute;left:44px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--glow);box-shadow:0 0 8px var(--glow)}
+.timeline li::after{content:"";position:absolute;left:47.5px;top:16px;bottom:-2px;width:1px;background:var(--line2)}
+.timeline li:last-child::after{display:none}
+.timeline .y{position:absolute;left:0;top:0;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text)}
+.timeline li.now::before{background:var(--idx);box-shadow:0 0 8px var(--idx)}
+details.method{font-size:13px;color:var(--dim)}
+details.method summary{cursor:pointer;color:var(--text);font-weight:600;min-height:32px;display:flex;align-items:center}
+details.method ul{margin:8px 0 0;padding-left:18px}details.method li{margin:4px 0}
+.footer{padding:16px 26px 26px;font-size:12.5px;color:var(--faint);border-top:1px solid var(--line)}
+@media (max-width:1100px){.steps .l{display:none}.steps .s{display:inline}}
+@media (min-width:1101px){.steps .s{display:none}}
+@media (max-width:980px){
+  .bar{position:static;height:auto;flex-direction:column;align-items:stretch;gap:6px;padding:8px 12px}
+  .brand{font-size:12px;text-align:center}
+  .steps{display:grid;grid-template-columns:1fr 1fr}
+  .steps a{justify-content:center;min-height:44px;border:1px solid var(--line);border-radius:10px;font-size:13px}
+  .layout{display:flex;flex-direction:column;gap:12px;padding-top:14px}
+  .stage{display:contents}
+  .stage>*{margin-inline:14px}
+  .stage>.pinwrap{margin-inline:0;padding:6px 14px 8px;position:sticky;top:0;z-index:8;background:var(--bg);box-shadow:0 10px 14px -10px rgba(0,0,0,.9)}
+  .neuron{height:36svh;min-height:220px}
+  .trace{height:86px}
+  .capwrap{position:static;padding:8px 10px;border-top:1px solid var(--line);background:#02050a;min-height:58px}
+  .caption{font-size:13px;max-width:none;padding:0;border:0;background:none;display:block}
+  #rate{display:none}
+  .side{position:static;height:auto;overflow:visible;border-left:0;border-top:1px solid var(--line);padding:0 16px 28px}
+  .controls .btn.primary{flex:1 1 auto}
+  .controls .seg{flex:1 1 100%}
+  .ctlgroup{flex:1 1 100%}.ctlgroup .seg{flex:1}
+  h1{font-size:25px}
+}
+@media (prefers-reduced-motion:reduce){.caption{transition:none}}
+</style>
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><b>CMH Scientific</b> · OptiCeil · calcium imaging</div>
+  <nav class="steps" aria-label="Demos">
+    <a href="imaging_design.html"><span class="n">1</span><span class="l">Imaging design</span><span class="s">Design</span></a>
+    <a href="calcium_fluorescence.html" aria-current="page"><span class="n">2</span><span class="l">Calcium fluorescence</span><span class="s">Fluorescence</span></a>
+  </nav>
+</header>
+
+<div class="layout">
+<main class="stage">
+  <div>
+    <p class="kicker"><span class="pill">Study-derived stop points</span>OptiCeil on paired fluorescence and electrophysiology</p>
+    <h1>Calcium fluorescence</h1>
+    <p class="lede">Watch a compressed neuron-development visualization, then rotate a stable 3-D neuron as it fires. GCaMP makes that firing visible. OptiCeil decides how long you need to keep watching after each spike.</p>
+  </div>
+  <div class="pinwrap"><div class="pin">
+    <div class="neuron" id="nwrap">
+      <canvas id="nc" aria-label="Animated neuron firing with calcium fluorescence"></canvas>
+      <div class="ov tl"><div class="big num" id="clock">t = 0.000 s</div><div class="small num" id="rate">—</div><div class="small" id="grow" style="color:var(--glow)">Growing</div></div>
+      <div class="ov br small" style="right:14px;bottom:10px;text-align:right">Drag to rotate</div>
+      <div class="ov tr"><span class="chip fire" id="fire">SPIKE</span><br><span class="chip num" id="vol" style="margin-top:6px">—</span></div>
+    </div>
+    <div class="capwrap"><div class="caption" id="cap"></div></div>
+    <div class="trace"><canvas id="tc" aria-label="Fluorescence trace with true spikes"></canvas></div>
+  </div></div>
+  <div class="legend"><span><i class="sw" style="background:var(--glow)"></i>Calcium fluorescence (what the microscope sees)</span><span><i class="sw" style="background:var(--spike)"></i>True spikes (electrode)</span><span><i class="sw" style="background:rgba(66,245,167,.35)"></i>Kept and needed</span><span><i class="sw" style="background:rgba(147,170,183,.45)"></i>Kept, not needed</span><span><i class="sw" style="background:rgba(255,176,58,.5)"></i>Needed, not kept</span></div>
+  <div class="controls">
+    <button class="btn primary" id="play"><svg viewBox="0 0 10 10" id="pi"><path d="M2 1h2v8H2zM6 1h2v8H6z"/></svg><span id="pt">Pause</span></button>
+    <div class="ctlgroup"><span class="lab">Firing</span><div class="seg fire" id="fmode"><button data-f="calm" aria-pressed="false">Calm</button><button data-f="burst" aria-pressed="false">Bursting</button><button data-f="intense" aria-pressed="true">Intense</button></div></div>
+    <button class="btn" id="regrow">Grow again</button>
+    <button class="btn" id="rotbtn" aria-pressed="true">Auto-rotate on</button>
+    <button class="btn" id="labbtn" aria-pressed="true">Labels on</button>
+    <div class="ctlgroup"><span class="lab">Speed</span><div class="seg" id="speed"><button data-s="0.08" aria-pressed="false">0.08×</button><button data-s="0.2" aria-pressed="true">0.2×</button><button data-s="1" aria-pressed="false">1×</button></div></div>
+  </div>
+</main>
+
+<aside class="side">
+  <section>
+    <h2>What you're seeing</h2>
+    <ul class="key">
+      <li><i style="background:#eaf4f8"></i><b>Bright dot at the center: cell body (soma).</b> The neuron's core, where inputs are added up and a spike is triggered.</li>
+      <li><i style="background:#42f5a7"></i><b>Thick line upward: trunk (apical dendrite).</b> The main cable collecting input from far away.</li>
+      <li><i style="background:#42f5a7;opacity:.6"></i><b>Fine lines: dendrites and branches.</b> Where the neuron receives signals from other cells.</li>
+      <li><i style="background:#c8ffe8"></i><b>Small glowing ends: growing tips.</b> Branches extending during the growth time-lapse.</li>
+      <li><i style="background:#8a9ab8"></i><b>Grey thread: axon.</b> Carries the spike to other neurons.</li>
+      <li><i style="background:#ffb03a"></i><b>Brief orange flash and pulse: the spike (action potential).</b> A millisecond electrical event. A microscope does not see this directly; it is drawn here so you know when it happened.</li>
+      <li><i style="background:#42f5a7"></i><b>Green glow spreading out: calcium fluorescence.</b> Calcium enters after the spike and GCaMP lights up. This slower glow is what the microscope actually records.</li>
+      <li><i style="background:#2a5a55"></i><b>Faint drifting specks:</b> decoration for depth only.</li>
+    </ul>
+  </section>
+  <section>
+    <h2>1 · Sensor and preparation</h2>
+    <div class="seg" id="reg"><button data-r="m8" aria-pressed="true">GCaMP8m</button><button data-r="s6" aria-pressed="false">GCaMP6s</button><button data-r="sp" aria-pressed="false">6s · spinal</button></div>
+    <p class="small" id="regnote" style="margin-top:8px"></p>
+  </section>
+  <section>
+    <h2>2 · How much of the attainable signal do you need?</h2>
+    <div class="seg" id="tgt"><button data-t="90" aria-pressed="false">90%</button><button data-t="95" aria-pressed="false">95%</button><button data-t="99" aria-pressed="true">99%</button></div>
+    <p class="small" style="margin-top:8px">A fraction of the best performance this recording can reach, as in the study.</p>
+  </section>
+  <section>
+    <h2>3 · Your imaging window after each spike</h2>
+    <label class="uctl"><span class="urow"><span>Keep imaging for</span><b class="num" id="uval">—</b></span><input type="range" id="uwin" min="0" max="60" step="1" value="30" aria-label="Imaging window in volumes"></label>
+    <div class="ubanner" id="uverdict"></div>
+    <div class="metric"><span class="k">Recoverability at your window (approx.)</span><span class="v" id="uidx">—</span></div>
+    <div class="metric"><span class="k">Accuracy at your window (approx.)</span><span class="v" id="uba">—</span></div>
+    <button class="btn primary" id="uopt" style="width:100%;margin-top:8px">Optimize: back out the stop point</button>
+  </section>
+  <section>
+    <h2>4 · OptiCeil's answer</h2>
+    <div class="verdict">
+      <div class="code">STOP_TEMPORAL_ACQUISITION</div>
+      <div class="stop num" id="vstop">—</div>
+      <div class="small" id="vtext"></div>
+      <div class="metric" style="margin-top:6px"><span class="k">Recoverability retained (held-out)</span><span class="v" id="vidx">—</span></div>
+      <div class="metric"><span class="k">Balanced accuracy retained (held-out)</span><span class="v" id="vba">—</span></div>
+      <div class="metric"><span class="k">Residual ambiguity at this stop</span><span class="v" id="vnid">—</span></div>
+      <div class="unres"><b>CEILING_UNRESOLVED</b> · OptiCeil compares acquisitions; it does not claim an absolute physical limit for this recording.</div>
+    </div>
+  </section>
+  <section>
+    <h2>5 · Information arriving after each spike</h2>
+    <canvas class="chart" id="ch" aria-label="Recoverability and accuracy versus acquisition time"></canvas>
+    <div class="legend" style="margin-top:4px"><span><i class="sw" style="background:var(--idx)"></i>Recoverability index</span><span><i class="sw" style="background:var(--ba)"></i>Held-out balanced accuracy</span><span>● measured · line interpolated</span></div>
+    <p class="small" style="margin-top:6px">The marker follows the latest spike. Green: information still arriving. Grey: beyond what your target needs. Red: past peak accuracy, where longer imaging made the answer worse.</p>
+  </section>
+  <section>
+    <div class="over"><b id="otitle">More light, worse answer</b><span id="otext"></span></div>
+  </section>
+  <section id="ocReport"></section>
+  <section>
+    <h2>The glow behind it</h2>
+    <ol class="timeline">
+      <li><span class="y">1962</span>Osamu Shimomura isolates green fluorescent protein (GFP) from the jellyfish <i>Aequorea victoria</i>.</li>
+      <li><span class="y">2001</span>Junichi Nakai and colleagues fuse a rearranged GFP to calmodulin and M13, creating GCaMP: it glows when calcium binds.</li>
+      <li><span class="y">2008</span>Nobel Prize in Chemistry to Shimomura, Martin Chalfie and Roger Tsien for the discovery and development of GFP.</li>
+      <li class="now"><span class="y">2026</span>OptiCeil asks the next question: once you can see the firing, how long do you actually need to look?</li>
+    </ol>
+  </section>
+  <section>
+    <details class="method">
+      <summary>Method and provenance</summary>
+      <ul>
+        <li><b>Measured values</b> (dots, stop points, retained fractions, residual ambiguity, accuracy drops) come from Ewing, "Information arrival sets the minimum acquisition time in calcium imaging," Research Square, 2026 (doi:10.21203/rs.3.rs-10898326/v1): 914 CASCADE segments, 312 neurons, neuron-disjoint discovery and held-out validation, 30 Hz (one volume ≈ 33 ms).</li>
+        <li><b>Curves between measured points</b> are shape-preserving interpolations to show direction. The recoverability index after its peak is drawn declining in proportion to the reported accuracy drop; the study reports that it declined but not by how much. Early accuracy for the two GCaMP6s regimes follows the index shape.</li>
+        <li><b>The neuron, spike trains and traces are illustrative</b>, not CASCADE recordings. Indicator rise and decay times are approximate, chosen to show that GCaMP6s is slower than GCaMP8m. "Intense" is a dramatized burst pattern.</li>
+        <li><b>Growth</b> is a compressed time-lapse. In the developing brain, calcium signalling triggered by activity helps regulate dendritic growth and branching over days, alongside activity-independent cues such as neurotrophins (e.g. Wong &amp; Ghosh, <i>Nat Rev Neurosci</i> 2002). The OptiCeil results concern spike detection, not growth.</li>
+        <li><b>Flashing</b> is limited to at most three flashes per second, and motion is reduced when the device requests it.</li>
+        <li>The spinal regime is shown with lower signal-to-noise for illustration. The study found that the spinal label itself did not explain lower recoverability; a matched residual difference remained and is described there as observational.</li>
+        <li>The recoverability index is comparative, not an absolute physical bound, hence <code>CEILING_UNRESOLVED</code>.</li>
+        <li>History: Nobel Prize in Chemistry 2008 (nobelprize.org); GCaMP: Nakai, Ohkura &amp; Imoto, 2001.</li>
+      </ul>
+    </details>
+  </section>
+</aside>
+</div>
+<footer class="footer">OptiCeil demonstration 2 · CMH Scientific. Measured values from paired optical and electrophysiological ground truth (CASCADE). Illustrative neuron and traces. Research demonstration.</footer>
+
+<script>
+/* ===== Neuron3D: growing, rotatable, calcium-lit neuron (canvas 2D, no dependencies) ===== */
+function Neuron3D(cv,opt){
+  opt=Object.assign({labels:true,core:'190,255,225',halo:'66,245,167',spark:'255,200,120',seed:7,growPerSpike:1/70,onResize:null},opt||{});
+  const TAU=Math.PI*2,clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cx=cv.getContext('2d');let W=0,H=0,D=1;
+  const resize=(silent)=>{const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2),w=Math.round(r.width),h=Math.round(r.height);if(w===W&&h===H&&d===D)return;W=w;H=h;D=d;cv.width=Math.max(1,w*d);cv.height=Math.max(1,h*d);if(!silent&&opt.onResize)opt.onResize()};
+  new ResizeObserver(()=>resize(false)).observe(cv);resize(true);
+
+  /* geometry: 3-D arbor, unit radius */
+  let s=opt.seed;const rnd=()=>{s=(s*1103515245+12345)%2147483648;return s/2147483648};
+  const norm=v=>{const l=Math.hypot(v[0],v[1],v[2])||1;return [v[0]/l,v[1]/l,v[2]/l]};
+  const SEG=[];
+  let ROOT=0;function br(p,dir,len,w,d,path){if(d>5||len<.028)return;const e=[p[0]+dir[0]*len,p[1]+dir[1]*len,p[2]+dir[2]*len];SEG.push({a:p,b:e,p0:path,p1:path+len,d,w,root:ROOT});
+    const n=d<2?3:2;for(let i=0;i<n;i++){const sp=.95;const nd=norm([dir[0]+(rnd()-.5)*sp,dir[1]+(rnd()-.5)*sp,dir[2]+(rnd()-.5)*sp]);br(e,nd,len*(.62+rnd()*.22),w*.68,d+1,path+len)}}
+  const roots=[[0,-1,.1],[.8,.5,.3],[-.8,.5,-.2],[.2,.6,-.9],[-.3,.4,.9],[.9,-.2,-.5],[-.9,-.3,.4]];
+  roots.forEach((r,i)=>{ROOT=i;br([0,0,0],norm(r),i===0?.27:.19,i===0?.028:.02,0,0)});
+  const AX=[];{let p=[0,0,0],dir=norm([.25,1,.15]);for(let i=0;i<40;i++){dir=norm([dir[0]+(rnd()-.5)*.25,dir[1]+(rnd()-.5)*.1,dir[2]+(rnd()-.5)*.25]);const e=[p[0]+dir[0]*.032,p[1]+dir[1]*.032,p[2]+dir[2]*.032];AX.push([p,e]);p=e}}
+  let RM=0,PM=0;for(const g of SEG){RM=Math.max(RM,Math.hypot(...g.b));PM=Math.max(PM,g.p1)}
+  for(const a of AX)RM=Math.max(RM,Math.hypot(...a[1])*.9);
+  const sc0=1/RM;for(const g of SEG){g.a=g.a.map(v=>v*sc0);g.b=g.b.map(v=>v*sc0);g.p0*=sc0;g.p1*=sc0;g.w*=sc0}
+  for(const a of AX){a[0]=a[0].map(v=>v*sc0);a[1]=a[1].map(v=>v*sc0)}
+  PM*=sc0;
+  const trunk=SEG.find(g=>g.root===0&&g.d===0),basal=SEG.find(g=>g.root===2&&g.d===0);
+  const branch=SEG.filter(g=>g.root===1&&g.d===3)[0]||SEG[SEG.length-1];
+  const MOTES=[];for(let i=0;i<110;i++){const u=norm([rnd()-.5,rnd()-.5,rnd()-.5]),r=.3+rnd()*1.25;MOTES.push({p:[u[0]*r,u[1]*r,u[2]*r],ph:rnd()*TAU,sp:.15+rnd()*.25,dr:[(rnd()-.5)*.02,(rnd()-.5)*.02,(rnd()-.5)*.02]})}
+
+  /* view state */
+  const V={yaw:.5,pitch:-.18,auto:!REDUCED,grow:0,growT:0,blur:0,lastFlash:-1e9,flash:0,rings:[],pulses:[],time:0};
+  let drag=null,lastUser=-1e9;
+  cv.style.touchAction='none';cv.style.cursor='grab';
+  cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,yaw:V.yaw,pitch:V.pitch};lastUser=performance.now();cv.style.cursor='grabbing';try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+  cv.addEventListener('pointermove',e=>{if(!drag)return;V.yaw=drag.yaw+(e.clientX-drag.x)*.009;V.pitch=clamp(drag.pitch+(e.clientY-drag.y)*.007,-1.3,1.3);lastUser=performance.now()});
+  const up=()=>{drag=null;cv.style.cursor='grab'};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+
+  function rot(p){const cy=Math.cos(V.yaw),sy=Math.sin(V.yaw),cp=Math.cos(V.pitch),sp=Math.sin(V.pitch);const x=p[0]*cy+p[2]*sy,z=-p[0]*sy+p[2]*cy,y=p[1];return [x,y*cp-z*sp,y*sp+z*cp]}
+  let G={};function geo(){const narrow=W<560;G={ox:W/2,oy:H*(narrow?.5:.52),s:Math.min(W,H)*(narrow?.44:.46)}}
+  function proj(p){const r=rot(p),k=3.2/(3.2-r[2]);return [G.ox+r[0]*G.s*k,G.oy+r[1]*G.s*k,r[2],k]}
+
+  const NR=6,ND=3,paths=[];for(let i=0;i<NR*ND;i++)paths.push(null);
+  function frame(dt,F,sat){ // F(delay) returns calcium level; sat = saturation reference
+    V.time+=dt;
+    if(V.auto&&!drag&&performance.now()-lastUser>2500)V.yaw+=dt*.18;
+    V.grow+=(V.growT-V.grow)*Math.min(1,dt*3);
+    V.flash=Math.max(0,V.flash-dt*3.2);
+    geo();const c=cx;c.setTransform(D,0,0,D,0,0);c.globalCompositeOperation='source-over';c.globalAlpha=1;
+    const bg=c.createRadialGradient(G.ox,G.oy,0,G.ox,G.oy,Math.max(W,H)*.75);bg.addColorStop(0,'#06151c');bg.addColorStop(.55,'#030a10');bg.addColorStop(1,'#010306');c.fillStyle=bg;c.fillRect(0,0,W,H);
+    const gpath=V.grow*PM*1.02,blur=V.blur;
+    // motes (slow twinkle, never flashing)
+    c.globalCompositeOperation='lighter';
+    for(const m of MOTES){m.p[0]+=m.dr[0]*dt;m.p[1]+=m.dr[1]*dt;m.p[2]+=m.dr[2]*dt;const q=proj(m.p),tw=.5+.5*Math.sin(V.time*m.sp*TAU*.3+m.ph),a=(.06+.14*tw)*(.45+.55*(q[2]+1)/2);c.fillStyle=`rgba(${opt.halo},${a.toFixed(3)})`;const z=1.2+1.4*q[3]*(1+blur*.4);c.fillRect(q[0]-z/2,q[1]-z/2,z,z)}
+    // bin segments by calcium delay (path distance) and depth
+    for(let i=0;i<paths.length;i++)paths[i]=[new Path2D(),new Path2D()];
+    const tips=[];
+    for(const g of SEG){if(g.p0>=gpath)continue;let b=g.b;if(g.p1>gpath){const f=(gpath-g.p0)/(g.p1-g.p0);b=[g.a[0]+(g.b[0]-g.a[0])*f,g.a[1]+(g.b[1]-g.a[1])*f,g.a[2]+(g.b[2]-g.a[2])*f];tips.push(b)}
+      const A=proj(g.a),B=proj(b),z=(A[2]+B[2])/2,di=z>.25?0:z>-.25?1:2,ri=Math.min(NR-1,Math.floor(g.p0/PM*NR)),P=paths[ri*ND+di];
+      P[0].moveTo(A[0],A[1]);P[0].lineTo(B[0],B[1]);P[1].moveTo(A[0],A[1]);P[1].lineTo(B[0],B[1])}
+    c.lineCap='round';
+    for(let ri=0;ri<NR;ri++){const lv=clamp(F((ri+.5)/NR*.035)/sat,0,1.2);
+      for(let di=0;di<ND;di++){const P=paths[ri*ND+di],depthA=[1,.7,.42][di],defocus=[0,1,2][di]*.8+blur;
+        c.strokeStyle=`rgba(${opt.halo},${((.05+.30*lv)*depthA/(1+defocus*.35)).toFixed(3)})`;c.lineWidth=(2.6+defocus*2.2)*(1+.6*lv)*G.s/260;c.stroke(P[0]);
+        c.strokeStyle=`rgba(${opt.core},${((.20+.75*lv)*depthA/(1+defocus*.6)).toFixed(3)})`;c.lineWidth=Math.max(.6,(.9-.1*ri)*G.s/260*(1+.3*lv));c.stroke(P[1])}}
+    // growth cones: soft, steady glow
+    const tipA=Math.min(.75,6/Math.max(1,tips.length));for(const t of tips){const q=proj(t),r=(1.4+.5*Math.sin(V.time*2+t[0]*9))*G.s/260;c.fillStyle=`rgba(${opt.core},${tipA.toFixed(3)})`;c.beginPath();c.arc(q[0],q[1],r*1.6,0,TAU);c.fill()}
+    // axon (grows after the first dendrites)
+    const axG=clamp((V.grow-.15)/.6,0,1),nA=Math.floor(AX.length*axG);
+    if(nA>0){const ap=new Path2D();for(let i=0;i<nA;i++){const A=proj(AX[i][0]),B=proj(AX[i][1]);if(!i)ap.moveTo(A[0],A[1]);ap.lineTo(B[0],B[1])}c.strokeStyle='rgba(150,170,200,.28)';c.lineWidth=Math.max(1,1.6*G.s/260);c.stroke(ap)}
+    // soma
+    const o=proj([0,0,0]),lv0=clamp(F(0)/sat,0,1.2),sr=Math.max(6,.05*G.s*o[3]);
+    let gr=c.createRadialGradient(o[0],o[1],0,o[0],o[1],sr*5);gr.addColorStop(0,`rgba(${opt.halo},${(.25+.5*lv0).toFixed(3)})`);gr.addColorStop(1,`rgba(${opt.halo},0)`);c.fillStyle=gr;c.beginPath();c.arc(o[0],o[1],sr*5,0,TAU);c.fill();
+    if(V.flash>0){gr=c.createRadialGradient(o[0],o[1],0,o[0],o[1],sr*4);gr.addColorStop(0,`rgba(${opt.spark},${(.45*V.flash).toFixed(3)})`);gr.addColorStop(1,`rgba(${opt.spark},0)`);c.fillStyle=gr;c.beginPath();c.arc(o[0],o[1],sr*4,0,TAU);c.fill()}
+    c.fillStyle=`rgba(${opt.core},${(.45+.5*lv0).toFixed(3)})`;c.beginPath();c.arc(o[0],o[1],sr,0,TAU);c.fill();
+    // soft spherical ripple and axon pulse (rate-limited with the flash)
+    for(const r of V.rings){r.a+=dt*1.6;if(r.a>=1)continue;const rr=sr+r.a*G.s*.85*o[3];c.strokeStyle=`rgba(${opt.spark},${(.22*(1-r.a)).toFixed(3)})`;c.lineWidth=1.2;c.beginPath();c.arc(o[0],o[1],rr,0,TAU);c.stroke()}
+    V.rings=V.rings.filter(r=>r.a<1);
+    for(const p of V.pulses){p.a+=dt*1.4;if(p.a>=1||nA<2)continue;const k=Math.min(nA-1,Math.floor(p.a*nA)),q=proj(AX[k][1]);gr=c.createRadialGradient(q[0],q[1],0,q[0],q[1],7);gr.addColorStop(0,`rgba(${opt.spark},.75)`);gr.addColorStop(1,`rgba(${opt.spark},0)`);c.fillStyle=gr;c.beginPath();c.arc(q[0],q[1],7,0,TAU);c.fill()}
+    V.pulses=V.pulses.filter(p=>p.a<1);
+    c.globalCompositeOperation='source-over';
+    if(opt.labels)drawLabels(tips,gpath,nA,o,sr);
+  }
+  function drawLabels(tips,gpath,nA,o,sr){const c=cx,small=W<560,fs=small?10.5:12;c.font=`600 ${fs}px system-ui,-apple-system,sans-serif`;c.textBaseline='middle';
+    const L=[];const mid=(g,f)=>[g.a[0]+(g.b[0]-g.a[0])*f,g.a[1]+(g.b[1]-g.a[1])*f,g.a[2]+(g.b[2]-g.a[2])*f];
+    L.push({at:[o[0],o[1]],t:'Cell body (soma)',sub:'where the spike starts',off:[-1,-.35],r:sr+2});
+    if(trunk&&gpath>trunk.p0+.05){const q=proj(mid(trunk,.8));L.push({at:[q[0],q[1]],t:'Trunk (apical dendrite)',sub:small?'':'main input cable',off:[1,-.6]})}
+    if(basal&&gpath>basal.p0+.04){const q=proj(mid(basal,.8));L.push({at:[q[0],q[1]],t:'Basal dendrites',sub:small?'':'short inputs near the soma',off:[-1,.95]})}
+    if(branch&&gpath>branch.p1){const q=proj(branch.b);L.push({at:[q[0],q[1]],t:'Branches',sub:small?'':'receive synaptic inputs',off:[1,.3]})}
+    if(tips.length&&V.grow<.98){const q=proj(tips[0]);L.push({at:[q[0],q[1]],t:'Growing tip',sub:small?'':'extends as activity continues',off:[1,-.2]})}
+    if(nA>AX.length*.6){const q=proj(AX[Math.floor(AX.length*.55)][1]);L.push({at:[q[0],q[1]],t:'Axon',sub:small?'':'carries the spike to other cells',off:[1,.4]})}
+    const boxes=[];
+    for(const l of L){const len=small?34:58,dx=l.off[0],dy=l.off[1],n=Math.hypot(dx,dy);let tx=l.at[0]+dx/n*len,ty=l.at[1]+dy/n*len*.8;
+      const w1=c.measureText(l.t).width;c.font=`${fs-1}px system-ui,-apple-system,sans-serif`;const w2=l.sub?c.measureText(l.sub).width:0;c.font=`600 ${fs}px system-ui,-apple-system,sans-serif`;
+      const bw=Math.max(w1,w2)+14,bh=l.sub?fs*2.9:fs*1.9,left=dx<0;let bx=left?tx-bw:tx;bx=Math.max(4,Math.min(W-bw-4,bx));
+      const step=(dy<0?-1:1)*(bh+4);let guard=0;
+      const hit=()=>boxes.some(q=>bx<q.x+q.w+4&&bx+bw+4>q.x&&(ty-bh/2)<q.y+q.h+3&&(ty+bh/2)+3>q.y);
+      ty=Math.max(bh/2+4,Math.min(H-bh/2-4,ty));
+      while(hit()&&guard++<6){ty+=step;if(ty<bh/2+4||ty>H-bh/2-4){ty=Math.max(bh/2+4,Math.min(H-bh/2-4,ty));break}}
+      boxes.push({x:bx,y:ty-bh/2,w:bw,h:bh,l,left,dx,dy,n});}
+    for(const q of boxes){const l=q.l,bx=q.x,bw=q.w,bh=q.h,ty=q.y+bh/2,ax=l.at[0]+(q.dx/q.n)*(l.r||3),ay=l.at[1]+(q.dy/q.n)*(l.r||3);
+      c.strokeStyle='rgba(234,244,248,.55)';c.lineWidth=1;c.beginPath();c.moveTo(ax,ay);c.lineTo(q.left?bx+bw:bx,ty);c.stroke();
+      c.fillStyle='rgba(234,244,248,.9)';c.beginPath();c.arc(l.at[0],l.at[1],2.2,0,TAU);c.fill();
+      c.fillStyle='rgba(3,8,12,.82)';c.strokeStyle='rgba(234,244,248,.25)';c.beginPath();if(c.roundRect)c.roundRect(bx,ty-bh/2,bw,bh,6);else c.rect(bx,ty-bh/2,bw,bh);c.fill();c.stroke();
+      c.fillStyle='#eaf4f8';c.textAlign='left';c.fillText(l.t,bx+7,l.sub?ty-fs*.55:ty);
+      if(l.sub){c.fillStyle='rgba(180,200,210,.95)';c.font=`${fs-1}px system-ui,-apple-system,sans-serif`;c.fillText(l.sub,bx+7,ty+fs*.65);c.font=`600 ${fs}px system-ui,-apple-system,sans-serif`}}
+  }
+  return {
+    frame,
+    setGrowPerSpike(g){opt.growPerSpike=g},
+    spike(){V.growT=Math.min(1,V.growT+opt.growPerSpike);const now=performance.now();if(now-V.lastFlash>=340){V.lastFlash=now;V.flash=1;if(!REDUCED){V.rings.push({a:0});V.pulses.push({a:0})}}},
+    regrow(){V.grow=0;V.growT=0},
+    grown(){return V.grow},
+    setBlur(b){V.blur=b},
+    setAuto(a){V.auto=a},
+    setLabels(v){opt.labels=v},
+    resetView(){V.yaw=.5;V.pitch=-.18},
+    size:()=>({W,H})
+  };
+}
+
+/* ===== OptiCeil session recorder + downloadable play-by-play report ===== */
+const OC_DEMOS={design:{n:1,title:'Imaging design',file:'imaging_design.html'},firing:{n:2,title:'Calcium fluorescence',file:'calcium_fluorescence.html'}};
+const OC_PUB={ // Supplementary Table S1: window ms, volumes, index/max, BA/max, residual non-identifiability
+  m8:{name:'GCaMP8m',rows:{90:[33,1,.9905,.9987,.128],95:[33,1,.9905,.9987,.128],99:[67,2,.9986,1.0,.106]},drop:.065,peak:'held-out accuracy peaks at 67 ms'},
+  s6:{name:'GCaMP6s (nonspinal)',rows:{90:[67,2,.9360,.9248,.549],95:[167,5,.9826,.9730,.407],99:[250,8,1.0,1.0,.339]},drop:.031,peak:'held-out accuracy peaks at 250 ms'},
+  sp:{name:'GCaMP6s (spinal preparation)',rows:{90:[167,5,.9408,.9724,.949],95:[333,10,.9757,.9873,.825],99:[667,20,.9829,.9969,.688]},drop:.024,peak:'held-out accuracy peaks at 500 ms'}
+};
+function ocDebounce(fn,ms){let h;return (...a)=>{clearTimeout(h);h=setTimeout(()=>fn(...a),ms)}}
+const OCSession=(()=>{const KEY='opticeil_session_v1';let mem=null;
+  function load(){if(mem)return mem;try{mem=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!mem||!mem.started)mem={started:new Date().toISOString(),demos:{}};return mem}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(mem))}catch(e){try{for(const k in mem.demos)delete mem.demos[k].snap;localStorage.setItem(KEY,JSON.stringify(mem))}catch(_){}}}
+  function D(d){const m=load();return m.demos[d]||(m.demos[d]={events:[],trials:[],opts:[]})}
+  return {
+    event(d,text){const x=D(d),l=x.events[x.events.length-1];if(l&&l.text===text)return;x.events.push({t:new Date().toISOString(),text});if(x.events.length>300)x.events.splice(0,x.events.length-300);save()},
+    trial(d,key,row){const x=D(d),l=x.trials[x.trials.length-1];if(l&&l.key===key)return false;x.trials.push({t:new Date().toISOString(),key,...row});if(x.trials.length>200)x.trials.splice(0,x.trials.length-200);save();return true},
+    opt(d,row){D(d).opts.push({t:new Date().toISOString(),...row});save()},
+    snap(d,cv){try{const w=520,h=Math.round(w*cv.height/cv.width),o=document.createElement('canvas');o.width=w;o.height=h;const c=o.getContext('2d');c.fillStyle='#03060b';c.fillRect(0,0,w,h);c.drawImage(cv,0,0,w,h);D(d).snap=o.toDataURL('image/jpeg',.72);save()}catch(e){}},
+    data:load,reset(){mem={started:new Date().toISOString(),demos:{}};save()}
+  }})();
+
+const ocEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ocTm=iso=>new Date(iso).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+const ocPct=x=>(x*100).toFixed(x>=.9995?0:1)+'%';
+function ocTable(head,rows){return '<div class="tw"><table><thead><tr>'+head.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
+function ocEvents(d){if(!d||!d.events.length)return '<p class="muted">No actions recorded.</p>';return '<ol class="log">'+d.events.map(e=>'<li><span class="t">'+ocTm(e.t)+'</span> '+ocEsc(e.text)+'</li>').join('')+'</ol>'}
+function ocSnap(d){return d&&d.snap?'<figure><img src="'+d.snap+'" alt="Last view"><figcaption>Last view recorded in this demo</figcaption></figure>':''}
+const ocMs=v=>v==null?'—':v<1000?Math.round(v)+' ms':(v/1000).toFixed(2)+' s';
+
+function ocSecDesign(d){let h='<p>A parametric sandbox: indicator ceilings, noise, depth blur and the observer model are illustrative, not measured values. It shows the logic of OptiCeil: state the accuracy you need, and read the minimum acquisition off the ceiling curve.</p>';
+  if(!d||(!d.trials.length&&!d.opts.length))return h+'<p class="muted">Not explored in this session.</p>';
+  h+='<h3>What you did</h3>'+ocEvents(d);
+  if(d.trials.length){h+='<h3>How your settings worked</h3>'+ocTable(['Time','Indicator','Target','Window','Photons','Depth','Capacity','Ceiling','Observer','Target met?','Minimum window'],
+    d.trials.map(t=>[ocTm(t.t),ocEsc(t.indName)+(t.prep==='sc'?' (observer from cortex)':''),ocPct(t.tgt),ocMs(t.win*1000),t.ph.toFixed(2),t.dp+' µm',t.cx.toFixed(1),ocPct(t.ceil),ocPct(t.obs),t.ceil>=t.tgt?'Yes':'<b>No</b>',t.minWin==null?'not reachable':ocMs(t.minWin*1000)]));
+    const met=d.trials.filter(t=>t.ceil>=t.tgt).length;h+='<p>'+met+' of '+d.trials.length+' settings reached the stated accuracy.</p>'}
+  if(d.opts.length){h+='<h3>What optimization backed out</h3>';for(const o of d.opts){h+='<p><b>'+ocTm(o.t)+' · target '+ocPct(o.tgt)+'.</b> '+ocEsc(o.summary)+'</p>'+ocTable(['','Indicator','Window','Photons','Depth','Capacity','Ceiling','Observer'],[
+      ['Before',ocEsc(o.before.indName),ocMs(o.before.win*1000),o.before.ph.toFixed(2),o.before.dp+' µm',o.before.cx.toFixed(1),ocPct(o.before.ceil),ocPct(o.before.obs)],
+      ['<b>After</b>',ocEsc(o.after.indName),'<b>'+ocMs(o.after.win*1000)+'</b>',o.after.ph.toFixed(2),o.after.dp+' µm',o.after.cx.toFixed(1),ocPct(o.after.ceil),ocPct(o.after.obs)]])}}
+  else h+='<p class="muted">Optimization was not run in this demo.</p>';
+  return h+ocSnap(d)}
+
+function ocSecFiring(d){let h='<p>Stop points, retained fractions, residual ambiguity and accuracy drops are the published values (Supplementary Table S1). The neuron, spike trains and traces are illustrative; values between measured windows are interpolated.</p>';
+  if(d&&(d.trials.length||d.opts.length)){const optCombos=new Set(d.opts.map(o=>o.reg+'|'+o.tgt));
+    h+='<h3>What you did</h3>'+ocEvents(d);
+    if(d.trials.length){h+='<h3>How your imaging windows compared</h3>'+ocTable(['Time','Regime','Target','Your window','OptiCeil stop','Verdict','Recoverability (approx.)','Accuracy (approx.)'],
+      d.trials.map(t=>{const r=OC_PUB[t.reg].rows[t.tgt];return [ocTm(t.t),OC_PUB[t.reg].name,t.tgt+'%',ocMs(t.win)+' · '+Math.round(t.win/33.33)+' vol',ocMs(r[0])+' · '+r[1]+' vol',ocEsc(t.verdict),ocPct(t.idxFrac)+' of max',ocPct(t.baFrac)+' of max']}));
+      const combos=[...new Set(d.trials.map(t=>t.reg+'|'+t.tgt).concat([...optCombos]))];
+      for(const c of combos){const [reg,tg]=c.split('|'),r=OC_PUB[reg].rows[tg],mine=d.trials.filter(t=>t.reg===reg&&String(t.tgt)===tg);
+        const hit=mine.find(t=>Math.abs(t.win-r[0])<17);const viaOpt=optCombos.has(reg+'|'+tg);const closest=mine.length?mine.reduce((a,t)=>Math.abs(t.win-r[0])<Math.abs(a.win-r[0])?t:a):null;
+        h+='<p><b>'+OC_PUB[reg].name+' at '+tg+'%.</b> OptiCeil backs out <b>'+r[0]+' ms ('+r[1]+' volume'+(r[1]>1?'s':'')+')</b>, retaining '+ocPct(r[2])+' of recoverability and '+ocPct(r[3])+' of balanced accuracy on held-out neurons, with residual ambiguity '+r[4].toFixed(3)+'. '+
+          (hit?'You set this window yourself.':viaOpt?'You backed it out with Optimize.':closest?'Your closest window was '+ocMs(closest.win)+' ('+(closest.win>r[0]?'longer than needed':'shorter than needed')+').':'')+(hit&&viaOpt?' Optimize confirmed it.':'')+'</p>'}}
+    if(d.opts.length)h+='<h3>Optimization runs</h3><ol class="log">'+d.opts.map(o=>'<li><span class="t">'+ocTm(o.t)+'</span> '+ocEsc(o.summary)+'</li>').join('')+'</ol>';
+    h+=ocSnap(d)}
+  else h+='<p class="muted">Not explored in this session.</p>';
+  h+='<h3>All reported stop points</h3>'+ocTable(['Regime','Target','Stop','Volumes','Recoverability retained','Accuracy retained','Residual ambiguity'],
+    Object.keys(OC_PUB).flatMap(k=>[90,95,99].map(tg=>{const r=OC_PUB[k].rows[tg];return [OC_PUB[k].name,tg+'%',r[0]+' ms',r[1],ocPct(r[2]),ocPct(r[3]),r[4].toFixed(3)]})));
+  h+='<h3>Past the stop point</h3><p>From the task-saturating window to the longest tested window (2 s), held-out balanced accuracy fell by '+Object.keys(OC_PUB).map(k=>OC_PUB[k].drop.toFixed(3)+' for '+OC_PUB[k].name).join(', ')+'.</p>';
+  return h}
+
+function ocBuildReport(){const S=OCSession.data(),now=new Date(),vis=Object.keys(OC_DEMOS).filter(k=>S.demos[k]);
+  const sec=(k,body)=>'<section><h2>'+OC_DEMOS[k].n+'. '+OC_DEMOS[k].title+'</h2>'+body+'</section>';
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OptiCeil session report</title>
+<style>body{margin:0;background:#f6f8f9;color:#14212b;font:15px/1.55 "Avenir Next","Segoe UI",system-ui,sans-serif}main{max-width:920px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:26px;margin:0 0 4px;line-height:1.2}h2{font-size:20px;margin:0 0 10px}h3{font-size:15.5px;margin:22px 0 8px}
+section{background:#fff;border:1px solid #dde5ea;border-radius:12px;padding:18px 20px;margin:18px 0}.meta,.muted{color:#566b78;font-size:13.5px}
+.tw{overflow-x:auto;margin:8px 0}table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:600;color:#3d525f;border-bottom:2px solid #dde5ea;padding:6px 8px;vertical-align:bottom}td{border-bottom:1px solid #edf1f3;padding:6px 8px;vertical-align:top}
+ol.log{padding-left:22px;margin:6px 0;font-size:13.5px}ol.log li{margin:3px 0}.t{color:#6b808c;font-variant-numeric:tabular-nums;margin-right:4px}
+figure{margin:12px 0 0}figure img{max-width:100%;width:420px;border-radius:10px;display:block}figcaption{font-size:12px;color:#6b808c;margin-top:4px}
+.note{background:#fff8e1;border-color:#f0dfa0}button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid #b9c7cf;background:#fff;cursor:pointer}
+@media print{body{background:#fff}section{border:0;padding:0;margin:14px 0}.print{display:none}.tw{overflow:visible}tr{break-inside:avoid}}</style></head><body><main>
+<h1>OptiCeil session report</h1>
+<div class="meta">CMH Scientific · OptiCeil imaging-design and calcium-fluorescence demonstrations<br>Session started ${ocEsc(new Date(S.started).toLocaleString())} · report generated ${ocEsc(now.toLocaleString())}</div>
+<p>${vis.length?'Demos explored: '+vis.map(k=>OC_DEMOS[k].n+'. '+OC_DEMOS[k].title).join('; ')+'.':'No interactions recorded yet; published reference values are shown.'}</p><div class="print"><button onclick="print()">Print or save as PDF</button></div>
+<section class="note"><b>How to read this report.</b> OptiCeil asks how long to keep imaging after a spike to reach a stated share of the best attainable performance, and flags when imaging longer makes the answer worse. Demo 2 uses the reported stop points; demo 1 is a parametric sandbox. The recoverability index is comparative, not an absolute physical ceiling (CEILING_UNRESOLVED).</section>
+${sec('design',ocSecDesign(S.demos.design))}${sec('firing',ocSecFiring(S.demos.firing))}
+<section><h2>Provenance and related work</h2><p class="muted">Published values: Ewing, "Information arrival sets the minimum acquisition time in calcium imaging," Research Square, 2026, doi:10.21203/rs.3.rs-10898326/v1 — CASCADE paired fluorescence/electrophysiology ground truth (Rupprecht et al., Nature Neuroscience 2021), 914 segments, 312 neurons, neuron-disjoint discovery and held-out validation, 30 Hz. The study is retrospective: no microscope was reconfigured. Related observations: spike inference can approach its best performance with only a few frames after an event, and GCaMP8's fast rise supports real-time detection (Rupprecht et al., Nature Methods 2026). GFP: Nobel Prize in Chemistry 2008; GCaMP: Nakai, Ohkura &amp; Imoto, 2001. Research demonstration.</p></section>
+</main></body></html>`}
+function ocCSV(){const S=OCSession.data(),rows=[['time','demo','kind','description']];
+  for(const k of Object.keys(OC_DEMOS)){const d=S.demos[k];if(!d)continue;for(const e of d.events)rows.push([e.t,OC_DEMOS[k].title,'action',e.text]);for(const t of d.trials){const {t:tt,key,...r}=t;rows.push([tt,OC_DEMOS[k].title,'setting',JSON.stringify(r)])}for(const o of d.opts){const {t:tt,...r}=o;rows.push([tt,OC_DEMOS[k].title,'optimization',JSON.stringify(r)])}}
+  const hd=rows.shift();rows.sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0);rows.unshift(hd);return rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n')}
+function ocSave(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
+function ocStamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())}
+function ocMountReport(box,demo,canvas,beforeSnap){if(!box)return;
+  if(!document.getElementById('ocrep-css')){const st=document.createElement('style');st.id='ocrep-css';st.textContent='.ocrep p{margin:0 0 8px;font-size:12.5px;line-height:1.45;color:#93aab7}.ocrep .rb{display:block;width:100%;min-height:40px;margin:6px 0 0;border-radius:8px;border:1px solid #27394a;background:#0a1621;color:#dce9ef;font:inherit;font-size:13px;cursor:pointer}.ocrep .rb.p{background:#eaf4f8;color:#04121a;border-color:#eaf4f8;font-weight:600}.ocrep .row{display:flex;gap:6px}.ocrep .row .rb{flex:1}.ocrep .cnt{font-size:12px;color:#93aab7;margin-top:8px}';document.head.appendChild(st)}
+  box.classList.add('ocrep');
+  box.innerHTML='<h2>Session report</h2><p>Everything you try in both OptiCeil demos is recorded in this browser. The report lists what you did, how each setting performed, and the settings OptiCeil backs out.</p><button class="rb p" data-a="html">Download report</button><div class="row"><button class="rb" data-a="csv">Data (CSV)</button><button class="rb" data-a="new">New session</button></div><div class="cnt"></div>';
+  const cnt=box.querySelector('.cnt'),count=()=>{const S=OCSession.data();let a=0,t=0,o=0;for(const k in S.demos){a+=S.demos[k].events.length;t+=S.demos[k].trials.length;o+=S.demos[k].opts.length}cnt.textContent=a+t+o?a+(a===1?' action, ':' actions, ')+t+(t===1?' setting and ':' settings and ')+o+(o===1?' optimization recorded.':' optimizations recorded.'):'Nothing recorded yet.'};
+  box.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a;
+    if(a==='html'){if(beforeSnap)beforeSnap();if(canvas)OCSession.snap(demo,canvas);ocSave('OptiCeil_report_'+ocStamp()+'.html',ocBuildReport(),'text/html')}
+    if(a==='csv')ocSave('OptiCeil_session_'+ocStamp()+'.csv',ocCSV(),'text/csv');
+    if(a==='new'&&confirm('Clear everything recorded so far and start a new session?')){OCSession.reset();count()}});
+  count();setInterval(count,2000)}
+
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TAU=Math.PI*2;
+
+/* ---------------- measured values (preprint) ---------------- */
+const REG={
+  m8:{name:'GCaMP8m',note:'Fast, bright indicator. 42 neurons, 191 recordings.',
+      idx:[[0,.840],[33,.966],[100,.975]],ba:[[0,.8129],[33,.9608],[67,.9620],[100,.959]],
+      peakIdx:[100,.975],baMax:.962,baPeakAt:67,drop:.065,
+      kin:{rise:.010,decay:.26,amp:1.0,sat:3.4,noise:.045,bright:1.0}},
+  s6:{name:'GCaMP6s',note:'Slower indicator, outside the spinal cord. 57 neurons, 68 recordings.',
+      idx:[[0,.655],[33,.743],[333,.867]],ba:[[250,.7946]],
+      peakIdx:[333,.867],baMax:.7946,baPeakAt:250,drop:.031,
+      kin:{rise:.075,decay:1.05,amp:.72,sat:2.0,noise:.085,bright:.85}},
+  sp:{name:'GCaMP6s (spinal preparation)',note:'Same indicator in spinal-cord preparations. 40 neurons, 116 recordings.',
+      idx:[[0,.587],[33,.608],[833,.739]],ba:[[500,.6584],[667,.6564]],
+      peakIdx:[833,.739],baMax:.6584,baPeakAt:500,drop:.024,
+      kin:{rise:.075,decay:1.05,amp:.55,sat:2.0,noise:.15,bright:.7}}
+};
+// Supplementary Table S1: window ms, volumes, index/max, BA/max, residual non-identifiability
+const PROT={
+  m8:{90:[33,1,.9905,.9987,.128],95:[33,1,.9905,.9987,.128],99:[67,2,.9986,1.0,.106]},
+  s6:{90:[67,2,.9360,.9248,.549],95:[167,5,.9826,.9730,.407],99:[250,8,1.0,1.0,.339]},
+  sp:{90:[167,5,.9408,.9724,.949],95:[333,10,.9757,.9873,.825],99:[667,20,.9829,.9969,.688]}
+};
+const XMAX=2000;
+
+/* monotone cubic interpolation */
+function pchip(pts){const x=pts.map(p=>p[0]),y=pts.map(p=>p[1]),n=x.length,h=[],d=[],m=new Array(n).fill(0);
+  for(let i=0;i<n-1;i++){h[i]=x[i+1]-x[i];d[i]=(y[i+1]-y[i])/h[i]}
+  if(n===2){m[0]=m[1]=d[0]}else{m[0]=d[0];m[n-1]=d[n-2];for(let k=1;k<n-1;k++){if(d[k-1]*d[k]<=0)m[k]=0;else{const w1=2*h[k]+h[k-1],w2=h[k]+2*h[k-1];m[k]=(w1+w2)/(w1/d[k-1]+w2/d[k])}}}
+  return t=>{if(t<=x[0])return y[0];if(t>=x[n-1])return y[n-1];let i=0;while(t>x[i+1])i++;const s=(t-x[i])/h[i],s2=s*s,s3=s2*s;
+    return (2*s3-3*s2+1)*y[i]+(s3-2*s2+s)*h[i]*m[i]+(-2*s3+3*s2)*y[i+1]+(s3-s2)*h[i]*m[i+1]}}
+for(const k in REG){const R=REG[k];
+  const idxEnd=R.peakIdx[1]*(1-R.drop/R.baMax);
+  const hold=Math.min(XMAX*.6,R.peakIdx[0]*1.6+60);
+  R.idxF=pchip([...R.idx,[hold,R.peakIdx[1]-.002],[XMAX,idxEnd]]);
+  const baPts=[...R.ba];
+  if(k!=='m8'){const ref=baPts[0][0],r=R.baMax/R.idxF(ref);[0,33,100].filter(t=>t<ref).forEach(t=>baPts.push([t,R.idxF(t)*r]));baPts.sort((a,b)=>a[0]-b[0])}
+  const last=baPts[baPts.length-1][0],baEnd=R.baMax-R.drop;
+  baPts.push([Math.max(last*1.5+40,hold),baPts[baPts.length-1][1]-.003]);
+  baPts.push([XMAX,baEnd]);
+  R.baF=pchip(baPts);R.baEnd=baEnd;
+}
+
+/* ---------------- state ---------------- */
+let uwin=1000,reg='m8',tgt=99,mode='intense',speed=.2,playing=!REDUCED,t=0;
+const SPK=[];let genT=0,seed=12345;
+const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+const MODES={calm:{rate:1.6,pb:.10,bn:[2,3],isi:[.02,.04]},burst:{rate:2.6,pb:.45,bn:[3,6],isi:[.012,.025]},intense:{rate:3.6,pb:.72,bn:[5,11],isi:[.006,.014]}};
+function genTo(T){const M=MODES[mode];while(genT<T){genT+=-Math.log(1-rnd())/M.rate+.04;
+    if(rnd()<M.pb){const n=M.bn[0]+Math.floor(rnd()*(M.bn[1]-M.bn[0]+1));let s=genT;for(let i=0;i<n;i++){SPK.push(s);s+=M.isi[0]+rnd()*(M.isi[1]-M.isi[0])}genT=s}
+    else SPK.push(genT)}
+  while(SPK.length&&SPK[0]<T-8)SPK.shift()}
+function F(tt){const K=REG[reg].kin;let v=0;for(let i=SPK.length-1;i>=0;i--){const s=SPK[i];if(s>tt)continue;const dt=tt-s;if(dt>K.decay*7)break;v+=K.amp*(1-Math.exp(-dt/K.rise))*Math.exp(-dt/K.decay)}return v/(1+v/K.sat)}
+function lastSpike(tt){for(let i=SPK.length-1;i>=0;i--)if(SPK[i]<=tt)return SPK[i];return -1e9}
+function recentCount(tt,win){let c=0;for(let i=SPK.length-1;i>=0;i--){const s=SPK[i];if(s>tt)continue;if(tt-s>win)break;c++}return c}
+function noise(tt){const k=Math.floor(tt*30);let h=Math.sin(k*12.9898+reg.length*78.233)*43758.5453;return (h-Math.floor(h))-.5}
+
+/* ---------------- canvases ---------------- */
+function fit(cv,cb){const st={ctx:cv.getContext('2d'),W:0,H:0,D:1};const ap=(silent)=>{const r=cv.getBoundingClientRect(),D=Math.min(devicePixelRatio||1,2),W=Math.round(r.width),H=Math.round(r.height);if(W===st.W&&H===st.H&&D===st.D)return;Object.assign(st,{W,H,D});cv.width=Math.max(1,W*D);cv.height=Math.max(1,H*D);st.ctx.setTransform(D,0,0,D,0,0);if(!silent&&cb)cb()};new ResizeObserver(()=>ap(false)).observe(cv);ap(true);return st}
+
+const NEU=Neuron3D($('nc'),{growPerSpike:1/60});
+function drawNeuron(dtReal){const K=REG[reg].kin;NEU.frame(dtReal,d=>F(t-d),K.sat/K.bright*.8)}
+function paceGrowth(){const M=MODES[mode],rate=M.rate*(1+M.pb*((M.bn[0]+M.bn[1])/2-1));NEU.setGrowPerSpike(1/Math.max(8,22*rate*speed))}
+
+/* trace: last 3 s of fluorescence, 30 Hz volumes, spikes, OptiCeil windows */
+const tcs=fit($('tc'));
+function drawTrace(){const c=tcs.ctx,W=tcs.W,H=tcs.H;if(W<10)return;const K=REG[reg].kin,P=PROT[reg][tgt],span=3;
+  c.clearRect(0,0,W,H);const L=8,R=10,T=8,B=20,x=tt=>L+(tt-(t-span))/span*(W-L-R),y=v=>T+(H-T-B)*(1-v/(K.sat*1.02));
+  // each 30 Hz volume after a spike: kept and needed / kept but not needed / needed but not kept
+  const stopS=P[0]/1000,uS=uwin/1000,vw=(W-L-R)/(span*30);
+  for(let k=Math.ceil((t-span)*30);k<=Math.floor(t*30);k++){const tt=k/30,ls=lastSpike(tt);if(ls<0)continue;const a=tt-ls+1e-6;let col=null;
+    if(a<=uS){col=a<=stopS+1e-6?'rgba(66,245,167,.24)':'rgba(147,170,183,.16)'}else if(a<=stopS+1e-6){col='rgba(255,176,58,.30)'}
+    if(col){c.fillStyle=col;c.fillRect(x(tt)-vw/2,T,vw+.5,H-T-B)}}
+  // continuous fluorescence (faint)
+  c.beginPath();for(let i=0;i<=240;i++){const tt=t-span+span*i/240,v=F(tt);i?c.lineTo(x(tt),y(v)):c.moveTo(x(tt),y(v))}c.strokeStyle='rgba(66,245,167,.35)';c.lineWidth=1;c.stroke();
+  // sampled volumes at 30 Hz with noise
+  c.beginPath();const k0=Math.ceil((t-span)*30),k1=Math.floor(t*30);let first=true;
+  for(let k=k0;k<=k1;k++){const tt=k/30,v=Math.max(0,F(tt)+noise(tt)*K.noise*2*K.sat);if(first){c.moveTo(x(tt),y(v));first=false}else c.lineTo(x(tt),y(v))}
+  c.strokeStyle='#42f5a7';c.lineWidth=1.6;c.stroke();
+  for(let k=k0;k<=k1;k++){const tt=k/30,v=Math.max(0,F(tt)+noise(tt)*K.noise*2*K.sat);c.fillStyle='#b8ffdc';c.fillRect(x(tt)-1,y(v)-1,2,2)}
+  // spikes
+  c.strokeStyle='#ffb03a';c.lineWidth=1.4;for(const s of SPK){if(s<t-span||s>t)continue;c.beginPath();c.moveTo(x(s),H-B+2);c.lineTo(x(s),H-B+12);c.stroke()}
+  c.fillStyle='rgba(147,170,183,.9)';c.font='11px system-ui,sans-serif';c.textBaseline='alphabetic';c.fillText('last 3 s · dots = 30 Hz image volumes',L,H-4);
+  c.textAlign='right';c.fillText('now',W-R-4,T+10);c.textAlign='left';
+  c.strokeStyle='rgba(234,244,248,.6)';c.beginPath();c.moveTo(W-R+.5,T);c.lineTo(W-R+.5,H-B);c.stroke();
+}
+
+/* information-arrival chart */
+const chs=fit($('ch'),()=>chartStatic=null);let chartStatic=null;
+const xs=ms=>Math.sqrt(clamp(ms,0,XMAX)/XMAX);
+function chartGeo(){const W=chs.W,H=chs.H,L=36,R=10,T=14,B=30,Rg=REG[reg];let lo=1;for(let i=0;i<=60;i++){const ms=XMAX*Math.pow(i/60,2);lo=Math.min(lo,Rg.idxF(ms),Rg.baF(ms))}const y0=Math.max(.3,Math.floor((lo-.03)*20)/20),y1=1;return {W,H,L,R,T,B,y0,X:ms=>L+xs(ms)*(W-L-R),Y:v=>T+(H-T-B)*(1-(v-y0)/(y1-y0))}}
+function drawChartStatic(){const G=chartGeo(),Rg=REG[reg],P=PROT[reg][tgt];if(G.W<10)return null;
+  const cv=document.createElement('canvas');cv.width=G.W*chs.D;cv.height=G.H*chs.D;const c=cv.getContext('2d');c.setTransform(chs.D,0,0,chs.D,0,0);
+  c.font='11px system-ui,sans-serif';c.fillStyle='#93aab7';c.strokeStyle='#1a2a39';
+  const step=(1-G.y0)>.35?.1:.05;for(let v=Math.ceil(G.y0/step-1e-9)*step;v<=1.0001;v+=step){const py=Math.round(G.Y(v))+.5;c.beginPath();c.moveTo(G.L,py);c.lineTo(G.W-G.R,py);c.stroke();c.textAlign='right';c.textBaseline='middle';c.fillText(v.toFixed(1),G.L-6,py)}
+  c.textAlign='center';c.textBaseline='top';for(const m of [0,33,100,250,500,1000,2000])c.fillText(m>=1000?(m/1000)+' s':m,G.X(m),G.H-G.B+6);
+  c.fillText('ms after the spike (square-root scale)',G.L+(G.W-G.L-G.R)/2,G.H-13);
+  // past-stop region
+  const pk=Math.max(P[0],Rg.baPeakAt);
+  if(pk>P[0]){c.fillStyle='rgba(147,170,183,.08)';c.fillRect(G.X(P[0]),G.T,G.X(pk)-G.X(P[0]),G.H-G.T-G.B)}
+  c.fillStyle='rgba(255,93,93,.09)';c.fillRect(G.X(pk),G.T,G.W-G.R-G.X(pk),G.H-G.T-G.B);
+  const line=(f,col,w)=>{c.beginPath();for(let i=0;i<=200;i++){const ms=XMAX*Math.pow(i/200,2),v=f(ms);i?c.lineTo(G.X(ms),G.Y(v)):c.moveTo(G.X(ms),G.Y(v))}c.strokeStyle=col;c.lineWidth=w;c.stroke()};
+  line(Rg.idxF,'#ff6b8a',2.2);line(Rg.baF,'#7ea6ff',2.2);
+  const dot=(ms,v,col,hollow)=>{c.beginPath();c.arc(G.X(ms),G.Y(v),3.8,0,TAU);if(hollow){c.fillStyle='#060e17';c.fill();c.strokeStyle=col;c.lineWidth=1.6;c.stroke()}else{c.fillStyle=col;c.fill();c.strokeStyle='#060e17';c.lineWidth=1;c.stroke()}};
+  Rg.idx.forEach(p=>dot(p[0],p[1],'#ff6b8a'));Rg.ba.forEach(p=>dot(p[0],p[1],'#7ea6ff'));dot(XMAX,Rg.baEnd,'#7ea6ff',true);
+  // your window
+  const ux=G.X(uwin);c.strokeStyle='#ffb03a';c.lineWidth=2;c.beginPath();c.moveTo(ux,G.T);c.lineTo(ux,G.H-G.B);c.stroke();
+  c.fillStyle='#ffb03a';c.font='600 11px system-ui,sans-serif';c.textAlign=ux>G.W*.6?'right':'left';c.textBaseline='bottom';c.fillText('YOU '+Math.round(uwin)+' ms',ux+(ux>G.W*.6?-5:5),G.H-G.B-4);
+  // stop line
+  const sx=G.X(P[0]);c.strokeStyle='#eaf4f8';c.lineWidth=1.5;c.setLineDash([4,3]);c.beginPath();c.moveTo(sx,G.T);c.lineTo(sx,G.H-G.B);c.stroke();c.setLineDash([]);
+  c.fillStyle='#eaf4f8';c.font='600 11.5px system-ui,sans-serif';c.textAlign=sx>G.W*.6?'right':'left';c.textBaseline='top';c.fillText('STOP '+P[0]+' ms · '+P[1]+' vol',sx+(sx>G.W*.6?-5:5),G.T+2);
+  c.fillStyle='#ff9a9a';c.font='11px system-ui,sans-serif';c.textAlign='right';c.fillText('accuracy −'+Rg.drop.toFixed(3)+' by 2 s',G.W-G.R-2,G.Y(Rg.baEnd)+8);
+  return cv}
+function drawChart(){if(!chartStatic)chartStatic=drawChartStatic();if(!chartStatic)return;const c=chs.ctx,G=chartGeo(),Rg=REG[reg],P=PROT[reg][tgt];
+  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,chs.W*chs.D,chs.H*chs.D);c.drawImage(chartStatic,0,0);c.setTransform(chs.D,0,0,chs.D,0,0);
+  const since=(t-lastSpike(t))*1000;if(since<0||since>XMAX*1.2)return;const ms=Math.min(XMAX,since),past=ms>P[0];
+  const pk=Math.max(P[0],Rg.baPeakAt),worse=ms>pk,px=G.X(ms),py=G.Y(Rg.baF(ms));c.strokeStyle=worse?'rgba(255,93,93,.8)':past?'rgba(234,244,248,.6)':'rgba(66,245,167,.8)';c.lineWidth=1;c.beginPath();c.moveTo(px,G.T);c.lineTo(px,G.H-G.B);c.stroke();
+  c.beginPath();c.arc(px,py,6,0,TAU);c.fillStyle=worse?'#ff5d5d':past?'#eaf4f8':'#42f5a7';c.fill();c.strokeStyle='#fff';c.lineWidth=1.5;c.stroke();
+}
+
+/* ---------------- UI text ---------------- */
+function uEval(){const Rg=REG[reg],P=PROT[reg][tgt],w=uwin,pk=Math.max(P[0],Rg.baPeakAt);
+  let idxMax=0;for(let i=0;i<=200;i++)idxMax=Math.max(idxMax,Rg.idxF(XMAX*i/200));
+  const idxFrac=Rg.idxF(w)/idxMax,baFrac=Rg.baF(w)/Rg.baMax;
+  let st,title,text;
+  if(w<P[0]-1){st='short';title='Too short';text='You stop before the information needed for '+tgt+'% has arrived. OptiCeil keeps '+P[1]+' volume'+(P[1]>1?'s':'')+'.'}
+  else if(w<=P[0]+1){st='meets';title='Matches OptiCeil';text='This is the shortest window that reaches '+tgt+'% of attainable performance on held-out neurons.'}
+  else if(w<=pk+1){st='extra';title='Longer than needed';text='The target was already met at '+P[0]+' ms. The extra imaging adds light exposure for this target.'}
+  else{st='past';title='Past peak accuracy';text='Beyond '+pk+' ms, held-out accuracy fell in the study: longer imaging returned a worse answer.'}
+  return {w,idxFrac,baFrac,st,title,text,P}}
+function updateUser(){const u=uEval(),v=Math.round(uwin/33.333);
+  $('uval').textContent=v+' vol · '+(uwin<1000?Math.round(uwin)+' ms':(uwin/1000).toFixed(2)+' s');
+  const b=$('uverdict');b.className='ubanner '+u.st;b.innerHTML='<b>'+u.title+'</b>'+u.text;
+  $('uidx').textContent=(u.idxFrac*100).toFixed(1)+'% of max';$('uba').textContent=(u.baFrac*100).toFixed(1)+'% of max';
+  chartStatic=null}
+const settleU=ocDebounce(()=>{const u=uEval();if(OCSession.trial('firing',reg+'|'+tgt+'|'+Math.round(uwin),{reg,tgt,win:Math.round(uwin),verdict:u.title,idxFrac:u.idxFrac,baFrac:u.baFrac}))
+  OCSession.event('firing',REG[reg].name+' at '+tgt+'%: tried '+Math.round(uwin)+' ms ('+Math.round(uwin/33.333)+' vol) → '+u.title.toLowerCase()+' (OptiCeil stop '+u.P[0]+' ms)');NEU&&OCSession.snap('firing',$('nc'))},800);
+function setText2(el,v){if(el.textContent!==v)el.textContent=v}
+function pct(x){return (x*100).toFixed(x>=.9995?0:1)+'%'}
+function panel(){const Rg=REG[reg],P=PROT[reg][tgt];updateUser();
+  $('regnote').textContent=Rg.note;
+  $('vstop').innerHTML=P[0]+' ms <small>· '+P[1]+' volume'+(P[1]>1?'s':'')+'</small>';
+  $('vtext').textContent='For '+Rg.name+' at '+tgt+'% of attainable performance, keep '+P[1]+' image volume'+(P[1]>1?'s':'')+' after each spike, then stop. Frozen on discovery neurons, then tested on unseen neurons.';
+  $('vidx').textContent=pct(P[2]);$('vba').textContent=pct(P[3]);$('vnid').textContent=P[4].toFixed(3);
+  $('otitle').textContent='More light, worse answer';
+  $('otext').textContent=' For '+Rg.name+', imaging past the stop point cost '+Rg.drop.toFixed(3)+' in held-out balanced accuracy by 2 s, the longest window tested. Longer acquisition admits later spikes that blur the answer and costs photons.';
+  chartStatic=null;
+}
+const CAPS=[
+  ()=>'Watch the neuron <b>take shape</b>. During development, firing and the calcium it lets in help steer how dendrites grow. Days are compressed into seconds here.',
+  ()=>'A neuron fires in <b>milliseconds</b>. The electrical spike itself is invisible to the microscope.',
+  ()=>'Calcium rushes in behind each spike. <b>GCaMP</b>, built from jellyfish GFP, glows when calcium binds.',
+  ()=>'GFP was found in <i>Aequorea victoria</i> in 1962 and won the <b>2008 Nobel Prize in Chemistry</b>.',
+  ()=>'But the glow <b>lags and blurs</b> the spikes, especially in slower sensors and hard bursts.',
+  ()=>{const P=PROT[reg][tgt];return 'OptiCeil reads the data: for '+REG[reg].name.split(' ·')[0]+', stop after <b>'+P[0]+' ms</b> ('+P[1]+' vol). Longer looking makes the answer worse.'}
+];
+let capI=0,capT=0;const capEl=$('cap');
+function setCap(){capEl.innerHTML=CAPS[capI]()}
+function tickCap(dt){capT+=dt;if(capT>6.2){capT=0;capEl.classList.add('fade');setTimeout(()=>{capI=(capI+1)%CAPS.length;setCap();capEl.classList.remove('fade')},450)}}
+
+/* ---------------- loop ---------------- */
+let lastTs=0,shownText=0,lastSeen=-1;
+function frame(ts){const dtReal=lastTs?Math.min(.05,(ts-lastTs)/1000):0;lastTs=ts;
+  if(playing){t+=dtReal*speed;genTo(t+2)}
+  const ls=lastSpike(t);if(ls>lastSeen){for(const sp of SPK){if(sp>lastSeen&&sp<=t)NEU.spike()}lastSeen=ls}
+  drawNeuron(dtReal);drawTrace();drawChart();
+  if(ts-shownText>90){shownText=ts;$('clock').textContent='t = '+t.toFixed(3)+' s';
+    const n=recentCount(t,1);$('rate').textContent=n+' spikes in the last second · '+(speed===1?'real time':speed+'× speed');
+    $('fire').classList.toggle('on',t-ls<.02);
+    const gp=NEU.grown();setText2($('grow'),gp<.995?'Growing · '+Math.round(gp*100)+'%':'Fully grown');
+    const P=PROT[reg][tgt],v=Math.floor((t-ls)*30)+1;const ch=$('vol');
+    const uv=Math.round(uwin/33.333);if(ls<0){ch.textContent='—'}else if(v<=Math.min(uv,P[1])){ch.textContent='volume '+v+' · kept · needed';ch.style.color='#42f5a7'}else if(v<=uv){ch.textContent='volume '+v+' · kept · not needed';ch.style.color='#c9d6dd'}else if(v<=P[1]){ch.textContent='volume '+v+' · needed · not kept';ch.style.color='#ffb03a'}else{ch.textContent='volume '+v+' · imaging stopped';ch.style.color='#93aab7'}}
+  if(!REDUCED)tickCap(dtReal);
+  requestAnimationFrame(frame)}
+
+/* ---------------- controls ---------------- */
+function press(seg,b){[...seg.querySelectorAll('button')].forEach(x=>x.setAttribute('aria-pressed',String(x===b)))}
+function bindSeg(id,fn){const s=$(id);s.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;press(s,b);fn(b)})}
+bindSeg('reg',b=>{reg=b.dataset.r;panel();setCap();settleU()});
+bindSeg('tgt',b=>{tgt=+b.dataset.t;panel();setCap();settleU()});
+bindSeg('fmode',b=>{mode=b.dataset.f;paceGrowth();while(SPK.length&&SPK[SPK.length-1]>t)SPK.pop();genT=t;genTo(t+2)});
+bindSeg('speed',b=>{speed=+b.dataset.s;paceGrowth()});
+function setPlay(){$('pt').textContent=playing?'Pause':'Play';$('pi').innerHTML=playing?'<path d="M2 1h2v8H2zM6 1h2v8H6z"/>':'<path d="M2 1l7 4-7 4z"/>'}
+$('play').onclick=()=>{playing=!playing;setPlay()};
+$('uwin').addEventListener('input',e=>{uwin=+e.target.value*33.333;updateUser();settleU()});
+let anim=null;
+$('uopt').onclick=()=>{const P=PROT[reg][tgt],from=uwin,to=P[0],t0=performance.now(),before=Math.round(uwin);cancelAnimationFrame(anim);
+  const step=now=>{const k=Math.min(1,(now-t0)/700),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;uwin=from+(to-from)*e;$('uwin').value=Math.round(uwin/33.333);updateUser();if(k<1)anim=requestAnimationFrame(step);else{uwin=to;updateUser();
+    const summary=REG[reg].name+' at '+tgt+'%: moved from '+before+' ms to OptiCeil\u2019s stop, '+P[0]+' ms ('+P[1]+' vol), retaining '+(P[2]*100).toFixed(1)+'% of recoverability and '+(P[3]*100).toFixed(1)+'% of accuracy on held-out neurons';
+    OCSession.opt('firing',{reg,tgt,from:before,to:P[0],summary});OCSession.event('firing','Optimize: '+summary);const u=uEval();OCSession.trial('firing',reg+'|'+tgt+'|'+Math.round(uwin),{reg,tgt,win:Math.round(uwin),verdict:u.title,idxFrac:u.idxFrac,baFrac:u.baFrac});OCSession.snap('firing',$('nc'))}};
+  anim=requestAnimationFrame(step)};
+$('regrow').onclick=()=>{NEU.regrow();capI=0;capT=0;setCap();if(!playing){playing=true;setPlay()}};
+let autoRot=!REDUCED;const rb=$('rotbtn');const setRot=()=>{rb.textContent='Auto-rotate '+(autoRot?'on':'off');rb.setAttribute('aria-pressed',String(autoRot));NEU.setAuto(autoRot)};setRot();
+rb.onclick=()=>{autoRot=!autoRot;setRot()};
+let labs=true;const lb=$('labbtn');lb.onclick=()=>{labs=!labs;lb.textContent='Labels '+(labs?'on':'off');lb.setAttribute('aria-pressed',String(labs));NEU.setLabels(labs)};
+document.addEventListener('visibilitychange',()=>{lastTs=0});
+if(/[?&]autoplay=0/.test(location.search))playing=false;
+$('uwin').value=30;paceGrowth();genTo(2);t=.35;panel();OCSession.event('firing','Opened the calcium firing demo');ocMountReport($('ocReport'),'firing',$('nc'));setCap();setPlay();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
