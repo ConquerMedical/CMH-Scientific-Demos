@@ -19,38 +19,40 @@
 .comparecard p{font-size:12px;line-height:1.55;color:#7e98a5;margin:0}
 .takeaway{margin-top:12px;padding:14px 16px;border-left:2px solid var(--rim);background:rgba(47,227,214,.04);font-size:13px;line-height:1.55;color:#a7bdc7}
 @media(max-width:700px){.comparegrid{grid-template-columns:1fr}.comparecard .pct{font-size:42px}}
+.card.wide{min-height:0;margin-top:12px;border-color:rgba(242,220,78,.35)}.card.wide h2{margin-top:6px}
 </style></head><body>
 <div class="top"><div class="brand">CMH Scientific · ABP</div><div class="spacer"></div><a href="../">All instruments</a></div>
-<main class="wrap"><section class="hero"><div class="eyebrow">AI as a Biological Primitive · LUMIERE glioblastoma</div><h1>One patient. Four questions.</h1><p>Start with the observed longitudinal tumor, instantiate the patient-derived primitive, interrogate pharmacological and surgical alternatives separately, then ask whether the record supports a best intervention — or whether the evidence remains unresolved.</p></section>
-<div class="flow"><b>OBSERVE</b><i>→</i><b>PHARMACOLOGICAL</b><i>→</i><b>SURGICAL</b><i>→</i><b>DECIDE</b></div>
+<main class="wrap"><section class="hero"><div class="eyebrow">AI as a Biological Primitive · LUMIERE glioblastoma</div><h1>One patient. Four questions.<br>Then two patients who looked alike.</h1><p>Start with one patient's observed tumor course. Then build a 3-D model sized from her measured volumes, ask what-if questions about drug and surgical alternatives, and see whether any option is clearly favored — or whether the evidence leaves it unresolved. Every demo records your session and can produce a downloadable report.</p></section>
+<div class="flow"><b>OBSERVE</b><i>→</i><b>PHARMACOLOGICAL</b><i>→</i><b>SURGICAL</b><i>→</i><b>DECIDE</b><i>→</i><b>WHY INDIVIDUAL</b></div>
 <section class="grid">
-<a class="card c1" href="01_tumor_dynamics.html"><span class="n">01 · OBSERVED</span><h2>Tumor dynamics</h2><p>Patient-067's real longitudinal MRI, automated tumor contours, 3-D compartment burden and RANO course. Includes observed-MRI and position-frozen views.</p><div class="status">Observed record · no counterfactual outcome</div><div class="go">Open demo →</div></a>
-<a class="card c2" href="02_pharmacological_intervention.html"><span class="n">02 · INTERROGATE</span><h2>Pharmacological intervention</h2><p>Start from an observed patient state and perturb the patient-scaled primitive through radiation and alkylating-treatment channels.</p><div class="status">Patient-derived state · modeled counterfactual intervention</div><div class="go">Open demo →</div></a>
-<a class="card c3" href="03_surgical_intervention.html"><span class="n">03 · INTERROGATE</span><h2>Surgical intervention</h2><p>Probe alternative corridors, extents and depths from the same longitudinal primitive, with support-aware surgical guardrails.</p><div class="status">Observed surgical course · modeled alternative intervention</div><div class="go">Open demo →</div></a>
-<a class="card c4" href="04_optimal_intervention.html"><span class="n">04 · SYNTHESIZE</span><h2>Optimal intervention</h2><p>Compare pharmacological, surgical and combined intervention families under a declared objective — and refuse a unique optimum when support does not separate them.</p><div class="status">Counterfactual comparison · support-constrained decision</div><div class="go">Open demo →</div></a>
+<a class="card c1" href="01_tumor_dynamics.html"><span class="n">01 · OBSERVED</span><h2>Tumor dynamics</h2><p>Patient-067's real MRI follow-up over 167 weeks and 20 scans, with automated tumor outlines, measured 3-D volumes and expert RANO ratings. The default view holds one reference slice fixed so size changes are not distorted by changing scan angles.</p><div class="status">Observed record · no counterfactual outcome</div><div class="go">Open demo →</div></a>
+<a class="card c2" href="02_pharmacological_intervention.html"><span class="n">02 · INTERROGATE</span><h2>Pharmacological intervention</h2><p>Start from a real scan of this patient and change radiation dose and chemotherapy exposure in a patient-scaled demonstration model, with a map showing where the model declines to predict.</p><div class="status">Observed starting state · demonstration response model</div><div class="go">Open demo →</div></a>
+<a class="card c3" href="03_surgical_intervention.html"><span class="n">03 · INTERROGATE</span><h2>Surgical intervention</h2><p>From the week-156 decision point, try different extents, depths and approach directions, and compare with the scan taken after her actual operation.</p><div class="status">Observed surgical course · demonstration response model</div><div class="go">Open demo →</div></a>
+<a class="card c4" href="04_optimal_intervention.html"><span class="n">04 · SYNTHESIZE</span><h2>Optimal intervention</h2><p>Compare medical, surgical and combined options under a goal you choose — and see ABP decline to name a winner when the options are too close to separate.</p><div class="status">Modeled comparison · declines when the options are too close</div><div class="go">Open demo →</div></a>
 </section>
+<a class="card c5 wide" href="05_matched_divergence.html"><span class="n">05 · WHY INDIVIDUAL-FIRST</span><h2>Two tumors that looked alike</h2><p>Patients 071 and 072 had nearly identical scans at one point: similar size, same rating, among the closest 1% of scan pairs on imaging features. Follow both full courses: one progressed rapidly with survival ending 17 weeks later, the other lived 96 more weeks. Make your own call at the match before you press play.</p><div class="status">Observed record · two patients · no model applied</div><div class="go">Open demo →</div></a>
 
 <section class="compare">
 <div class="eyebrow">Why individual-first?</div>
-<h2>Tested head-to-head in type 1 diabetes.</h2>
-<p>We gave a population-based, digital-twin-style model and ABP the same problem: identify an intervention that would move high blood glucose toward a target. One started from the population. ABP started from each person's own biological history.</p>
+<h2>What the type 1 diabetes study showed.</h2>
+<p>In 12 people with type 1 diabetes (194,010 five-minute observations), a model trained on the pooled population and models built from each person's own history were given the same task: find an intervention that moves high blood glucose toward a target.</p>
 <div class="comparegrid">
   <div class="comparecard">
-    <div class="label">DIGITAL-TWIN-STYLE POPULATION MODEL</div>
+    <div class="label">POPULATION MODEL VS EACH PERSON'S OWN MODEL</div>
     <div class="pct">24.5%</div>
-    <h3>of individual-dynamics intervention choices matched</h3>
-    <p>The population-based model reproduced the intervention selected from the patient's own dynamics only 24.5% of the time. In the other 75.5% of tests, the population-based answer differed from the intervention derived from that individual's own biological history.</p>
+    <h3>of tests gave the identical intervention</h3>
+    <p>The population-trained model and the person's own model chose the same intervention in only 24.5% of evaluations. In the other 75.5%, they disagreed about what would move that person toward target. This measures agreement, not which answer was right.</p>
   </div>
   <div class="comparecard">
-    <div class="label">ABP · INDIVIDUAL-FIRST MODEL</div>
+    <div class="label">ABP INVERSION · SEPARATE RESULT</div>
     <div class="pct">96.0%</div>
-    <h3>of tested high-glucose cases moved toward target</h3>
-    <p>Across 400 high-glucose cases, ABP found a clinically constrained intervention that moved the individual's modeled biological state in the desired direction 96.0% of the time.</p>
+    <h3>of 400 high-glucose cases moved toward target in the model</h3>
+    <p>Queried in reverse under clinical constraints, ABP found an intervention that moved the modeled glucose state closer to target in 96.0% of cases, reducing the average gap by 87.8%. This is a modeled result, not clinical treatment success.</p>
   </div>
 </div>
-<div class="takeaway"><b>A model personalized from the population is not the same thing as a model built from the person.</b> The diabetes experiment showed that the two approaches can look at the same problem and reach very different conclusions about what intervention fits the individual.</div>
+<div class="takeaway"><b>A model trained on the population is not the same thing as a model built from the person.</b> Faced with the same task, the two usually reached different conclusions about what intervention fits the individual. The comparison is architectural: it does not claim that every digital twin is built the same way.</div>
 </section>
 
-<div class="note"><b>Research demonstrator.</b> LUMIERE imaging is de-identified research data. Patient-derived observations and modeled counterfactuals are labeled separately. ABP outputs are retrospective, non-causal experimental hypotheses and are not treatment recommendations.</div>
+<div class="note"><b>Research demonstrator.</b> Imaging: LUMIERE dataset (Suter et al., <i>Scientific Data</i> 9:768, 2022), de-identified research data. Patient-derived observations and modeled counterfactuals are labeled separately. The response models in demos 2–4 are declared demonstration functions, not fitted to this patient's treatment history. ABP outputs are retrospective, non-causal experimental hypotheses and are not treatment recommendations.</div>
 <div class="links"><a href="https://conquermedical.health/cmh-scientific/papers/abp/">White paper</a> · <a href="https://doi.org/10.21203/rs.3.rs-10898489/v1">Study</a></div>
 </main></body></html>

@@ -1,160 +1,662 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self' data:; connect-src https://cmh-public-demo-compute.onrender.com; object-src 'none'; base-uri 'self'; form-action 'self' mailto:; frame-src 'none'">
-<meta name="referrer" content="no-referrer">
-
-<title>OptiCeil — constraint space</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Acquisition design from information limits</title>
 <style>
 :root{
-  --bg:#050a10;--pane:#0a1622;--edge:#16303f;--ink:#e9f3f9;--dim:#8aa4b6;--faint:#5d7686;
-  --cy:#4fd4ff;--gr:#5fe3a6;--am:#ffc857;--rd:#ff6b7f;--vi:#a897ff;
+  --void:#04070c;--line:#1c2836;--text:#c8dce6;--dim:#6b8394;
+  --cell:#3ce0c8;--spike:#ffb03a;--ceil:#ff6b8a;--model:#7ea6ff;--bad:#ff4b3a;--warn:#ffb03a;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);
-  font:14px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;letter-spacing:-.004em}
-.wrap{max-width:1500px;margin:auto;padding:16px}
-.eyebrow{font-size:11px;color:var(--cy);letter-spacing:.08em;margin-bottom:5px}
-h1{font-size:22px;font-weight:600;letter-spacing:-.02em;margin:0 0 6px}
-.lede{color:#a4bccc;max-width:74ch;margin:0 0 10px;font-size:14.5px}.instant{margin:0 0 14px;border-left:4px solid var(--cy);background:#071923;padding:10px 13px;border-radius:8px;font-size:15px;line-height:1.45}.instant b{color:#fff}
-.grid{display:grid;grid-template-columns:250px minmax(0,1fr) 320px;grid-template-areas:"controls stage rail";gap:14px;align-items:start}.controlPane{grid-area:controls}.stagePane{grid-area:stage}.rail{grid-area:rail}
-.pane{background:var(--pane);border:1px solid var(--edge);border-radius:12px;overflow:hidden}
-.sec{padding:13px 15px;border-bottom:1px solid #0f2230}
-.sec:last-child{border-bottom:0}
-h3{margin:0 0 10px;font-size:11.5px;font-weight:600;color:#b6cddb}
-.opt{display:block;width:100%;text-align:left;border:1px solid #24404f;background:#091724;color:var(--ink);
-  padding:9px 11px;border-radius:8px;font:inherit;font-size:13px;cursor:pointer;margin-bottom:6px}
-.opt:hover{border-color:var(--cy)}
-.opt.on{background:#2a2160;border-color:var(--vi);color:#fff}
-.opt:focus-visible{outline:2px solid var(--cy);outline-offset:2px}
-.sl{margin-bottom:11px}
-.sl label{display:flex;justify-content:space-between;font-size:12px;color:var(--dim);margin-bottom:3px}
-.sl label b{color:var(--ink);font-variant-numeric:tabular-nums}
-.sl input{width:100%;accent-color:var(--vi);margin:0}
-.chips{display:flex;gap:5px;flex-wrap:wrap}
-.chip{border:1px solid #24404f;background:#091724;color:var(--ink);padding:6px 11px;border-radius:7px;
-  font:inherit;font-size:12.5px;cursor:pointer}
-.chip.on{background:#2a2160;border-color:var(--vi)}
-
-.stage{padding:16px 18px 6px}
-.stagehead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:2px}
-.stagehead b{font-size:14px;font-weight:600}
-.stagehead span{font-size:12px;color:var(--faint)}
-.plots{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:center}
-canvas{display:block;width:100%;touch-action:none}.stage canvas{cursor:crosshair}
-.cap{font-size:11.5px;color:var(--faint);text-align:center;margin-top:2px}
-
-.verdict{margin:0 18px 16px;padding:12px 14px;border-radius:9px;border:1px solid;display:flex;gap:12px;align-items:flex-start}
-.verdict.ok{background:#08211a;border-color:#1f6a4c}
-.verdict.no{background:#231a06;border-color:#6d5518}.verdict.bad{background:#241018;border-color:#7b2637}
-.verdict .m{font-size:22px;line-height:1;flex:none}
-.verdict h4{margin:0 0 3px;font-size:15px;font-weight:600}
-.verdict.ok h4{color:var(--gr)}.verdict.no h4{color:var(--am)}.verdict.bad h4{color:var(--rd)}
-.verdict p{margin:0;font-size:13px;color:#b7cbd8}
-
-.kv{display:grid;grid-template-columns:1fr auto;gap:6px 10px;font-size:13px}
-.kv dt{color:var(--dim);margin:0}
-.kv dd{margin:0;text-align:right;font-variant-numeric:tabular-nums}
-.con{display:grid;grid-template-columns:auto 1fr auto;gap:6px 9px;font-size:12.5px;align-items:baseline}
-.con .d{width:7px;height:7px;border-radius:50%;align-self:center}
-.con .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--dim)}
-.con .n.bind{color:var(--am);font-weight:600}
-.rel{border-left:2px solid var(--am);background:#1a1507;padding:9px 11px;border-radius:0 7px 7px 0;
-  font-size:12.5px;color:#f0dfae;line-height:1.45;margin-top:10px}
-.rel.ok{border-color:var(--gr);background:#071a13;color:#bfe8d4}
-.frozen{font-size:12px}
-.foot{margin-top:14px;color:var(--faint);font-size:11.5px;line-height:1.5}
-@media(max-width:1200px){.grid{grid-template-columns:230px minmax(0,1fr)}.rail{grid-column:1/-1}
-  .plots{grid-template-columns:1fr}}
-@media(max-width:760px){.grid{display:flex!important;flex-direction:column!important}.stagePane{order:1!important}.controlPane{order:2!important}.rail{order:3!important}.wrap{padding:11px}.plots{grid-template-columns:1fr}.stage{padding:13px 12px 6px}.stagehead{display:block}.stagehead span{display:block;margin-top:3px}}
+html,body{margin:0;padding:0;height:100%;background:var(--void);color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+#app{position:fixed;inset:0;display:grid;grid-template-columns:1fr 300px}
+#stage{position:relative;overflow:hidden;display:grid;grid-template-rows:1fr 150px}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+#arbor{cursor:crosshair}
+.hud{position:absolute;left:20px;top:16px;max-width:min(52ch,calc(100% - 260px));pointer-events:none;z-index:2}
+.vbtns{position:absolute;right:14px;top:14px;z-index:3;display:flex;gap:6px}
+.vbtns button{font:inherit;font-size:12px;padding:7px 11px;border-radius:6px;border:1px solid var(--line);background:rgba(4,7,12,.8);color:var(--text);cursor:pointer}
+.vbtns button[aria-pressed=false]{color:var(--dim)}
+@media(max-width:860px){.vbtns{top:auto;bottom:140px;right:10px}.vbtns button{padding:6px 9px;font-size:11.5px}.hud{max-width:calc(100% - 40px)!important}.hud h1{font-size:13px}}
+.hud h1{font-size:14px;font-weight:500;margin:0 0 5px;text-shadow:0 1px 12px rgba(4,7,12,.95)}
+.hud p{margin:0;font-size:11.5px;line-height:1.5;color:var(--dim);
+  text-shadow:0 1px 10px rgba(4,7,12,.95)}
+.side{background:#060a11;border-left:1px solid var(--line);overflow-y:auto;padding:18px 18px 26px}
+.side h2{font-size:10.5px;font-weight:600;letter-spacing:.07em;color:var(--dim);margin:0 0 12px}
+.side section+section{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+label{display:block;margin-bottom:14px}
+label .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+label .n{font-size:12.5px}
+label .v{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;
+  font-variant-numeric:tabular-nums;color:var(--cell)}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:20px;background:none;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
+  border-radius:50%;background:var(--cell);margin-top:-6px;box-shadow:0 0 10px rgba(60,224,200,.55)}
+input[type=range]::-moz-range-track{height:2px;background:var(--line)}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--cell);
+  border:none;box-shadow:0 0 10px rgba(60,224,200,.55)}
+input#cx::-webkit-slider-thumb{background:var(--model);box-shadow:0 0 10px rgba(126,166,255,.55)}
+input#cx::-moz-range-thumb{background:var(--model)}
+input[type=range]:focus-visible{outline:1px solid var(--cell);outline-offset:4px}
+.seg{display:flex;gap:5px;flex-wrap:wrap}
+.seg button{flex:1 1 44px;font:inherit;font-size:11px;padding:6px 2px;background:none;
+  color:var(--dim);border:1px solid var(--line);border-radius:3px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--cell);color:#04070c;border-color:var(--cell);
+  font-weight:600}
+.seg.two button[aria-pressed=true]{background:var(--model);border-color:var(--model)}
+.m{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:7px}
+.m span:last-child{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-variant-numeric:tabular-nums}
+.bars{margin:12px 0 4px}
+.bar{height:16px;background:#0d1620;border:1px solid var(--line);border-radius:2px;
+  position:relative;margin-bottom:6px;overflow:hidden}
+.bar i{position:absolute;left:0;top:0;bottom:0;display:block;font-style:normal}
+.bar u{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ceil);
+  text-decoration:none}
+.blab{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim);
+  margin-bottom:3px}
+.note{font-size:10.5px;line-height:1.5;color:#48606f}
+.flag{margin-top:10px;padding:9px 11px;border-left:2px solid var(--dim);
+  background:rgba(255,255,255,.03);border-radius:2px;font-size:11px;line-height:1.45}
+.flag b{display:block;font-size:12px;margin-bottom:3px}
+.key{list-style:none;margin:0;padding:0}.key li{position:relative;padding:0 0 9px 20px;font-size:11.5px;line-height:1.4;color:var(--dim)}.key li b{color:#dce9ef;font-weight:600}.key li i{position:absolute;left:0;top:5px;width:10px;height:10px;border-radius:50%}
+.optbtn{display:block;width:100%;margin-top:10px;min-height:38px;border-radius:6px;border:1px solid var(--ceil);background:rgba(255,107,138,.12);color:#fff;font:inherit;font-size:12.5px;font-weight:600;cursor:pointer}
+.optbtn:hover{background:rgba(255,107,138,.22)}
+.next{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-4px 0 16px;padding:10px 12px;border-radius:8px;border:1px solid rgba(66,245,167,.45);color:#dce9ef;text-decoration:none;font-size:12.5px;background:rgba(66,245,167,.06)}
+.next b{color:#42f5a7;font-weight:600}
+.next:hover{background:rgba(66,245,167,.12)}
+@media(max-width:860px){
+  #app{grid-template-columns:1fr;grid-template-rows:minmax(240px,44vh) 1fr}
+  #stage{grid-template-rows:1fr 110px}
+  .side{border-left:none;border-top:1px solid var(--line)}
+  .hud p{display:none}
+}
 </style>
-<link rel="stylesheet" href="../cmh-patch-v33.css"><link rel="stylesheet" href="../cmh-session-v33.css"></head>
+</head>
 <body>
-<div class="wrap">
-  <div class="eyebrow">OPTICEIL · ACQUISITION DESIGN</div>
-  <h1>State the inference. OptiCeil returns the acquisition that supports it.</h1>
-  <p class="lede">State the inference you need to make, and OptiCeil returns the acquisition that supports it — volume rate, sampling, depth, photon budget — along with the one constraint that binds and what it would take to relieve it. When a specification cannot close, it says so and names the trade.</p><div class="instant" id="instant">—</div>
-
-  <div class="grid">
-    <!-- controls -->
-    <aside class="pane controlPane">
-      <section class="sec">
-        <h3>What do you need to resolve?</h3>
-        <div id="tasks"></div>
-      </section>
-      <section class="sec">
-        <h3>Over what</h3>
-        <div class="sl"><label>Field of view <b id="nFov">450</b></label><input type="range" id="fov" min="120" max="900" value="450"></div>
-        <div class="sl"><label>Depth required <b id="nDep">230</b></label><input type="range" id="dep" min="40" max="500" value="230"></div>
-        <div class="sl"><label>Recording duration <b id="nDur">10</b></label><input type="range" id="dur" min="1" max="60" value="10"></div>
-      </section>
-      <section class="sec">
-        <h3>Indicator</h3>
-        <div class="chips" id="inds"></div>
-      </section>
-      <section class="sec">
-        <h3>Falsify the estimator</h3>
-        <div class="sl"><label>Geometry agreement <b id="nStable">100%</b></label><input type="range" id="stable" min="10" max="100" step="5" value="100"></div>
-        <button class="chip" id="breakEstimator" style="width:100%">Push past the validity boundary</button>
-        <p class="foot" style="margin-top:8px">Illustrative stress control: when the tested geometries stop agreeing, OptiCeil refuses to report a ceiling.</p>
-      </section>
-    </aside>
-
-    <!-- stage -->
-    <main class="pane stagePane">
-      <div class="stage">
-        <div class="stagehead"><b>Constraint space</b><span id="stageSub">requested configuration against the achievable envelope</span></div>
-        <div class="plots">
-          <div><canvas id="env" height="340"></canvas><div class="cap">Achievable envelope — volume rate against usable depth. The point is your request.</div></div>
-          <div><canvas id="rad" height="300"></canvas><div class="cap">Required against available, per constraint.</div></div>
-        </div>
-        <div style="margin-top:9px;border-top:1px solid #132836;padding-top:10px"><canvas id="trace" height="118"></canvas><div class="cap">Frozen timing evidence — target event at 0; GCaMP8m 99% discovery-selected protocol: 67 ms / 2 post-target volumes at 30 Hz. The acquisition-constraint model above is an interactive design demonstrator, not a claim that its illustrative hardware numbers were prospectively calibrated.</div></div>
-      </div>
-      <div class="verdict ok" id="verdict">
-        <div class="m" id="vm">✓</div>
-        <div><h4 id="vh">Configuration closes</h4><p id="vp">Every constraint has margin at the stated inference.</p></div>
-      </div>
-    </main>
-
-    <!-- readout -->
-    <aside class="pane rail">
-      <section class="sec">
-        <h3>Required configuration</h3>
-        <dl class="kv">
-          <dt>Volume rate</dt><dd><span id="kRate">100</span> vol/s</dd>
-          <dt>Lateral sampling</dt><dd><span id="kSamp">1.20</span> µm</dd>
-          <dt>Voxels per volume</dt><dd id="kVox">7.3M</dd>
-          <dt>Signal photons per voxel</dt><dd id="kPh">69</dd>
-          <dt>Usable depth at this rate</dt><dd><span id="kUse">211</span> µm</dd>
-          <dt>Bleaching-limited duration</dt><dd><span id="kBl">18</span> min</dd>
-        </dl>
-      </section>
-      <section class="sec">
-        <h3>Binding constraint</h3>
-        <div class="con" id="cons"></div>
-        <p class="rel" id="rel"></p>
-      </section>
-      <section class="sec">
-        <h3>Frozen validation</h3>
-        <dl class="kv frozen">
-          <dt>CASCADE recordings</dt><dd>914</dd>
-          <dt>Neurons</dt><dd>312</dd>
-          <dt>Balanced samples</dt><dd>146,962</dd>
-          <dt>Best fixed balanced accuracy</dt><dd>83.8%</dd>
-          <dt>Conservative recoverability envelope</dt><dd>≈87.0%</dd>
-          <dt>GCaMP8m 99% timing protocol</dt><dd>67 ms / 2 volumes</dd>
-          <dt>nonspinal GCaMP6s 99%</dt><dd>250 ms / 8 volumes</dd>
-          <dt>spinal GCaMP6s 99%</dt><dd>667 ms / 20 volumes</dd>
-        </dl>
-        <button id="downloadReport" class="chip" style="width:100%;margin-top:12px">Download current report</button>
-        <p class="foot">The configuration model above is an interactive image-design demonstrator, not a hardware calibration. OptiCeil's recoverability and acquisition logic were validated retrospectively on paired calcium-fluorescence/electrophysiology ground truth from CASCADE.</p>
-      </section>
-    </aside>
+<div id="app">
+  <div id="stage">
+    <div class="hud">
+      <h1>State the inference. The recording tells you the acquisition it needs.</h1>
+      <p>One neuron's fluorescence and the spikes that actually occurred. Set the accuracy your
+      inference requires; the minimum acquisition that supports it is read off the curve.</p>
+    </div>
+    <canvas id="arbor"></canvas>
+    <div class="vbtns"><button id="regrow">Grow again</button><button id="rot" aria-pressed="true">Auto-rotate</button><button id="labs" aria-pressed="true">Labels on</button></div>
+    <canvas id="trace"></canvas>
   </div>
+
+  <aside class="side">
+    <a class="next" href="hidden_firing.html"><span>Demo 2 · <b>The hidden firing</b><br>Published stop points, in slow motion</span><span aria-hidden="true">→</span></a>
+    <section>
+      <h2>What you're seeing</h2>
+      <ul class="key">
+      <li><i style="background:#eaf4f8"></i><b>Bright dot at the center: cell body (soma).</b> The neuron's core, where inputs are added up and a spike is triggered.</li>
+      <li><i style="background:#3ce0c8"></i><b>Thick line upward: trunk (apical dendrite).</b> The main cable collecting input from far away.</li>
+      <li><i style="background:#3ce0c8;opacity:.6"></i><b>Fine lines: dendrites and branches.</b> Where the neuron receives signals from other cells.</li>
+      <li><i style="background:#c8ffe8"></i><b>Small glowing ends: growing tips.</b> Branches extending during the growth time-lapse.</li>
+      <li><i style="background:#8a9ab8"></i><b>Grey thread: axon.</b> Carries the spike to other neurons.</li>
+      <li><i style="background:#ffb03a"></i><b>Orange flash: the spike (action potential).</b> A millisecond electrical event. Shown as orange ticks under the trace; the microscope does not see it directly.</li>
+      <li><i style="background:#3ce0c8"></i><b>Green glow spreading out: calcium fluorescence.</b> Calcium enters after the spike and GCaMP lights up. This slower glow is what the microscope actually records.</li>
+      <li><i style="background:#2a5a55"></i><b>Faint drifting specks:</b> decoration for depth only.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Indicator</h2>
+      <div class="seg" id="ind"></div>
+    </section>
+
+    <section>
+      <h2>Inference required</h2>
+      <label style="margin-bottom:6px"><span class="row"><span class="n">Accuracy needed</span>
+        <span class="v" id="vTgt" style="color:var(--ceil)">90.0%</span></span>
+        <input type="range" id="tgt" min="0.60" max="0.98" step="0.005" value="0.90"></label>
+      <div class="flag" id="design" style="margin-top:9px">
+        <b id="dT">—</b><span id="dE">—</span></div>
+      <button class="optbtn" id="optBtn">Optimize for this target</button>
+      <div class="flag" id="optOut" style="display:none"></div>
+    </section>
+
+    <section>
+      <h2>Acquisition</h2>
+      <label><span class="row"><span class="n">Post-event window</span>
+        <span class="v" id="vWin">0.50 s</span></span>
+        <input type="range" id="win" min="0" max="1.5" step="0.033" value="0.5">
+        <canvas id="wc" height="52" style="width:100%;height:52px;display:block;margin-top:5px"></canvas>
+        </label>
+      <label><span class="row"><span class="n">Photon budget</span>
+        <span class="v" id="vPh">1.00</span></span>
+        <input type="range" id="ph" min="0.12" max="1" step="0.02" value="1"></label>
+      <label style="margin-bottom:2px"><span class="row"><span class="n">Imaging depth</span>
+        <span class="v" id="vDp">0 µm</span></span>
+        <input type="range" id="dp" min="0" max="600" step="10" value="0"></label>
+    </section>
+
+    <section>
+      <h2>Observer</h2>
+      <label style="margin-bottom:8px"><span class="row"><span class="n">Model capacity</span>
+        <span class="v" id="vCx" style="color:var(--model)">1.0</span></span>
+        <input type="range" id="cx" min="0" max="10" step="0.1" value="1"></label>
+      <div class="seg two" id="prep">
+        <button data-p="ctx" aria-pressed="true">Trained &amp; tested: cortex</button>
+        <button data-p="sc" aria-pressed="false">Tested: spinal cord</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recoverable</h2>
+      <div class="bars">
+        <div class="blab"><span>observer</span><span id="lObs">—</span></div>
+        <div class="bar"><i id="bObs" style="background:var(--model)"></i><u id="uCeil"></u></div>
+        <div class="blab"><span>ceiling for this acquisition</span><span id="lCeil">—</span></div>
+      </div>
+      <div class="m"><span>Unreached by observer</span><span id="mGap">—</span></div>
+      <div class="m"><span>Absent from recording</span><span id="mLost">—</span></div>
+      <div class="flag" id="flag"><b id="fT">Add capacity</b><span id="fE">Raise model capacity
+      and watch where it stops.</span></div>
+    </section>
+
+    <section id="ocReport"></section>
+
+    <section>
+      <p class="note">The minimum acquisition is read off the ceiling curve backwards: the shaded region is the set of windows that reach the stated accuracy, and its left edge is the minimum. This is a parametric sandbox, not patient or animal data. "Accuracy needed" is absolute here; the published study sets targets as fractions of each recording's best attainable performance and measured GCaMP8m and GCaMP6s only (6f, 7f, 8f and 8s are parametric). The window saturation near 250&nbsp;ms reflects nonspinal GCaMP6s. The published stop points for all three measured regimes are in demo 2.</p>
+    </section>
+  </aside>
 </div>
 
-<script src="../cmh-demo-client-v1.js"></script><script src="public-client-v1.js"></script>
-<script src="../cmh-patch-v33.js"></script><script src="../cmh-session-v33.js"></script></body>
+<script>
+/* ===== Neuron3D: growing, rotatable, calcium-lit neuron (canvas 2D, no dependencies) ===== */
+function Neuron3D(cv,opt){
+  opt=Object.assign({labels:true,core:'190,255,225',halo:'66,245,167',spark:'255,200,120',seed:7,growPerSpike:1/70,onResize:null},opt||{});
+  const TAU=Math.PI*2,clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+  const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cx=cv.getContext('2d');let W=0,H=0,D=1;
+  const resize=(silent)=>{const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2),w=Math.round(r.width),h=Math.round(r.height);if(w===W&&h===H&&d===D)return;W=w;H=h;D=d;cv.width=Math.max(1,w*d);cv.height=Math.max(1,h*d);if(!silent&&opt.onResize)opt.onResize()};
+  new ResizeObserver(()=>resize(false)).observe(cv);resize(true);
+
+  /* geometry: 3-D arbor, unit radius */
+  let s=opt.seed;const rnd=()=>{s=(s*1103515245+12345)%2147483648;return s/2147483648};
+  const norm=v=>{const l=Math.hypot(v[0],v[1],v[2])||1;return [v[0]/l,v[1]/l,v[2]/l]};
+  const SEG=[];
+  let ROOT=0;function br(p,dir,len,w,d,path){if(d>5||len<.028)return;const e=[p[0]+dir[0]*len,p[1]+dir[1]*len,p[2]+dir[2]*len];SEG.push({a:p,b:e,p0:path,p1:path+len,d,w,root:ROOT});
+    const n=d<2?3:2;for(let i=0;i<n;i++){const sp=.95;const nd=norm([dir[0]+(rnd()-.5)*sp,dir[1]+(rnd()-.5)*sp,dir[2]+(rnd()-.5)*sp]);br(e,nd,len*(.62+rnd()*.22),w*.68,d+1,path+len)}}
+  const roots=[[0,-1,.1],[.8,.5,.3],[-.8,.5,-.2],[.2,.6,-.9],[-.3,.4,.9],[.9,-.2,-.5],[-.9,-.3,.4]];
+  roots.forEach((r,i)=>{ROOT=i;br([0,0,0],norm(r),i===0?.27:.19,i===0?.028:.02,0,0)});
+  const AX=[];{let p=[0,0,0],dir=norm([.25,1,.15]);for(let i=0;i<40;i++){dir=norm([dir[0]+(rnd()-.5)*.25,dir[1]+(rnd()-.5)*.1,dir[2]+(rnd()-.5)*.25]);const e=[p[0]+dir[0]*.032,p[1]+dir[1]*.032,p[2]+dir[2]*.032];AX.push([p,e]);p=e}}
+  let RM=0,PM=0;for(const g of SEG){RM=Math.max(RM,Math.hypot(...g.b));PM=Math.max(PM,g.p1)}
+  for(const a of AX)RM=Math.max(RM,Math.hypot(...a[1])*.9);
+  const sc0=1/RM;for(const g of SEG){g.a=g.a.map(v=>v*sc0);g.b=g.b.map(v=>v*sc0);g.p0*=sc0;g.p1*=sc0;g.w*=sc0}
+  for(const a of AX){a[0]=a[0].map(v=>v*sc0);a[1]=a[1].map(v=>v*sc0)}
+  PM*=sc0;
+  const trunk=SEG.find(g=>g.root===0&&g.d===0),basal=SEG.find(g=>g.root===2&&g.d===0);
+  const branch=SEG.filter(g=>g.root===1&&g.d===3)[0]||SEG[SEG.length-1];
+  const MOTES=[];for(let i=0;i<110;i++){const u=norm([rnd()-.5,rnd()-.5,rnd()-.5]),r=.3+rnd()*1.25;MOTES.push({p:[u[0]*r,u[1]*r,u[2]*r],ph:rnd()*TAU,sp:.15+rnd()*.25,dr:[(rnd()-.5)*.02,(rnd()-.5)*.02,(rnd()-.5)*.02]})}
+
+  /* view state */
+  const V={yaw:.5,pitch:-.18,auto:!REDUCED,grow:0,growT:0,blur:0,lastFlash:-1e9,flash:0,rings:[],pulses:[],time:0};
+  let drag=null,lastUser=-1e9;
+  cv.style.touchAction='none';cv.style.cursor='grab';
+  cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,y:e.clientY,yaw:V.yaw,pitch:V.pitch};lastUser=performance.now();cv.style.cursor='grabbing';try{cv.setPointerCapture(e.pointerId)}catch(_){}});
+  cv.addEventListener('pointermove',e=>{if(!drag)return;V.yaw=drag.yaw+(e.clientX-drag.x)*.009;V.pitch=clamp(drag.pitch+(e.clientY-drag.y)*.007,-1.3,1.3);lastUser=performance.now()});
+  const up=()=>{drag=null;cv.style.cursor='grab'};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+
+  function rot(p){const cy=Math.cos(V.yaw),sy=Math.sin(V.yaw),cp=Math.cos(V.pitch),sp=Math.sin(V.pitch);const x=p[0]*cy+p[2]*sy,z=-p[0]*sy+p[2]*cy,y=p[1];return [x,y*cp-z*sp,y*sp+z*cp]}
+  let G={};function geo(){const narrow=W<560;G={ox:W/2,oy:H*(narrow?.5:.52),s:Math.min(W,H)*(narrow?.44:.46)}}
+  function proj(p){const r=rot(p),k=3.2/(3.2-r[2]);return [G.ox+r[0]*G.s*k,G.oy+r[1]*G.s*k,r[2],k]}
+
+  const NR=6,ND=3,paths=[];for(let i=0;i<NR*ND;i++)paths.push(null);
+  function frame(dt,F,sat){ // F(delay) returns calcium level; sat = saturation reference
+    V.time+=dt;
+    if(V.auto&&!drag&&performance.now()-lastUser>2500)V.yaw+=dt*.18;
+    V.grow+=(V.growT-V.grow)*Math.min(1,dt*3);
+    V.flash=Math.max(0,V.flash-dt*3.2);
+    geo();const c=cx;c.setTransform(D,0,0,D,0,0);c.globalCompositeOperation='source-over';c.globalAlpha=1;
+    const bg=c.createRadialGradient(G.ox,G.oy,0,G.ox,G.oy,Math.max(W,H)*.75);bg.addColorStop(0,'#06151c');bg.addColorStop(.55,'#030a10');bg.addColorStop(1,'#010306');c.fillStyle=bg;c.fillRect(0,0,W,H);
+    const gpath=V.grow*PM*1.02,blur=V.blur;
+    // motes (slow twinkle, never flashing)
+    c.globalCompositeOperation='lighter';
+    for(const m of MOTES){m.p[0]+=m.dr[0]*dt;m.p[1]+=m.dr[1]*dt;m.p[2]+=m.dr[2]*dt;const q=proj(m.p),tw=.5+.5*Math.sin(V.time*m.sp*TAU*.3+m.ph),a=(.06+.14*tw)*(.45+.55*(q[2]+1)/2);c.fillStyle=`rgba(${opt.halo},${a.toFixed(3)})`;const z=1.2+1.4*q[3]*(1+blur*.4);c.fillRect(q[0]-z/2,q[1]-z/2,z,z)}
+    // bin segments by calcium delay (path distance) and depth
+    for(let i=0;i<paths.length;i++)paths[i]=[new Path2D(),new Path2D()];
+    const tips=[];
+    for(const g of SEG){if(g.p0>=gpath)continue;let b=g.b;if(g.p1>gpath){const f=(gpath-g.p0)/(g.p1-g.p0);b=[g.a[0]+(g.b[0]-g.a[0])*f,g.a[1]+(g.b[1]-g.a[1])*f,g.a[2]+(g.b[2]-g.a[2])*f];tips.push(b)}
+      const A=proj(g.a),B=proj(b),z=(A[2]+B[2])/2,di=z>.25?0:z>-.25?1:2,ri=Math.min(NR-1,Math.floor(g.p0/PM*NR)),P=paths[ri*ND+di];
+      P[0].moveTo(A[0],A[1]);P[0].lineTo(B[0],B[1]);P[1].moveTo(A[0],A[1]);P[1].lineTo(B[0],B[1])}
+    c.lineCap='round';
+    for(let ri=0;ri<NR;ri++){const lv=clamp(F((ri+.5)/NR*.035)/sat,0,1.2);
+      for(let di=0;di<ND;di++){const P=paths[ri*ND+di],depthA=[1,.7,.42][di],defocus=[0,1,2][di]*.8+blur;
+        c.strokeStyle=`rgba(${opt.halo},${((.05+.30*lv)*depthA/(1+defocus*.35)).toFixed(3)})`;c.lineWidth=(2.6+defocus*2.2)*(1+.6*lv)*G.s/260;c.stroke(P[0]);
+        c.strokeStyle=`rgba(${opt.core},${((.20+.75*lv)*depthA/(1+defocus*.6)).toFixed(3)})`;c.lineWidth=Math.max(.6,(.9-.1*ri)*G.s/260*(1+.3*lv));c.stroke(P[1])}}
+    // growth cones: soft, steady glow
+    const tipA=Math.min(.75,6/Math.max(1,tips.length));for(const t of tips){const q=proj(t),r=(1.4+.5*Math.sin(V.time*2+t[0]*9))*G.s/260;c.fillStyle=`rgba(${opt.core},${tipA.toFixed(3)})`;c.beginPath();c.arc(q[0],q[1],r*1.6,0,TAU);c.fill()}
+    // axon (grows after the first dendrites)
+    const axG=clamp((V.grow-.15)/.6,0,1),nA=Math.floor(AX.length*axG);
+    if(nA>0){const ap=new Path2D();for(let i=0;i<nA;i++){const A=proj(AX[i][0]),B=proj(AX[i][1]);if(!i)ap.moveTo(A[0],A[1]);ap.lineTo(B[0],B[1])}c.strokeStyle='rgba(150,170,200,.28)';c.lineWidth=Math.max(1,1.6*G.s/260);c.stroke(ap)}
+    // soma
+    const o=proj([0,0,0]),lv0=clamp(F(0)/sat,0,1.2),sr=Math.max(6,.05*G.s*o[3]);
+    let gr=c.createRadialGradient(o[0],o[1],0,o[0],o[1],sr*5);gr.addColorStop(0,`rgba(${opt.halo},${(.25+.5*lv0).toFixed(3)})`);gr.addColorStop(1,`rgba(${opt.halo},0)`);c.fillStyle=gr;c.beginPath();c.arc(o[0],o[1],sr*5,0,TAU);c.fill();
+    if(V.flash>0){gr=c.createRadialGradient(o[0],o[1],0,o[0],o[1],sr*4);gr.addColorStop(0,`rgba(${opt.spark},${(.45*V.flash).toFixed(3)})`);gr.addColorStop(1,`rgba(${opt.spark},0)`);c.fillStyle=gr;c.beginPath();c.arc(o[0],o[1],sr*4,0,TAU);c.fill()}
+    c.fillStyle=`rgba(${opt.core},${(.45+.5*lv0).toFixed(3)})`;c.beginPath();c.arc(o[0],o[1],sr,0,TAU);c.fill();
+    // soft spherical ripple and axon pulse (rate-limited with the flash)
+    for(const r of V.rings){r.a+=dt*1.6;if(r.a>=1)continue;const rr=sr+r.a*G.s*.85*o[3];c.strokeStyle=`rgba(${opt.spark},${(.22*(1-r.a)).toFixed(3)})`;c.lineWidth=1.2;c.beginPath();c.arc(o[0],o[1],rr,0,TAU);c.stroke()}
+    V.rings=V.rings.filter(r=>r.a<1);
+    for(const p of V.pulses){p.a+=dt*1.4;if(p.a>=1||nA<2)continue;const k=Math.min(nA-1,Math.floor(p.a*nA)),q=proj(AX[k][1]);gr=c.createRadialGradient(q[0],q[1],0,q[0],q[1],7);gr.addColorStop(0,`rgba(${opt.spark},.75)`);gr.addColorStop(1,`rgba(${opt.spark},0)`);c.fillStyle=gr;c.beginPath();c.arc(q[0],q[1],7,0,TAU);c.fill()}
+    V.pulses=V.pulses.filter(p=>p.a<1);
+    c.globalCompositeOperation='source-over';
+    if(opt.labels)drawLabels(tips,gpath,nA,o,sr);
+  }
+  function drawLabels(tips,gpath,nA,o,sr){const c=cx,small=W<560,fs=small?10.5:12;c.font=`600 ${fs}px system-ui,-apple-system,sans-serif`;c.textBaseline='middle';
+    const L=[];const mid=(g,f)=>[g.a[0]+(g.b[0]-g.a[0])*f,g.a[1]+(g.b[1]-g.a[1])*f,g.a[2]+(g.b[2]-g.a[2])*f];
+    L.push({at:[o[0],o[1]],t:'Cell body (soma)',sub:'where the spike starts',off:[-1,-.35],r:sr+2});
+    if(trunk&&gpath>trunk.p0+.05){const q=proj(mid(trunk,.8));L.push({at:[q[0],q[1]],t:'Trunk (apical dendrite)',sub:small?'':'main input cable',off:[1,-.6]})}
+    if(basal&&gpath>basal.p0+.04){const q=proj(mid(basal,.8));L.push({at:[q[0],q[1]],t:'Basal dendrites',sub:small?'':'short inputs near the soma',off:[-1,.95]})}
+    if(branch&&gpath>branch.p1){const q=proj(branch.b);L.push({at:[q[0],q[1]],t:'Branches',sub:small?'':'receive synaptic inputs',off:[1,.3]})}
+    if(tips.length&&V.grow<.98){const q=proj(tips[0]);L.push({at:[q[0],q[1]],t:'Growing tip',sub:small?'':'extends as activity continues',off:[1,-.2]})}
+    if(nA>AX.length*.6){const q=proj(AX[Math.floor(AX.length*.55)][1]);L.push({at:[q[0],q[1]],t:'Axon',sub:small?'':'carries the spike to other cells',off:[1,.4]})}
+    const boxes=[];
+    for(const l of L){const len=small?34:58,dx=l.off[0],dy=l.off[1],n=Math.hypot(dx,dy);let tx=l.at[0]+dx/n*len,ty=l.at[1]+dy/n*len*.8;
+      const w1=c.measureText(l.t).width;c.font=`${fs-1}px system-ui,-apple-system,sans-serif`;const w2=l.sub?c.measureText(l.sub).width:0;c.font=`600 ${fs}px system-ui,-apple-system,sans-serif`;
+      const bw=Math.max(w1,w2)+14,bh=l.sub?fs*2.9:fs*1.9,left=dx<0;let bx=left?tx-bw:tx;bx=Math.max(4,Math.min(W-bw-4,bx));
+      const step=(dy<0?-1:1)*(bh+4);let guard=0;
+      const hit=()=>boxes.some(q=>bx<q.x+q.w+4&&bx+bw+4>q.x&&(ty-bh/2)<q.y+q.h+3&&(ty+bh/2)+3>q.y);
+      ty=Math.max(bh/2+4,Math.min(H-bh/2-4,ty));
+      while(hit()&&guard++<6){ty+=step;if(ty<bh/2+4||ty>H-bh/2-4){ty=Math.max(bh/2+4,Math.min(H-bh/2-4,ty));break}}
+      boxes.push({x:bx,y:ty-bh/2,w:bw,h:bh,l,left,dx,dy,n});}
+    for(const q of boxes){const l=q.l,bx=q.x,bw=q.w,bh=q.h,ty=q.y+bh/2,ax=l.at[0]+(q.dx/q.n)*(l.r||3),ay=l.at[1]+(q.dy/q.n)*(l.r||3);
+      c.strokeStyle='rgba(234,244,248,.55)';c.lineWidth=1;c.beginPath();c.moveTo(ax,ay);c.lineTo(q.left?bx+bw:bx,ty);c.stroke();
+      c.fillStyle='rgba(234,244,248,.9)';c.beginPath();c.arc(l.at[0],l.at[1],2.2,0,TAU);c.fill();
+      c.fillStyle='rgba(3,8,12,.82)';c.strokeStyle='rgba(234,244,248,.25)';c.beginPath();if(c.roundRect)c.roundRect(bx,ty-bh/2,bw,bh,6);else c.rect(bx,ty-bh/2,bw,bh);c.fill();c.stroke();
+      c.fillStyle='#eaf4f8';c.textAlign='left';c.fillText(l.t,bx+7,l.sub?ty-fs*.55:ty);
+      if(l.sub){c.fillStyle='rgba(180,200,210,.95)';c.font=`${fs-1}px system-ui,-apple-system,sans-serif`;c.fillText(l.sub,bx+7,ty+fs*.65);c.font=`600 ${fs}px system-ui,-apple-system,sans-serif`}}
+  }
+  return {
+    frame,
+    setGrowPerSpike(g){opt.growPerSpike=g},
+    spike(){V.growT=Math.min(1,V.growT+opt.growPerSpike);const now=performance.now();if(now-V.lastFlash>=340){V.lastFlash=now;V.flash=1;if(!REDUCED){V.rings.push({a:0});V.pulses.push({a:0})}}},
+    regrow(){V.grow=0;V.growT=0},
+    grown(){return V.grow},
+    setBlur(b){V.blur=b},
+    setAuto(a){V.auto=a},
+    setLabels(v){opt.labels=v},
+    resetView(){V.yaw=.5;V.pitch=-.18},
+    size:()=>({W,H})
+  };
+}
+
+/* ===== OptiCeil session recorder + downloadable play-by-play report ===== */
+const OC_DEMOS={design:{n:1,title:'Acquisition design (parametric sandbox)',file:'index.html'},firing:{n:2,title:'The hidden firing (published protocols)',file:'hidden_firing.html'}};
+const OC_PUB={ // Supplementary Table S1: window ms, volumes, index/max, BA/max, residual non-identifiability
+  m8:{name:'GCaMP8m',rows:{90:[33,1,.9905,.9987,.128],95:[33,1,.9905,.9987,.128],99:[67,2,.9986,1.0,.106]},drop:.065,peak:'held-out accuracy peaks at 67 ms'},
+  s6:{name:'GCaMP6s (nonspinal)',rows:{90:[67,2,.9360,.9248,.549],95:[167,5,.9826,.9730,.407],99:[250,8,1.0,1.0,.339]},drop:.031,peak:'held-out accuracy peaks at 250 ms'},
+  sp:{name:'GCaMP6s (spinal preparation)',rows:{90:[167,5,.9408,.9724,.949],95:[333,10,.9757,.9873,.825],99:[667,20,.9829,.9969,.688]},drop:.024,peak:'held-out accuracy peaks at 500 ms'}
+};
+function ocDebounce(fn,ms){let h;return (...a)=>{clearTimeout(h);h=setTimeout(()=>fn(...a),ms)}}
+const OCSession=(()=>{const KEY='opticeil_session_v1';let mem=null;
+  function load(){if(mem)return mem;try{mem=JSON.parse(localStorage.getItem(KEY))}catch(e){}if(!mem||!mem.started)mem={started:new Date().toISOString(),demos:{}};return mem}
+  function save(){try{localStorage.setItem(KEY,JSON.stringify(mem))}catch(e){try{for(const k in mem.demos)delete mem.demos[k].snap;localStorage.setItem(KEY,JSON.stringify(mem))}catch(_){}}}
+  function D(d){const m=load();return m.demos[d]||(m.demos[d]={events:[],trials:[],opts:[]})}
+  return {
+    event(d,text){const x=D(d),l=x.events[x.events.length-1];if(l&&l.text===text)return;x.events.push({t:new Date().toISOString(),text});if(x.events.length>300)x.events.splice(0,x.events.length-300);save()},
+    trial(d,key,row){const x=D(d),l=x.trials[x.trials.length-1];if(l&&l.key===key)return false;x.trials.push({t:new Date().toISOString(),key,...row});if(x.trials.length>200)x.trials.splice(0,x.trials.length-200);save();return true},
+    opt(d,row){D(d).opts.push({t:new Date().toISOString(),...row});save()},
+    snap(d,cv){try{const w=520,h=Math.round(w*cv.height/cv.width),o=document.createElement('canvas');o.width=w;o.height=h;const c=o.getContext('2d');c.fillStyle='#03060b';c.fillRect(0,0,w,h);c.drawImage(cv,0,0,w,h);D(d).snap=o.toDataURL('image/jpeg',.72);save()}catch(e){}},
+    data:load,reset(){mem={started:new Date().toISOString(),demos:{}};save()}
+  }})();
+
+const ocEsc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ocTm=iso=>new Date(iso).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+const ocPct=x=>(x*100).toFixed(x>=.9995?0:1)+'%';
+function ocTable(head,rows){return '<div class="tw"><table><thead><tr>'+head.map(h=>'<th>'+h+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>'}
+function ocEvents(d){if(!d||!d.events.length)return '<p class="muted">No actions recorded.</p>';return '<ol class="log">'+d.events.map(e=>'<li><span class="t">'+ocTm(e.t)+'</span> '+ocEsc(e.text)+'</li>').join('')+'</ol>'}
+function ocSnap(d){return d&&d.snap?'<figure><img src="'+d.snap+'" alt="Last view"><figcaption>Last view recorded in this demo</figcaption></figure>':''}
+const ocMs=v=>v==null?'—':v<1000?Math.round(v)+' ms':(v/1000).toFixed(2)+' s';
+
+function ocSecDesign(d){let h='<p>A parametric sandbox: indicator ceilings, noise, depth blur and the observer model are illustrative, not measured values. It shows the logic of OptiCeil: state the accuracy you need, and read the minimum acquisition off the ceiling curve.</p>';
+  if(!d||(!d.trials.length&&!d.opts.length))return h+'<p class="muted">Not explored in this session.</p>';
+  h+='<h3>What you did</h3>'+ocEvents(d);
+  if(d.trials.length){h+='<h3>How your settings worked</h3>'+ocTable(['Time','Indicator','Target','Window','Photons','Depth','Capacity','Ceiling','Observer','Target met?','Minimum window'],
+    d.trials.map(t=>[ocTm(t.t),ocEsc(t.indName)+(t.prep==='sc'?' (observer from cortex)':''),ocPct(t.tgt),ocMs(t.win*1000),t.ph.toFixed(2),t.dp+' µm',t.cx.toFixed(1),ocPct(t.ceil),ocPct(t.obs),t.ceil>=t.tgt?'Yes':'<b>No</b>',t.minWin==null?'not reachable':ocMs(t.minWin*1000)]));
+    const met=d.trials.filter(t=>t.ceil>=t.tgt).length;h+='<p>'+met+' of '+d.trials.length+' settings reached the stated accuracy.</p>'}
+  if(d.opts.length){h+='<h3>What optimization backed out</h3>';for(const o of d.opts){h+='<p><b>'+ocTm(o.t)+' · target '+ocPct(o.tgt)+'.</b> '+ocEsc(o.summary)+'</p>'+ocTable(['','Indicator','Window','Photons','Depth','Capacity','Ceiling','Observer'],[
+      ['Before',ocEsc(o.before.indName),ocMs(o.before.win*1000),o.before.ph.toFixed(2),o.before.dp+' µm',o.before.cx.toFixed(1),ocPct(o.before.ceil),ocPct(o.before.obs)],
+      ['<b>After</b>',ocEsc(o.after.indName),'<b>'+ocMs(o.after.win*1000)+'</b>',o.after.ph.toFixed(2),o.after.dp+' µm',o.after.cx.toFixed(1),ocPct(o.after.ceil),ocPct(o.after.obs)]])}}
+  else h+='<p class="muted">Optimization was not run in this demo.</p>';
+  return h+ocSnap(d)}
+
+function ocSecFiring(d){let h='<p>Stop points, retained fractions, residual ambiguity and accuracy drops are the published values (Supplementary Table S1). The neuron, spike trains and traces are illustrative; values between measured windows are interpolated.</p>';
+  if(d&&(d.trials.length||d.opts.length)){const optCombos=new Set(d.opts.map(o=>o.reg+'|'+o.tgt));
+    h+='<h3>What you did</h3>'+ocEvents(d);
+    if(d.trials.length){h+='<h3>How your imaging windows compared</h3>'+ocTable(['Time','Regime','Target','Your window','OptiCeil stop','Verdict','Recoverability (approx.)','Accuracy (approx.)'],
+      d.trials.map(t=>{const r=OC_PUB[t.reg].rows[t.tgt];return [ocTm(t.t),OC_PUB[t.reg].name,t.tgt+'%',ocMs(t.win)+' · '+Math.round(t.win/33.33)+' vol',ocMs(r[0])+' · '+r[1]+' vol',ocEsc(t.verdict),ocPct(t.idxFrac)+' of max',ocPct(t.baFrac)+' of max']}));
+      const combos=[...new Set(d.trials.map(t=>t.reg+'|'+t.tgt).concat([...optCombos]))];
+      for(const c of combos){const [reg,tg]=c.split('|'),r=OC_PUB[reg].rows[tg],mine=d.trials.filter(t=>t.reg===reg&&String(t.tgt)===tg);
+        const hit=mine.find(t=>Math.abs(t.win-r[0])<17);const viaOpt=optCombos.has(reg+'|'+tg);const closest=mine.length?mine.reduce((a,t)=>Math.abs(t.win-r[0])<Math.abs(a.win-r[0])?t:a):null;
+        h+='<p><b>'+OC_PUB[reg].name+' at '+tg+'%.</b> OptiCeil backs out <b>'+r[0]+' ms ('+r[1]+' volume'+(r[1]>1?'s':'')+')</b>, retaining '+ocPct(r[2])+' of recoverability and '+ocPct(r[3])+' of balanced accuracy on held-out neurons, with residual ambiguity '+r[4].toFixed(3)+'. '+
+          (hit?'You set this window yourself.':viaOpt?'You backed it out with Optimize.':closest?'Your closest window was '+ocMs(closest.win)+' ('+(closest.win>r[0]?'longer than needed':'shorter than needed')+').':'')+(hit&&viaOpt?' Optimize confirmed it.':'')+'</p>'}}
+    if(d.opts.length)h+='<h3>Optimization runs</h3><ol class="log">'+d.opts.map(o=>'<li><span class="t">'+ocTm(o.t)+'</span> '+ocEsc(o.summary)+'</li>').join('')+'</ol>';
+    h+=ocSnap(d)}
+  else h+='<p class="muted">Not explored in this session.</p>';
+  h+='<h3>All reported stop points</h3>'+ocTable(['Regime','Target','Stop','Volumes','Recoverability retained','Accuracy retained','Residual ambiguity'],
+    Object.keys(OC_PUB).flatMap(k=>[90,95,99].map(tg=>{const r=OC_PUB[k].rows[tg];return [OC_PUB[k].name,tg+'%',r[0]+' ms',r[1],ocPct(r[2]),ocPct(r[3]),r[4].toFixed(3)]})));
+  h+='<h3>Past the stop point</h3><p>From the task-saturating window to the longest tested window (2 s), held-out balanced accuracy fell by '+Object.keys(OC_PUB).map(k=>OC_PUB[k].drop.toFixed(3)+' for '+OC_PUB[k].name).join(', ')+'.</p>';
+  return h}
+
+function ocBuildReport(){const S=OCSession.data(),now=new Date(),vis=Object.keys(OC_DEMOS).filter(k=>S.demos[k]);
+  const sec=(k,body)=>'<section><h2>'+OC_DEMOS[k].n+'. '+OC_DEMOS[k].title+'</h2>'+body+'</section>';
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>OptiCeil session report</title>
+<style>body{margin:0;background:#f6f8f9;color:#14212b;font:15px/1.55 "Avenir Next","Segoe UI",system-ui,sans-serif}main{max-width:920px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:26px;margin:0 0 4px;line-height:1.2}h2{font-size:20px;margin:0 0 10px}h3{font-size:15.5px;margin:22px 0 8px}
+section{background:#fff;border:1px solid #dde5ea;border-radius:12px;padding:18px 20px;margin:18px 0}.meta,.muted{color:#566b78;font-size:13.5px}
+.tw{overflow-x:auto;margin:8px 0}table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:600;color:#3d525f;border-bottom:2px solid #dde5ea;padding:6px 8px;vertical-align:bottom}td{border-bottom:1px solid #edf1f3;padding:6px 8px;vertical-align:top}
+ol.log{padding-left:22px;margin:6px 0;font-size:13.5px}ol.log li{margin:3px 0}.t{color:#6b808c;font-variant-numeric:tabular-nums;margin-right:4px}
+figure{margin:12px 0 0}figure img{max-width:100%;width:420px;border-radius:10px;display:block}figcaption{font-size:12px;color:#6b808c;margin-top:4px}
+.note{background:#fff8e1;border-color:#f0dfa0}button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid #b9c7cf;background:#fff;cursor:pointer}
+@media print{body{background:#fff}section{border:0;padding:0;margin:14px 0}.print{display:none}.tw{overflow:visible}tr{break-inside:avoid}}</style></head><body><main>
+<h1>OptiCeil session report</h1>
+<div class="meta">CMH Scientific · OptiCeil calcium-imaging demonstrations<br>Session started ${ocEsc(new Date(S.started).toLocaleString())} · report generated ${ocEsc(now.toLocaleString())}</div>
+<p>${vis.length?'Demos explored: '+vis.map(k=>OC_DEMOS[k].n+'. '+OC_DEMOS[k].title).join('; ')+'.':'No interactions recorded yet; published reference values are shown.'}</p><div class="print"><button onclick="print()">Print or save as PDF</button></div>
+<section class="note"><b>How to read this report.</b> OptiCeil asks how long to keep imaging after a spike to reach a stated share of the best attainable performance, and flags when imaging longer makes the answer worse. Demo 2 uses the reported stop points; demo 1 is a parametric sandbox. The recoverability index is comparative, not an absolute physical ceiling (CEILING_UNRESOLVED).</section>
+${sec('design',ocSecDesign(S.demos.design))}${sec('firing',ocSecFiring(S.demos.firing))}
+<section><h2>Provenance and related work</h2><p class="muted">Published values: Ewing, "Information arrival sets the minimum acquisition time in calcium imaging," Research Square, 2026, doi:10.21203/rs.3.rs-10898326/v1 — CASCADE paired fluorescence/electrophysiology ground truth (Rupprecht et al., Nature Neuroscience 2021), 914 segments, 312 neurons, neuron-disjoint discovery and held-out validation, 30 Hz. The study is retrospective: no microscope was reconfigured. Related observations: spike inference can approach its best performance with only a few frames after an event, and GCaMP8's fast rise supports real-time detection (Rupprecht et al., Nature Methods 2026). GFP: Nobel Prize in Chemistry 2008; GCaMP: Nakai, Ohkura &amp; Imoto, 2001. Research demonstration.</p></section>
+</main></body></html>`}
+function ocCSV(){const S=OCSession.data(),rows=[['time','demo','kind','description']];
+  for(const k of Object.keys(OC_DEMOS)){const d=S.demos[k];if(!d)continue;for(const e of d.events)rows.push([e.t,OC_DEMOS[k].title,'action',e.text]);for(const t of d.trials){const {t:tt,key,...r}=t;rows.push([tt,OC_DEMOS[k].title,'setting',JSON.stringify(r)])}for(const o of d.opts){const {t:tt,...r}=o;rows.push([tt,OC_DEMOS[k].title,'optimization',JSON.stringify(r)])}}
+  const hd=rows.shift();rows.sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0);rows.unshift(hd);return rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n')}
+function ocSave(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
+function ocStamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())}
+function ocMountReport(box,demo,canvas,beforeSnap){if(!box)return;
+  if(!document.getElementById('ocrep-css')){const st=document.createElement('style');st.id='ocrep-css';st.textContent='.ocrep p{margin:0 0 8px;font-size:12.5px;line-height:1.45;color:#93aab7}.ocrep .rb{display:block;width:100%;min-height:40px;margin:6px 0 0;border-radius:8px;border:1px solid #27394a;background:#0a1621;color:#dce9ef;font:inherit;font-size:13px;cursor:pointer}.ocrep .rb.p{background:#eaf4f8;color:#04121a;border-color:#eaf4f8;font-weight:600}.ocrep .row{display:flex;gap:6px}.ocrep .row .rb{flex:1}.ocrep .cnt{font-size:12px;color:#93aab7;margin-top:8px}';document.head.appendChild(st)}
+  box.classList.add('ocrep');
+  box.innerHTML='<h2>Session report</h2><p>Everything you try in both OptiCeil demos is recorded in this browser. The report lists what you did, how each setting performed, and the settings OptiCeil backs out.</p><button class="rb p" data-a="html">Download report</button><div class="row"><button class="rb" data-a="csv">Data (CSV)</button><button class="rb" data-a="new">New session</button></div><div class="cnt"></div>';
+  const cnt=box.querySelector('.cnt'),count=()=>{const S=OCSession.data();let a=0,t=0,o=0;for(const k in S.demos){a+=S.demos[k].events.length;t+=S.demos[k].trials.length;o+=S.demos[k].opts.length}cnt.textContent=a+t+o?a+(a===1?' action, ':' actions, ')+t+(t===1?' setting and ':' settings and ')+o+(o===1?' optimization recorded.':' optimizations recorded.'):'Nothing recorded yet.'};
+  box.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a;
+    if(a==='html'){if(beforeSnap)beforeSnap();if(canvas)OCSession.snap(demo,canvas);ocSave('OptiCeil_report_'+ocStamp()+'.html',ocBuildReport(),'text/html')}
+    if(a==='csv')ocSave('OptiCeil_session_'+ocStamp()+'.csv',ocCSV(),'text/csv');
+    if(a==='new'&&confirm('Clear everything recorded so far and start a new session?')){OCSession.reset();count()}});
+  count();setInterval(count,2000)}
+
+(function(){
+"use strict";
+const A=document.getElementById("arbor"), ac=A.getContext("2d");
+const T=document.getElementById("trace"), tc=T.getContext("2d");
+let AW,AH,TW,TH,DPR=1;
+function size(){
+  DPR=Math.min(devicePixelRatio||1,2);
+  [[A,ac],[T,tc]].forEach(([c,x])=>{
+    const r=c.parentElement.getBoundingClientRect();
+    const h=c.id==="trace"?c.getBoundingClientRect().height:r.height-T.getBoundingClientRect().height;
+    const w=r.width;
+    c.width=w*DPR; c.height=Math.max(60,h)*DPR;
+    c.style.width=w+"px"; c.style.height=Math.max(60,h)+"px";
+    x.setTransform(DPR,0,0,DPR,0,0);
+  });
+  AW=A.clientWidth; AH=A.clientHeight; TW=T.clientWidth; TH=T.clientHeight;
+}
+addEventListener("resize",()=>{size();draw();});
+
+// ---- indicators: ceiling, rise and decay kinetics, brightness ----
+const IND=[
+ {k:"6s", n:"GCaMP6s", c:0.798, rise:0.14, dec:1.30, amp:0.85},
+ {k:"6f", n:"GCaMP6f", c:0.886, rise:0.07, dec:0.55, amp:0.70},
+ {k:"7f", n:"GCaMP7f", c:0.928, rise:0.05, dec:0.42, amp:0.95},
+ {k:"8f", n:"GCaMP8f", c:0.934, rise:0.02, dec:0.20, amp:1.00},
+ {k:"8m", n:"GCaMP8m", c:0.962, rise:0.03, dec:0.28, amp:1.15},
+ {k:"8s", n:"GCaMP8s", c:0.959, rise:0.05, dec:0.45, amp:1.25}
+];
+let P={ind:4, win:0.5, ph:1.0, dp:0, cx:1.0, prep:"ctx", tgt:0.90};
+
+// spikes: fixed realisation so comparisons are like-for-like
+const SPK=[]; (function(){let t=0.35,r=1;
+  while(t<6.4){SPK.push(t); r=(r*1103515245+12345)%2147483648; t+=0.18+ (r/2147483648)*0.85;}})();
+
+function noiseSigma(){ return 0.055/Math.sqrt(P.ph) * (1+P.dp/430); }
+function blurPx(){ return P.dp/62 + (1-P.ph)*2.2; }
+
+// ceiling: indicator sets the asymptote; window saturates near 250 ms; SNR and depth erode it
+function ceiling(){
+  const base=IND[P.ind].c;
+  const wSat=1-Math.exp(-P.win/0.085);            // saturates by ~250 ms
+  const snr=1/(1+Math.pow(noiseSigma()/0.055,1.55)-1+1e-9);
+  const q=0.5+(base-0.5)*(0.34+0.66*wSat)*Math.max(0.22,Math.min(1,snr));
+  return Math.max(0.5,Math.min(0.999,q));
+}
+// observer: approaches the ceiling with capacity and never exceeds it
+function observer(){
+  const c=ceiling();
+  const reach=1-Math.exp(-0.62*P.cx);
+  const transport=P.prep==="sc"?0.545:1.0;        // trained on cortex, tested on spinal cord
+  return 0.5+(c-0.5)*reach*transport;
+}
+
+function ca(t){ // calcium concentration from the fixed spike train
+  const I=IND[P.ind]; let v=0;
+  for(const s of SPK){ if(t<s) break;
+    const dt=t-s;
+    v+=I.amp*(1-Math.exp(-dt/Math.max(0.008,I.rise)))*Math.exp(-dt/I.dec);
+  }
+  return v;
+}
+let clock=0,prevClock=0;
+const NEU=Neuron3D(A,{core:'200,255,248',halo:'60,224,200',growPerSpike:1/52});
+function drawArbor(dt){
+  NEU.setBlur(Math.min(2.6,blurPx()/2.6));
+  NEU.frame(dt||0.016,d=>ca(Math.max(0,clock-d)),1.4);
+  ac.fillStyle="rgba(107,131,148,.8)"; ac.font="11px system-ui"; ac.textAlign="left";
+  ac.fillText("depth "+P.dp+" µm   photons "+P.ph.toFixed(2)+"   blur "+blurPx().toFixed(1)+" px   · drag to rotate", 20, AH-12);
+}
+
+function drawTrace(){
+  tc.fillStyle="#060a11"; tc.fillRect(0,0,TW,TH);
+  const L=48,R=14,Tp=12,B=30, dur=6.6;
+  const px=t=>L+t/dur*(TW-L-R);
+  let ymax=1.9; for(let i=0;i<=160;i++){ymax=Math.max(ymax,ca(i/160*dur)*1.15+noiseSigma()*3);}
+  const py=v=>TH-B-(Math.min(v,ymax)/ymax)*(TH-Tp-B);
+  // window shading around the most recent spike
+  tc.fillStyle="rgba(60,224,200,.07)";
+  for(const s of SPK){ tc.fillRect(px(s),Tp,Math.max(1,px(s+P.win)-px(s)),TH-Tp-B); }
+  // trace
+  const sig=noiseSigma(); let seed=99;
+  const rn=()=>{seed=(seed*1103515245+12345)%2147483648;return (seed/2147483648-0.5)*2;};
+  tc.beginPath();
+  for(let i=0;i<=460;i++){
+    const t=i/460*dur;
+    const v=Math.max(0,ca(t)+rn()*sig*3.1);
+    if(i===0) tc.moveTo(px(t),py(v)); else tc.lineTo(px(t),py(v));
+  }
+  tc.strokeStyle="#3ce0c8"; tc.lineWidth=1.15; tc.stroke();
+  // true spikes
+  tc.strokeStyle="#ffb03a"; tc.lineWidth=1.1;
+  for(const s of SPK){ tc.beginPath(); tc.moveTo(px(s),TH-B+3); tc.lineTo(px(s),TH-B+11); tc.stroke(); }
+  tc.strokeStyle="rgba(234,244,248,.8)"; tc.lineWidth=1.2;
+  tc.beginPath(); tc.moveTo(px(clock),Tp); tc.lineTo(px(clock),TH-B+12); tc.stroke();
+  tc.fillStyle="#eaf4f8"; tc.beginPath(); tc.arc(px(clock),Math.max(Tp+3,py(ca(clock))),3.2,0,Math.PI*2); tc.fill();
+  tc.fillStyle="rgba(107,131,148,.85)"; tc.font="10.5px system-ui";
+  tc.fillText("ΔF/F",8,Tp+10);
+  tc.textAlign="right"; tc.fillText("spikes",L-6,TH-B+11); tc.textAlign="left";
+  tc.fillText(TW<620?"shaded: window kept · white line: now":"shaded: acquisition window kept after each spike · white line: moment lighting the neuron",L,TH-4);
+}
+
+// smallest window reaching the target under the current photons/depth, for a given indicator
+function minWindow(indIdx){
+  const si=P.ind, sw=P.win; P.ind=indIdx;
+  let found=null;
+  for(let w=0; w<=1.5001; w+=0.0165){
+    P.win=w; if(ceiling()>=P.tgt){ found=w; break; }
+  }
+  P.ind=si; P.win=sw; return found;
+}
+function designReport(){
+  const here=minWindow(P.ind);
+  const dT=document.getElementById("dT"), dE=document.getElementById("dE"),
+        fl=document.getElementById("design");
+  const ms=v=>v<1?Math.round(v*1000)+" ms":v.toFixed(2)+" s";
+  if(here!==null){
+    dT.textContent=here<0.0005?"No post-event window needed":"Minimum acquisition: "+ms(here);
+    dE.textContent=(here<0.0005?"With "+IND[P.ind].n+" at this photon budget and depth, the signal at the moment of the event already reaches "+(P.tgt*100).toFixed(0)+"% accuracy.":"With "+IND[P.ind].n+" at this photon budget and depth, "+ms(here)+
+      " of post-event signal reaches "+(P.tgt*100).toFixed(0)+"% accuracy.")+" Longer acquisition does not raise the ceiling; in the study, it lowered held-out accuracy.";
+    fl.style.borderLeftColor="var(--ceil)"; dT.style.color="var(--ceil)";
+    return;
+  }
+  // not reachable here — is any indicator sufficient?
+  let alt=null;
+  for(let i=IND.length-1;i>=0;i--){ const w=minWindow(i); if(w!==null){ alt={i,w}; break; } }
+  if(alt){
+    dT.textContent="Not reachable with "+IND[P.ind].n;
+    dE.textContent="No window reaches "+(P.tgt*100).toFixed(0)+"% with this indicator. "+
+      IND[alt.i].n+" reaches it at "+ms(alt.w)+". Change the indicator, not the model.";
+    fl.style.borderLeftColor="var(--warn)"; dT.style.color="var(--warn)";
+  }else{
+    dT.textContent="No setting of this kind reaches the target";
+    dE.textContent="At this photon budget and depth, no indicator and no window reaches "+
+      (P.tgt*100).toFixed(0)+"%. Raise the photon budget, image shallower, or change what is measured.";
+    fl.style.borderLeftColor="var(--bad)"; dT.style.color="var(--bad)";
+  }
+}
+function drawWinCurve(){
+  const c=document.getElementById("wc"), x=c.getContext("2d");
+  const w=c.parentElement.getBoundingClientRect().width, h=52;
+  if(c.width!==Math.round(w*DPR)){c.width=w*DPR;c.height=h*DPR;}
+  x.setTransform(DPR,0,0,DPR,0,0);
+  x.clearRect(0,0,w,h);
+  const L=4,R=4,Tp=6,B=14, maxW=1.5;
+  const px=v=>L+v/maxW*(w-L-R), py=q=>Tp+(1-(q-0.5)/0.5)*(h-Tp-B);
+  // curve
+  x.beginPath();
+  for(let i=0;i<=120;i++){
+    const wv=i/120*maxW;
+    const save=P.win; P.win=wv; const q=ceiling(); P.win=save;
+    if(i===0) x.moveTo(px(wv),py(q)); else x.lineTo(px(wv),py(q));
+  }
+  x.strokeStyle="#ff6b8a"; x.lineWidth=1.4; x.stroke();
+  // knee marker
+  x.strokeStyle="rgba(107,131,148,.5)"; x.lineWidth=1; x.setLineDash([2,3]);
+  x.beginPath(); x.moveTo(px(0.25),Tp); x.lineTo(px(0.25),h-B); x.stroke();
+  x.setLineDash([]);
+  x.fillStyle="rgba(107,131,148,.9)"; x.font="9px system-ui";
+  x.fillText("250 ms",px(0.25)+3,h-B-2);
+  x.fillText("0",px(0)-1,h-3); x.fillText("0.75 s",px(0.75)-14,h-3); x.fillText("1.5 s",px(1.5)-20,h-3);
+  // target line and the minimum acquisition that meets it
+  const yT=py(P.tgt);
+  if(yT>Tp&&yT<h-B){
+    x.strokeStyle="rgba(255,107,138,.55)"; x.setLineDash([3,3]); x.lineWidth=1;
+    x.beginPath(); x.moveTo(L,yT); x.lineTo(w-R,yT); x.stroke(); x.setLineDash([]);
+  }
+  const mw=minWindow(P.ind);
+  if(mw!==null){
+    x.fillStyle="rgba(255,107,138,.16)";
+    x.fillRect(px(mw),Tp,(w-R)-px(mw),h-B-Tp);
+    x.strokeStyle="#ff6b8a"; x.lineWidth=1.4;
+    x.beginPath(); x.moveTo(px(mw),Tp); x.lineTo(px(mw),h-B); x.stroke();
+    x.fillStyle="#ff6b8a"; x.font="9px system-ui";
+    const lab=(mw<1?Math.round(mw*1000)+"ms":mw.toFixed(2)+"s");
+    x.fillText(lab, Math.min(px(mw)+3, w-R-30), Tp+18);
+  }
+  // current position
+  const q=ceiling();
+  x.fillStyle="#3ce0c8";
+  x.beginPath(); x.arc(px(P.win),py(q),3.6,0,Math.PI*2); x.fill();
+  x.strokeStyle="rgba(60,224,200,.45)"; x.lineWidth=1;
+  x.beginPath(); x.moveTo(px(P.win),py(q)); x.lineTo(px(P.win),h-B); x.stroke();
+  x.fillStyle="#6b8394"; x.font="9px system-ui";
+  x.textAlign="right"; x.fillText("ceiling vs window",w-R,h-B-3); x.textAlign="left";
+}
+function snapState(){const s={ind:P.ind,indName:IND[P.ind].n,tgt:P.tgt,win:P.win,ph:P.ph,dp:P.dp,cx:P.cx,prep:P.prep,ceil:ceiling(),obs:observer()};s.minWin=minWindow(P.ind);return s}
+const msTxt=v=>v<1?Math.round(v*1000)+" ms":v.toFixed(2)+" s";
+const settle=ocDebounce(()=>{const s=snapState();
+  if(OCSession.trial('design',[s.ind,s.tgt,s.win.toFixed(3),s.ph,s.dp,s.cx,s.prep].join('|'),s))
+    OCSession.event('design','Set '+s.indName+', target '+Math.round(s.tgt*1000)/10+'%, window '+msTxt(s.win)+', photons '+s.ph.toFixed(2)+', depth '+s.dp+' µm, capacity '+s.cx.toFixed(1)+' → ceiling '+(s.ceil*100).toFixed(1)+'%, observer '+(s.obs*100).toFixed(1)+'% ('+(s.ceil>=s.tgt?'target met':'target not met')+')');
+  OCSession.snap('design',A)},800);
+function setSlider(id,val,out,fmt){const el=document.getElementById(id);el.value=val;document.getElementById(out).textContent=fmt(val)}
+function optimize(){const before=snapState();const tgtPct=Math.round(P.tgt*1000)/10;
+  const tryConds=(ph,dp)=>{const s={ph:P.ph,dp:P.dp};P.ph=ph;P.dp=dp;let best=null;const cur=minWindow(P.ind);
+    if(cur!==null)best={ind:P.ind,w:cur};else for(let i=0;i<IND.length;i++){const w=minWindow(i);if(w!==null&&(!best||w<best.w))best={ind:i,w}}
+    P.ph=s.ph;P.dp=s.dp;return best};
+  let b=tryConds(P.ph,P.dp),cond={ph:P.ph,dp:P.dp},changedCond=false;
+  if(!b){let cost=1e9;for(let ph=P.ph;ph<=1.0001;ph+=0.02)for(let dp=P.dp;dp>=0;dp-=10){const r=tryConds(+ph.toFixed(2),dp);if(r){const c=(ph-P.ph)/0.88+(P.dp-dp)/600;if(c<cost){cost=c;b=r;cond={ph:+ph.toFixed(2),dp}}}}changedCond=!!b}
+  const out=document.getElementById('optOut');out.style.display='block';
+  if(!b){out.style.borderLeftColor='var(--bad)';out.innerHTML='<b style="color:var(--bad)">No setting reaches '+tgtPct+'%</b>Even with full photons, surface imaging and the best indicator, this sandbox cannot reach the target. Lower the accuracy you require.';
+    OCSession.opt('design',{tgt:P.tgt,before,after:before,summary:'No setting reaches '+tgtPct+'%; the target must be lowered.'});OCSession.event('design','Optimize for '+tgtPct+'%: no setting reaches the target');return}
+  P.ph=cond.ph;P.dp=cond.dp;P.ind=b.ind;
+  let w=Math.ceil(b.w/0.033-1e-9)*0.033;P.win=w;while(ceiling()<P.tgt&&w<1.5){w+=0.033;P.win=w}
+  let capNote='';
+  if(P.prep==='ctx'){let cx=0;for(;cx<=10.0001;cx+=0.1){P.cx=cx;if(ceiling()-observer()<=0.045)break}P.cx=Math.min(10,+cx.toFixed(1));capNote=' Observer capacity '+P.cx.toFixed(1)+' brings the observer within 4.5 points of the ceiling.'}
+  else capNote=' The observer was trained on a different preparation; more capacity will not close that gap, so retraining on the target preparation is the remaining step.';
+  setSlider('win',P.win,'vWin',msTxt);setSlider('ph',P.ph,'vPh',v=>(+v).toFixed(2));setSlider('dp',P.dp,'vDp',v=>(+v).toFixed(0)+' µm');setSlider('cx',P.cx,'vCx',v=>(+v).toFixed(1));
+  [...segI.children].forEach((c,j)=>c.setAttribute('aria-pressed',j===P.ind));
+  draw();const after=snapState();
+  const parts=[];if(after.ind!==before.ind)parts.push('switch to '+after.indName);if(changedCond){if(after.ph!==before.ph)parts.push('raise photons to '+after.ph.toFixed(2));if(after.dp!==before.dp)parts.push('image at '+after.dp+' µm')}
+  parts.push('stop at '+msTxt(after.win));
+  const summary='For '+tgtPct+'%: '+parts.join(', ')+'.'+capNote;
+  out.style.borderLeftColor='var(--ceil)';out.innerHTML='<b style="color:var(--ceil)">Backed out: '+msTxt(after.win)+' with '+after.indName+'</b>'+(s=>s.charAt(0).toUpperCase()+s.slice(1))(summary.replace(/^For [^:]+: /,''))+' Ceiling '+(after.ceil*100).toFixed(1)+'%, observer '+(after.obs*100).toFixed(1)+'%.';
+  OCSession.opt('design',{tgt:P.tgt,before,after,summary});OCSession.event('design','Optimize for '+tgtPct+'%: '+summary);OCSession.snap('design',A)}
+function draw(){
+  drawArbor(); drawTrace(); drawWinCurve(); designReport();
+  const c=ceiling(), o=observer();
+  const pc=v=>((v-0.5)/0.5*100);
+  document.getElementById("bObs").style.width=Math.max(0,pc(o)).toFixed(1)+"%";
+  document.getElementById("uCeil").style.left=Math.max(0,pc(c)).toFixed(1)+"%";
+  document.getElementById("lObs").textContent=(o*100).toFixed(1)+"%";
+  document.getElementById("lCeil").textContent=(c*100).toFixed(1)+"%";
+  document.getElementById("mGap").textContent=((c-o)*100).toFixed(1)+" pts";
+  document.getElementById("mLost").textContent=((IND[P.ind].c-c)*100).toFixed(1)+" pts";
+
+  const gap=c-o, fT=document.getElementById("fT"), fE=document.getElementById("fE");
+  const fl=document.getElementById("flag");
+  if(P.prep==="sc"){
+    fT.textContent="Transfer to another preparation (illustrative)";
+    fE.textContent="The ceiling barely moved. The observer lost "+
+      ((1-0.545)*(c-0.5)*100).toFixed(0)+" points in this illustration because it was trained on a different preparation. "+
+      "More capacity would not recover that; retraining on the target preparation might. The size of this loss is a modelling assumption, not a measured result.";
+    fl.style.borderLeftColor="var(--bad)"; fT.style.color="var(--bad)";
+  }else if(gap>0.045){
+    fT.textContent="Observer-limited";
+    fE.textContent="There are "+(gap*100).toFixed(1)+" points of recorded information the observer "+
+      "is not using. Raising capacity will recover some of it.";
+    fl.style.borderLeftColor="var(--model)"; fT.style.color="var(--model)";
+  }else{
+    fT.textContent="Measurement-limited";
+    fE.textContent="The observer is within "+(gap*100).toFixed(1)+" points of everything this "+
+      "recording contains. Capacity is no longer the constraint; only changing the acquisition "+
+      "moves the ceiling.";
+    fl.style.borderLeftColor="var(--ceil)"; fT.style.color="var(--ceil)";
+  }
+}
+
+// ---- controls ----
+const segI=document.getElementById("ind");
+IND.forEach((d,i)=>{const b=document.createElement("button");
+  b.textContent=d.n.replace("GCaMP",""); b.title=d.n;
+  b.setAttribute("aria-pressed", i===P.ind);
+  b.onclick=()=>{P.ind=i;[...segI.children].forEach((c,j)=>c.setAttribute("aria-pressed",j===i));draw();settle();document.getElementById("optOut").style.display="none";};
+  segI.appendChild(b);});
+const bind=(id,key,fmt,out)=>{const s=document.getElementById(id),o=document.getElementById(out);
+  s.oninput=()=>{P[key]=parseFloat(s.value);o.textContent=fmt(P[key]);draw();settle();document.getElementById("optOut").style.display="none";};
+  o.textContent=fmt(P[key]);};
+bind("win","win",v=>v<1?Math.round(v*1000)+" ms":v.toFixed(2)+" s","vWin");
+bind("ph","ph",v=>v.toFixed(2),"vPh");
+bind("dp","dp",v=>v.toFixed(0)+" µm","vDp");
+bind("cx","cx",v=>v.toFixed(1),"vCx");
+bind("tgt","tgt",v=>(v*100).toFixed(1)+"%","vTgt");
+const segP=document.getElementById("prep");
+segP.onclick=e=>{const b=e.target.closest("button"); if(!b)return;
+  P.prep=b.dataset.p; [...segP.children].forEach(c=>c.setAttribute("aria-pressed",c===b)); draw(); settle();};
+
+size(); draw();
+document.getElementById('optBtn').onclick=optimize;
+OCSession.event('design','Opened the acquisition design demo');
+ocMountReport(document.getElementById('ocReport'),'design',A);
+document.getElementById('regrow').onclick=()=>NEU.regrow();
+let labsOn=true;const lbt=document.getElementById('labs');lbt.onclick=()=>{labsOn=!labsOn;lbt.textContent='Labels '+(labsOn?'on':'off');lbt.setAttribute('aria-pressed',String(labsOn));NEU.setLabels(labsOn)};
+let autoRot=!matchMedia('(prefers-reduced-motion: reduce)').matches;const rbt=document.getElementById('rot');const sr=()=>{rbt.setAttribute('aria-pressed',String(autoRot));rbt.textContent='Auto-rotate '+(autoRot?'on':'off');NEU.setAuto(autoRot)};sr();rbt.onclick=()=>{autoRot=!autoRot;sr()};
+let _lt=0;(function loop(ts){ const dt=_lt?Math.min(.05,(ts-_lt)/1000):0.016; _lt=ts; prevClock=clock; clock=(clock+dt*1.7)%6.6;
+  for(const sp of SPK){ if((clock>=prevClock&&sp>prevClock&&sp<=clock)||(clock<prevClock&&(sp>prevClock||sp<=clock))) NEU.spike(); }
+  drawArbor(dt); drawTrace(); requestAnimationFrame(loop); })(0);
+})();
+</script>
+</body>
 </html>

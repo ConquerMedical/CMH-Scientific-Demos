@@ -1,8 +1,8 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#03060b"><meta name="color-scheme" content="dark">
-<title>Optimal intervention · ABP · CMH Scientific</title>
-<meta name="description" content="AI as a Biological Primitive (ABP) demonstration 4 of 5 on real longitudinal glioblastoma records (LUMIERE).">
+<title>Two tumors that looked alike · ABP · CMH Scientific</title>
+<meta name="description" content="AI as a Biological Primitive (ABP) demonstration 5 of 5 on real longitudinal glioblastoma records (LUMIERE).">
 <style>:root{
   --bg:#03060b;--panel:#060e17;--panel2:#0a1621;--line:#1a2a39;--line2:#27394a;
   --text:#dce9ef;--dim:#93aab7;--faint:#5f7988;
@@ -163,51 +163,68 @@ details.method li{margin:4px 0}
 .t3d-tools.compact [data-a=in],.t3d-tools.compact [data-a=out],.t3d-tools.compact .t3d-z{display:none}
 .t3d-tools.compact button{width:26px;height:26px;font-size:14px}
 </style></head><body>
-<header class="bar"><a class="brand" href="index.html" style="text-decoration:none"><b>CMH Scientific</b> · ABP · LUMIERE Patient-067 <span style="opacity:.7">· all demos</span></a><nav class="steps" aria-label="Demos"><a href="01_tumor_dynamics.html"><span class="n">1</span><span class="l">Tumor dynamics</span><span class="s">Dynamics</span></a><a href="02_pharmacological_intervention.html"><span class="n">2</span><span class="l">Pharmacological</span><span class="s">Pharma</span></a><a href="03_surgical_intervention.html"><span class="n">3</span><span class="l">Surgical</span><span class="s">Surgery</span></a><a href="04_optimal_intervention.html" aria-current="page"><span class="n">4</span><span class="l">Optimal intervention</span><span class="s">Optimal</span></a><a href="05_matched_divergence.html"><span class="n">5</span><span class="l">Look-alike tumors</span><span class="s">Diverge</span></a></nav></header>
+<header class="bar"><a class="brand" href="index.html" style="text-decoration:none"><b>CMH Scientific</b> · ABP · LUMIERE Patients 071 · 072 · 019 <span style="opacity:.7">· all demos</span></a><nav class="steps" aria-label="Demos"><a href="01_tumor_dynamics.html"><span class="n">1</span><span class="l">Tumor dynamics</span><span class="s">Dynamics</span></a><a href="02_pharmacological_intervention.html"><span class="n">2</span><span class="l">Pharmacological</span><span class="s">Pharma</span></a><a href="03_surgical_intervention.html"><span class="n">3</span><span class="l">Surgical</span><span class="s">Surgery</span></a><a href="04_optimal_intervention.html"><span class="n">4</span><span class="l">Optimal intervention</span><span class="s">Optimal</span></a><a href="05_matched_divergence.html" aria-current="page"><span class="n">5</span><span class="l">Look-alike tumors</span><span class="s">Diverge</span></a></nav></header>
 <div class="layout">
 <main class="stage">
   <div>
-    <p class="kicker"><span class="pill model">Modeled comparison</span>Medical vs surgical vs combined</p>
-    <h1>Which approach does the model favor?</h1>
-    <p class="lede">Same patient, same decision point at week 156. ABP compares three families of treatment on a goal you choose. It names a winner only when one option is clearly ahead; otherwise it says there is no clear answer.</p>
+    <p class="kicker"><span class="pill obs">Observed data</span>Observed patient data · no counterfactual response model</p>
+    <h1>Two tumors that looked alike</h1>
+    <p class="lede">At one scan, these two glioblastomas were exceptionally similar in tumor burden and in the observed radiomic representation. Follow both full courses and watch how differently they unfolded.</p>
   </div>
-  <div class="pin"><div class="seg" id="fam" role="group" aria-label="Show option"><button data-f="Baseline" aria-pressed="false">Week 156</button><button data-f="Medical" aria-pressed="false">Medical</button><button data-f="Surgical" aria-pressed="false">Surgical</button><button data-f="Combined" aria-pressed="false">Combined</button></div>
-  <div class="viz tumor">
-    <canvas id="c" aria-label="3-D tumor model for the selected option"></canvas>
-    <div class="ov tl"><div class="big" id="ovf">—</div><div class="num" id="ovv">—</div></div>
-    <div class="ov tr"><span class="chip" id="ovs">—</span></div>
-    <div class="ov bl small ovhide-m">Drag sideways to rotate</div>
-  </div></div>
-  <div class="legend"><span><i class="sw enh"></i>Enhancing tumor</span><span><i class="sw nec"></i>Necrotic core</span><span><i class="sw ede"></i>Edema / FLAIR</span><span>Dashed circle: size reference</span></div>
+  <div class="ctlrow">
+    <div class="seg" id="pairSel" role="group" aria-label="Patient pair"></div>
+    <div class="seg" id="modeSel" role="group" aria-label="Time axis"><button data-m="align" aria-pressed="true">Aligned at the match</button><button data-m="abs" aria-pressed="false">Weeks since surgery</button></div>
+  </div>
+  <div class="guess" id="guess"></div>
+  <div class="pin">
+    <div class="duo">
+      <div class="viz tumor pa" id="vA"><canvas id="cA" aria-label="Patient A tumor"></canvas><canvas class="cellcv" id="kA" aria-label="Patient A cell-level view"></canvas>
+        <div class="ov tl"><div class="big" id="nA">—</div><div class="num" id="wA">—</div><span class="chip mchip" id="mA">—</span></div>
+        <div class="ov tr"><span class="chip" id="rA">—</span></div>
+        <div class="ov bl"><div class="num big2" id="tA">—</div><div class="small" id="sA">—</div></div>
+        <div class="cover" id="xA"></div>
+      </div>
+      <div class="viz tumor pb" id="vB"><canvas id="cB" aria-label="Patient B tumor"></canvas><canvas class="cellcv" id="kB" aria-label="Patient B cell-level view"></canvas>
+        <div class="ov tl"><div class="big" id="nB">—</div><div class="num" id="wB">—</div><span class="chip mchip" id="mB">—</span></div>
+        <div class="ov tr"><span class="chip" id="rB">—</span></div>
+        <div class="ov bl"><div class="num big2" id="tB">—</div><div class="small" id="sB">—</div></div>
+        <div class="cover" id="xB"></div>
+      </div>
+    </div>
+    <div class="timeline">
+      <div class="clockline"><b class="num" id="clk">—</b><span class="small" id="clkSub"></span></div>
+      <div class="track"><input type="range" id="scrub" min="0" max="1000" step="1" value="0" aria-label="Time"><div class="dots" id="dotsA"></div><div class="dots b" id="dotsB"></div></div>
+      <div class="ticks num" id="ticks"></div>
+      <div class="controls">
+        <button class="btn" id="prev" aria-label="Previous scan"><svg viewBox="0 0 10 10"><path d="M1 1h1.6v8H1zM9 1v8L3.2 5z"/></svg></button>
+        <button class="btn primary" id="play"><svg viewBox="0 0 10 10" id="pi"><path d="M2 1l7 4-7 4z"/></svg><span id="pt">Play forward</span></button>
+        <button class="btn" id="next" aria-label="Next scan"><svg viewBox="0 0 10 10"><path d="M7.4 1H9v8H7.4zM1 1v8l5.8-4z"/></svg></button>
+        <button class="btn" id="toMatch">The match</button>
+        <button class="btn" id="toStart">From diagnosis</button>
+        <button class="btn inside" id="insideBtn" aria-pressed="false">Look inside</button>
+      </div>
+    </div>
+  </div>
+  <div class="insideNote" id="insideNote" style="display:none"><div class="seg" id="zoneSel" role="group" aria-label="Zone inside the tumor"><button data-z="rim" aria-pressed="true">Enhancing rim</button><button data-z="core" aria-pressed="false">Core boundary</button><button data-z="edge" aria-pressed="false">Infiltrating edge</button></div><div id="insideBody"></div></div>
+  <div class="legend"><span><i class="sw enh"></i>Enhancing tumor</span><span><i class="sw nec"></i>Necrotic core</span><span><i class="sw ede"></i>Edema / FLAIR</span><span>Shapes are equivalent-volume, not anatomy</span></div>
+  <div class="chartbox">
+    <h2>Total tumor volume, both patients (cm³)</h2>
+    <canvas class="chart tall" id="chart"></canvas>
+    <div class="legend"><span><i class="sw" style="background:var(--pa)"></i><span id="lgA">A</span></span><span><i class="sw" style="background:var(--pb)"></i><span id="lgB">B</span></span><span>Dots: scans, colored by expert rating (red progressive, green stable, blue response, white surgery)</span><span>Dashed: enhancing tumor</span></div>
+  </div>
 </main>
 <aside class="side">
   <section>
-    <h2>1 · Goal</h2>
-    <div class="seg" id="obj" role="group" aria-label="Goal"><button data-o="enh" aria-pressed="true">Least enhancing tumor</button><button data-o="total" aria-pressed="false">Least total burden</button><button data-o="harm" aria-pressed="false">Burden and harm</button></div>
-    <label class="ctl"><span class="row"><span class="lab">Look ahead</span><span class="val" id="vh">12 weeks</span></span><input type="range" id="hor" min="4" max="24" step="1" value="12"></label>
+    <h2>The match</h2>
+    <div id="matchBox"></div>
   </section>
   <section>
-    <h2>2 · ABP verdict</h2>
-    <div class="banner" id="result"></div>
-    <div class="bars" id="bars"></div>
-    <p class="small" id="barnote"></p>
+    <h2>How the two courses unfolded</h2>
+    <div class="courses" id="courses"></div>
   </section>
   <section>
-    <h2>3 · Details</h2>
-    <table class="vt">
-      <tr><th></th><th>Wk 156</th><th>Medical</th><th>Surgical</th><th>Combined</th></tr>
-      <tr><td><i class="sw enh"></i>Enhancing</td><td id="b_e"></td><td id="Medical_e"></td><td id="Surgical_e"></td><td id="Combined_e"></td></tr>
-      <tr><td><i class="sw nec"></i>Necrotic</td><td id="b_n"></td><td id="Medical_n"></td><td id="Surgical_n"></td><td id="Combined_n"></td></tr>
-      <tr><td><i class="sw ede"></i>Edema</td><td id="b_d"></td><td id="Medical_d"></td><td id="Surgical_d"></td><td id="Combined_d"></td></tr>
-      <tr class="tot"><td>Total</td><td id="b_t"></td><td id="Medical_t"></td><td id="Surgical_t"></td><td id="Combined_t"></td></tr>
-      <tr><td>Harm index</td><td>—</td><td id="Medical_h"></td><td id="Surgical_h"></td><td id="Combined_h"></td></tr>
-      <tr><td>Model support</td><td>—</td><td id="Medical_s"></td><td id="Surgical_s"></td><td id="Combined_s"></td></tr>
-    </table>
-    <p class="small" style="margin-top:6px">Volumes in cm³. Medical: 60 Gy with chemotherapy exposure 0.70 (demo 2). Surgical: near-total resection, depth 0.90, via the clearest approach (demo 3). Combined: both.</p>
-  </section>
-  <section>
-    <h2>What actually happened</h2>
-    <p class="small">Week 156: progressive disease, <span id="a156"></span>. She had an operation; the week 157 scan measured <span id="a157"></span>. By week 167 the disease was progressing again at <span id="a167"></span>. The options above are modeled alternatives, not a re-creation of that course.</p>
+    <h2>How often does this happen?</h2>
+    <div id="rates"></div>
   </section>
   <section id="report" class="report"></section>
   <section>
@@ -215,32 +232,84 @@ details.method li{margin:4px 0}
       <summary>Method and provenance</summary>
       <ul>
         <li><b>Zoom and cut-away</b> (pinch, the + and − buttons, or the mouse wheel after clicking the view; ◐ slices the tumor open) enlarge the equivalent-volume model to show how its compartments nest. They do not reveal detail finer than the MRI, whose resolution is on the millimetre scale.</li>
-        <li>All three options start from the measured week 156 compartments of LUMIERE Patient-067 and use exactly the same response models as demos 2 and 3.</li>
-        <li>Goal scores (lower is better): enhancing volume; total volume; or total × (1 + 0.65 × harm index). Harm index: treatment-related necrosis or infiltration for medical, a fixed 0.24 for surgical, and the larger of the two plus 0.08 for combined.</li>
-        <li>Model support expresses how well each family is covered by the demonstrator (82%, 72%, 64%). A winner is named only if its support is at least 60% and it beats the runner-up by at least 6%. Otherwise ABP abstains.</li>
-        <li>"Favored" means best supported under this declared model and goal. It is not a proven individual counterfactual and not a treatment recommendation.</li>
+        <li><b>Data:</b> LUMIERE longitudinal glioblastoma dataset (Suter et al., <i>Scientific Data</i> 9:768, 2022): DeepBraTumIA compartment volumes, expert RANO ratings with written rationale, demographics, MGMT/IDH status and overall survival as provided.</li>
+        <li><b>Matching:</b> a search over <span id="mN1"></span> rated scans from <span id="mN2"></span> patients represented each scan by <span id="mN3"></span> radiomic features reduced to <span id="mN4"></span> principal components, and paired scans with similar states whose next expert ratings went opposite ways. "Closer than X% of scan pairs" refers to that representation. It does not establish identical biology.</li>
+        <li><b>Look inside</b> shows illustrative cells, not imaged cells: the MRI cannot resolve individual cells. The animation rate is driven by each patient's measured compartment-level rate of change (enhancing volume for the rim, necrotic volume for the core boundary, edema/FLAIR volume for the infiltrating edge). It is not a measurement or estimate of cellular division, death or migration rates. Cell appearance and the zone layout follow published glioblastoma histology (pseudopalisading cells around necrosis, microvascular proliferation near the enhancing rim, tumor cells infiltrating the non-enhancing region); cell counts are not calibrated to a density.</li>
+        <li><b>Between scans</b> the volumes follow shape-preserving interpolation; only the dots are measurements. Shapes are equivalent-volume spheres sized by each compartment, identical in texture for both patients so only size differs.</li>
+        <li><b>Not in these data:</b> treatment details after surgery. Differences in treatment, timing since surgery, age or earlier history could explain the divergence; this demo shows that the matched snapshot alone did not predict it.</li>
+        <li><b>Expert ratings</b> can be driven by findings that total volume does not capture, such as T2 progression or new non-target lesions. Rationale text is shown as provided.</li>
+        <li><b>Overall survival</b> is the dataset's value in weeks; the panel dims when it is reached.</li>
+        <li>Automated segmentation volumes can fluctuate between scans for technical reasons.</li>
+        <li>Patient-071's first scan has no rating in the dataset; it is labelled "before surgery" because it precedes the same-week post-operative scan.</li>
       </ul>
     </details>
   </section>
 </aside>
 </div>
 <style>
-.tumor{aspect-ratio:16/10;max-height:calc(100svh - 330px);min-height:320px;margin-top:12px}
-#fam button{font-size:13px;white-space:nowrap;padding:6px 4px}
-.bars{margin-top:12px;display:flex;flex-direction:column;gap:10px}
-.bar-row{display:grid;grid-template-columns:78px 1fr 64px;gap:10px;align-items:center;font-size:13.5px}
-.bar-row .tr{height:12px;border-radius:6px;background:var(--panel2);overflow:hidden;border:1px solid var(--line)}
-.bar-row .fl{height:100%;border-radius:6px;background:var(--dim);transition:width .25s}
-.bar-row.win .fl{background:var(--ok)}
-.bar-row.win .nm{color:var(--ok);font-weight:650}
-.bar-row .sc{text-align:right;font-variant-numeric:tabular-nums}
-table.vt th{font-size:11.5px}
-table.vt td{font-size:13px}
-@media (max-width:980px){.tumor{aspect-ratio:auto;height:38svh;max-height:none;min-height:230px;margin-top:8px}.ovhide-m{display:none}}
-@media (prefers-reduced-motion:reduce){.bar-row .fl{transition:none}}
+:root{--pa:#ff8fb1;--pb:#8fd3ff}
+.viz .cellcv{position:absolute;inset:0;width:100%;height:100%;display:none;pointer-events:none}
+.viz.inside .cellcv{display:block}.viz.inside>canvas:first-child{visibility:hidden}.viz.inside .t3d-tools{display:none}
+.btn.inside{border-color:rgba(255,143,199,.6)}.btn.inside[aria-pressed="true"]{background:#ff8fc7;color:#1a0610;border-color:#ff8fc7;font-weight:600}
+#zoneSel{margin-bottom:10px}.cnt{font:600 12px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--dim)}
+.insideNote{border-radius:12px;padding:12px 14px;border:1px solid rgba(255,143,199,.45);background:rgba(255,143,199,.05);font-size:13.5px;line-height:1.45}
+.insideNote b{color:var(--text)}.insideNote .rates{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;margin:8px 0}
+.insideNote .rates div{font-variant-numeric:tabular-nums}.insideNote .small{margin-top:6px}
+.cellkey{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;font-size:12px;color:var(--dim)}
+.cellkey i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.ctlrow{display:flex;flex-wrap:wrap;gap:8px}
+.ctlrow .seg{flex:1 1 280px}
+.pin{display:flex;flex-direction:column;gap:10px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tumor{aspect-ratio:1/1;max-height:calc(100svh - 560px);min-height:220px;width:auto;justify-self:center;max-width:100%}
+.guess b.q{font-size:15px}.guess{padding:12px 14px}.mchip{display:none;margin-top:4px}
+.pa{border-color:rgba(255,143,177,.55)}.pb{border-color:rgba(143,211,255,.55)}
+.pa .big{color:var(--pa)}.pb .big{color:var(--pb)}
+.big2{font-size:20px;font-weight:700}
+.cover{position:absolute;inset:0;display:none;place-items:center;text-align:center;padding:16px;background:rgba(3,6,11,.72);font-size:14px;color:var(--text)}
+.cover.on{display:grid}
+.chip.PD{color:#ff9a9a;border-color:rgba(255,99,99,.6)}.chip.SD{color:var(--ok);border-color:rgba(111,224,140,.6)}
+.chip.PR,.chip.CR{color:#9ec0ff;border-color:rgba(126,166,255,.6)}.chip.OP{color:#eaf4f8;border-color:rgba(234,244,248,.5)}.chip.NA{color:var(--dim)}
+.timeline{display:flex;flex-direction:column;gap:4px}
+.clockline{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}.clockline b{font-size:16px}
+.track{position:relative;height:40px}
+.track input{position:absolute;left:0;right:0;top:4px;height:32px}
+.dots{position:absolute;left:11px;right:11px;top:2px;height:8px;pointer-events:none}
+.dots.b{top:32px}
+.dots i{position:absolute;top:0;width:8px;height:8px;margin-left:-4px;border-radius:50%;box-shadow:0 0 0 1.5px var(--bg)}
+.dots i.os{border-radius:1px;width:3px;margin-left:-1.5px;height:10px;top:-1px}
+.ticks{position:relative;height:16px;margin:0 11px;font-size:11.5px;color:var(--faint);overflow:hidden}
+.ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap}.ticks span.l{transform:none}.ticks span.r{transform:translateX(-100%)}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.guess{border-radius:14px;padding:14px 16px;border:1px solid rgba(242,220,78,.55);background:linear-gradient(180deg,rgba(242,220,78,.08),rgba(242,220,78,.02))}
+.guess b.q{display:block;font-size:16px;margin-bottom:8px}
+.guess .gb{display:flex;gap:8px;flex-wrap:wrap}
+.guess .gb .btn{flex:1 1 140px}
+.guess.done{border-color:var(--line2);background:var(--panel)}
+.chartbox{min-width:0}.chartbox h2{margin:6px 0 6px}.chartbox .legend span{white-space:normal}
+.chart.tall{height:230px}
+.mt{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
+.mt th{font-weight:500;color:var(--dim);text-align:right;padding:3px 0 6px 8px;font-size:12px}
+.mt th:first-child,.mt td:first-child{text-align:left;padding-left:0;color:var(--dim)}
+.mt td{padding:5px 0 5px 8px;text-align:right;border-top:1px solid var(--line)}
+.mt tr.same td:first-child::before{content:"≈ ";color:var(--ok)}
+.mt tr.diff td:first-child::before{content:"≠ ";color:var(--edge)}
+.courses{display:grid;grid-template-columns:1fr;gap:12px}
+.course h3{margin:0 0 6px;font-size:13.5px}
+.course ol{list-style:none;margin:0;padding:0}
+.course li{display:grid;grid-template-columns:52px 70px 1fr;gap:6px;padding:5px 6px;border-radius:8px;font-size:12.5px;line-height:1.35;border:1px solid transparent}
+.course li .why{grid-column:1/-1;color:var(--dim);font-size:12px}
+.course li.cur{border-color:var(--line2);background:var(--panel2)}
+.course li.match{box-shadow:inset 3px 0 0 var(--edge)}
+.course li.os{color:var(--dim);font-style:italic}
+.rbar{display:grid;grid-template-columns:92px 1fr 44px;gap:8px;align-items:center;font-size:12.5px;margin:5px 0}
+.rbar .tr{height:10px;border-radius:5px;background:var(--panel2);position:relative;overflow:visible}
+.rbar .fl{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--edge)}
+.rbar .ref{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--dim)}
+@media (max-width:980px){.insideNote .rates{grid-template-columns:1fr}.pin .ov.tr{display:none}.mchip{display:inline-block}.pin .ov.tl{right:8px;left:8px;top:8px}.pin .ov.bl{left:8px;bottom:8px}.tumor{max-height:none;min-height:0}.duo{gap:6px}.big2{font-size:16px}.pin .ov{font-size:11.5px}.pin .big{font-size:14px}.controls .btn{flex:1 1 auto;padding:6px 8px;min-height:40px}.ctlrow .seg{flex:1 1 100%}}
 </style>
 
-<footer class="footer">ABP demonstration 4 of 5 · CMH Scientific. De-identified public data: LUMIERE dataset (Suter et al., Scientific Data 9:768, 2022). Research demonstration, not for clinical use.</footer>
+<footer class="footer">ABP demonstration 5 of 5 · CMH Scientific. De-identified public data: LUMIERE dataset (Suter et al., Scientific Data 9:768, 2022). Research demonstration, not for clinical use.</footer>
 <script>const STATES=[{"patient":"Patient-067","week":"week-000-1","t_order":0.1,"volumes_mm3_from_native_mask":{"enhancing":36.000038623809814,"edema":13199.014160990715,"necrotic":529.0005675554276},"total_segmented_mm3_from_native_mask":13764.014767169952,"rano":{"RANO":"Pre-Op","rationale":null}},{"patient":"Patient-067","week":"week-000-2","t_order":0.2,"volumes_mm3_from_native_mask":{"necrotic":2586.0,"enhancing":1566.0,"edema":8968.0},"total_segmented_mm3_from_native_mask":13120.0,"rano":{"RANO":"Post-Op","rationale":null}},{"patient":"Patient-067","week":"week-013","t_order":13.0,"volumes_mm3_from_native_mask":{"edema":28747.0,"enhancing":2876.0,"necrotic":1151.0},"total_segmented_mm3_from_native_mask":32774.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-019-2","t_order":19.2,"volumes_mm3_from_native_mask":{"edema":77978.0,"necrotic":12835.0,"enhancing":7343.0},"total_segmented_mm3_from_native_mask":98156.0,"rano":{"RANO":"Post-Op","rationale":null}},{"patient":"Patient-067","week":"week-033","t_order":33.0,"volumes_mm3_from_native_mask":{"necrotic":20071.0,"edema":38163.0,"enhancing":694.0},"total_segmented_mm3_from_native_mask":58928.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-042","t_order":42.0,"volumes_mm3_from_native_mask":{"enhancing":63.0,"edema":16386.0,"necrotic":6151.0},"total_segmented_mm3_from_native_mask":22600.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-053","t_order":53.0,"volumes_mm3_from_native_mask":{"necrotic":5487.989532470703,"edema":19887.96206665039,"enhancing":495.9990539550781},"total_segmented_mm3_from_native_mask":25871.950653076172,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-059","t_order":59.0,"volumes_mm3_from_native_mask":{"edema":37469.0,"necrotic":44834.0,"enhancing":6531.0},"total_segmented_mm3_from_native_mask":88834.0,"rano":{"RANO":"Post-Op","rationale":null}},{"patient":"Patient-067","week":"week-068","t_order":68.0,"volumes_mm3_from_native_mask":{"necrotic":40700.0,"edema":43649.0,"enhancing":8932.0},"total_segmented_mm3_from_native_mask":93281.0,"rano":{"RANO":"SD","rationale":null}},{"patient":"Patient-067","week":"week-073","t_order":73.0,"volumes_mm3_from_native_mask":{"necrotic":32355.0,"edema":51843.0,"enhancing":10477.0},"total_segmented_mm3_from_native_mask":94675.0,"rano":{"RANO":"SD","rationale":null}},{"patient":"Patient-067","week":"week-077","t_order":77.0,"volumes_mm3_from_native_mask":{"necrotic":23324.0,"edema":49617.0,"enhancing":5131.0},"total_segmented_mm3_from_native_mask":78072.0,"rano":{"RANO":"SD","rationale":null}},{"patient":"Patient-067","week":"week-079","t_order":79.0,"volumes_mm3_from_native_mask":{"edema":51220.0,"necrotic":16034.0,"enhancing":2865.0},"total_segmented_mm3_from_native_mask":70119.0,"rano":{"RANO":"SD","rationale":null}},{"patient":"Patient-067","week":"week-092","t_order":92.0,"volumes_mm3_from_native_mask":{"necrotic":10470.0,"edema":37492.0,"enhancing":2372.0},"total_segmented_mm3_from_native_mask":50334.0,"rano":{"RANO":"SD","rationale":null}},{"patient":"Patient-067","week":"week-109","t_order":109.0,"volumes_mm3_from_native_mask":{"edema":45064.0,"necrotic":9012.0,"enhancing":896.0},"total_segmented_mm3_from_native_mask":54972.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-124","t_order":124.0,"volumes_mm3_from_native_mask":{"edema":45452.0,"necrotic":4079.0,"enhancing":444.0},"total_segmented_mm3_from_native_mask":49975.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-136","t_order":136.0,"volumes_mm3_from_native_mask":{"edema":49004.0,"necrotic":1329.0,"enhancing":21.0},"total_segmented_mm3_from_native_mask":50354.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-152","t_order":152.0,"volumes_mm3_from_native_mask":{"edema":84480.0,"enhancing":12905.0,"necrotic":2699.0},"total_segmented_mm3_from_native_mask":100084.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-156","t_order":156.0,"volumes_mm3_from_native_mask":{"enhancing":26572.0,"edema":104628.0,"necrotic":3191.0},"total_segmented_mm3_from_native_mask":134391.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-157","t_order":157.0,"volumes_mm3_from_native_mask":{"necrotic":24495.0,"edema":78099.0,"enhancing":893.0},"total_segmented_mm3_from_native_mask":103487.0,"rano":{"RANO":"Post-Op","rationale":null}},{"patient":"Patient-067","week":"week-167","t_order":167.0,"volumes_mm3_from_native_mask":{"edema":93466.0,"necrotic":16533.0,"enhancing":56820.0},"total_segmented_mm3_from_native_mask":166819.0,"rano":{"RANO":"PD","rationale":null}}];
 const TAU=Math.PI*2,clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),hill=(d,ec,h)=>Math.pow(d,h)/(Math.pow(ec,h)+Math.pow(d,h));
 const COL={enh:'#2fe3d6',nec:'#ffb03a',ede:'#b07cff',tot:'#eaf4f8',ok:'#6fe08c',edge:'#f2dc4e',out:'#ff6363',na:'#8198a5',grid:'#1a2a39',dim:'#93aab7'};
@@ -681,31 +750,168 @@ function mountReport(demo,canvas,beforeSnap){window.__demoKey=demo;const box=$('
   count();setInterval(count,2000)}
 
 
-const BASE=stateByWeek('week-156'),BV=vols(BASE);
-let objective='enh',shown=null,userPicked=false;
-const T3=new Tumor3D($('c'));
-const REFV=BV.t*1.05;
-const OBJ={enh:'enhancing tumor',total:'total burden',harm:'burden adjusted for harm'};
-setText($('a156'),fcc(BV.t));setText($('a157'),fcc(vols(stateByWeek('week-157')).t));setText($('a167'),fcc(vols(stateByWeek('week-167')).t));
-for(const k of ['e','n','d','t'])setText($('b_'+k),fv(BV[k]));
-function show(name,z){shown=name;pressSeg($('fam'),$('fam').querySelector('[data-f="'+name+'"]'));const h=+$('hor').value;
-  const x=name==='Baseline'?BV:z.A.find(a=>a.label===name);
-  setText($('ovf'),name==='Baseline'?'Week 156':name);
-  setText($('ovv'),name==='Baseline'?'Observed · total '+fcc(BV.t):'Week '+(156+h)+' · total '+fcc(x.t)+' ('+pct(x.t/BV.t-1)+')');
-  const ch=$('ovs');if(name==='Baseline'){setText(ch,'Observed');ch.className='chip obs'}else if(z.winner===name){setText(ch,'Favored by ABP');ch.className='chip obs'}else{setText(ch,'Modeled');ch.className='chip est'}
-  T3.set({vols:x,refV:REFV,scaleBar:true,fill:.30})}
-function render(){const h=+$('hor').value,z=compareFamilies(BASE,h,objective);setText($('vh'),h+' weeks');
-  for(const x of z.A){for(const k of ['e','n','d','t'])setText($(x.label+'_'+k),fv(x[k]));setText($(x.label+'_h'),x.harm.toFixed(2));setText($(x.label+'_s'),Math.round(x.support*100)+'%')}
-  const r=$('result');
-  if(z.winner){r.className='banner ok';setHTML(r,'<b>Favored: '+z.winner+'</b>Lowest '+OBJ[objective]+' at '+h+' weeks, ahead of '+z.second.label.toLowerCase()+' by '+Math.round(z.sep*100)+'%. A modeled ranking, not proof of what would have happened.')}
-  else{r.className='banner edge';setHTML(r,'<b>No clear winner</b>'+z.best.label+' and '+z.second.label.toLowerCase()+' are within '+Math.max(1,Math.round(z.sep*100))+'% of each other on '+OBJ[objective]+'. ABP declines to pick rather than turn a small numerical gap into a claim about this patient.')}
-  const mx=Math.max(...z.A.map(a=>a.score));
-  setHTML($('bars'),z.A.map(a=>'<div class="bar-row'+(z.winner===a.label?' win':'')+'"><span class="nm">'+a.label+'</span><span class="tr"><span class="fl" style="display:block;width:'+(a.score/mx*100).toFixed(1)+'%"></span></span><span class="sc">'+(objective==='harm'?a.score.toFixed(1):fcc(a.score))+'</span></div>').join(''));
-  setText($('barnote'),'Shorter bar is better. '+(objective==='harm'?'Score is total volume weighted by harm.':''));
-  if(!userPicked)show(z.winner||'Baseline',z);else show(shown,z);settle()}
-const settle=debounce(()=>{const h=+$('hor').value,z=compareFamilies(BASE,h,objective);if(Session.trial('opt',objective+'|'+h,{obj:objective,h}))Session.event('opt','Goal: '+OBJ[objective]+', look ahead '+h+' weeks — '+(z.winner?'ABP favors '+z.winner.toLowerCase()+' by '+Math.round(z.sep*100)+'%':'no clear winner ('+z.best.label.toLowerCase()+' and '+z.second.label.toLowerCase()+' within '+Math.max(1,Math.round(z.sep*100))+'%)'));T3.draw();Session.snap('opt',$('c'))},800);
-$('obj').onclick=e=>{const b=e.target.closest('button');if(!b)return;objective=b.dataset.o;pressSeg($('obj'),b);userPicked=false;render()};
-$('hor').addEventListener('input',render);
-$('fam').onclick=e=>{const b=e.target.closest('button');if(!b)return;userPicked=true;show(b.dataset.f,compareFamilies(BASE,+$('hor').value,objective));Session.event('opt','Viewed the '+(b.dataset.f==='Baseline'?'observed week 156':b.dataset.f.toLowerCase())+' option in 3-D')};
-Session.event('opt','Opened demo 4');render();mountReport('opt',$('c'),()=>T3.draw());
+const D=DIV_DATA;
+const RCLS=r=>!r?'NA':(r==='PRE-OP'||r==='POST-OP')?'OP':r;
+const RTXT={'PD':'Progressive disease','SD':'Stable disease','PR':'Partial response','CR':'Complete response','PRE-OP':'Before surgery','POST-OP':'After surgery'};
+const rtxt=r=>RTXT[r]||'Not rated';
+const RCOL={PD:COL.out,SD:COL.ok,PR:'#7ea6ff',CR:'#b8d6ff',OP:COL.tot,NA:COL.na};
+const short=id=>id.replace('Patient-','');
+function pchipF(xs,ys){const n=xs.length;if(n===1)return()=>ys[0];const h=[],d=[],m=new Array(n).fill(0);for(let i=0;i<n-1;i++){h[i]=xs[i+1]-xs[i];d[i]=(ys[i+1]-ys[i])/h[i]}
+  if(n===2){m[0]=m[1]=d[0]}else{m[0]=d[0];m[n-1]=d[n-2];for(let k=1;k<n-1;k++){if(d[k-1]*d[k]<=0)m[k]=0;else{const w1=2*h[k]+h[k-1],w2=h[k]+2*h[k-1];m[k]=(w1+w2)/(w1/d[k-1]+w2/d[k])}}}
+  return t=>{if(t<=xs[0])return ys[0];if(t>=xs[n-1])return ys[n-1];let i=0;while(t>xs[i+1])i++;const s=(t-xs[i])/h[i],s2=s*s,s3=s2*s;return Math.max(0,(2*s3-3*s2+1)*ys[i]+(s3-2*s2+s)*h[i]*m[i]+(-2*s3+3*s2)*ys[i+1]+(s3-s2)*h[i]*m[i+1])}}
+function prep(p){const S=p.scans,xs=S.map(s=>s.w);p.F={};for(const k of ['e','n','d','t'])p.F[k]=pchipF(xs,S.map(s=>s[k]));p.w0=xs[0];p.wl=xs[xs.length-1];return p}
+for(const k in D.patients)prep(D.patients[k]);
+let pair=D.pairs[0],mode='align',x=0,playing=false,guessed={};
+const T3A=new Tumor3D($('cA'),{yaw:.6}),T3B=new Tumor3D($('cB'),{yaw:.6});
+function PA(){return D.patients[pair.A]}function PB(){return D.patients[pair.B]}
+function mw(p,w){return p.scans.find(s=>s.week===w)}
+function off(which){return mode==='align'?mw(which==='A'?PA():PB(),which==='A'?pair.wA:pair.wB).w:0}
+function own(which,xx){return xx+off(which)}
+function range(){const vals=[];for(const w of ['A','B']){const p=w==='A'?PA():PB(),o=off(w);vals.push(p.w0-o,p.wl-o);if(p.os)vals.push(p.os-o)}return [Math.min(...vals),Math.max(...vals)]}
+function events(){const ev=[];for(const w of ['A','B']){const p=w==='A'?PA():PB(),o=off(w);p.scans.forEach((s,i)=>ev.push({x:s.w-o,w,i}));if(p.os&&p.os>p.wl)ev.push({x:p.os-o,w,os:true})}ev.sort((a,b)=>a.x-b.x);return ev}
+function stateOf(which,xx){const p=which==='A'?PA():PB(),wk=own(which,xx);
+  if(wk<p.w0-1e-6)return {st:'before',p,wk};
+  const exact=p.scans.findIndex(s=>Math.abs(s.w-wk)<.05);
+  const v={e:p.F.e(wk),n:p.F.n(wk),d:p.F.d(wk),t:p.F.t(wk)};
+  if(wk>p.wl+1e-6){if(p.os&&wk>=p.os-1e-6)return {st:'ended',p,wk,v:{e:p.scans[p.scans.length-1].e,n:p.scans[p.scans.length-1].n,d:p.scans[p.scans.length-1].d,t:p.scans[p.scans.length-1].t}};return {st:'after',p,wk,v:{...p.scans[p.scans.length-1]}}}
+  let prevI=0;p.scans.forEach((s,i)=>{if(s.w<=wk+1e-6)prevI=i});
+  return {st:exact>=0?'scan':'between',p,wk,v:exact>=0?{...p.scans[exact]}:v,i:exact>=0?exact:prevI,exact}}
+function refV(){let m=0;for(const p of [PA(),PB()])for(const s of p.scans)m=Math.max(m,s.t);return m}
+function fmtW(w){return 'week '+Math.round(w)}
+function panel(which){const s=stateOf(which,x),p=s.p,id=which,cov=$('x'+id);
+  const narrow=$('c'+id).getBoundingClientRect().width<380;
+  setText($('n'+id),(narrow?short(p.id):p.id)+' · '+p.age+' '+(p.sex==='male'?'M':p.sex==='female'?'F':p.sex));
+  const mch=$('m'+id);
+  setText($('w'+id),fmtW(Math.max(0,s.wk))+(narrow?'':' after first scan'));
+  const chip=$('r'+id);
+  if(s.st==='before'){cov.classList.add('on');setHTML(cov,'<div>No scans yet for '+p.id+'.<br><span class="small">Its first scan comes '+Math.round(p.w0-s.wk)+' weeks later.</span></div>');setText(chip,'—');chip.className='chip NA';setText(mch,'no scans yet');mch.className='chip mchip NA';setText($('t'+id),'—');setText($('s'+id),'');(which==='A'?T3A:T3B).set({vols:{e:0,n:0,d:0,t:0},refV:refV(),fill:.34});return s}
+  if(s.st==='ended'){cov.classList.add('on');setHTML(cov,'<div><b>Overall survival ended</b><br>week '+Math.round(p.os)+' ('+(mode==='align'?Math.round(p.os-off(which))+' weeks after the match':'')+')</div>')}
+  else cov.classList.remove('on');
+  const last=p.scans[Math.min(p.scans.length-1,s.i??p.scans.length-1)],r=s.st==='scan'?p.scans[s.exact].rano:(s.st==='between'?p.scans[s.i].rano:last.rano);
+  setText(chip,narrow?((s.st==='scan'?'':'last: ')+(r||'not rated')):(s.st==='scan'?'':'last: ')+rtxt(r));chip.className='chip '+RCLS(r);setText(mch,(s.st==='scan'?'':'last: ')+(r||'not rated'));mch.className='chip mchip '+RCLS(r);
+  setText($('t'+id),fcc(s.v.t));
+  setText($('s'+id),s.st==='scan'?'Scan '+(s.exact+1)+' of '+p.scans.length+' · measured':s.st==='between'?'Between scans · estimated':s.st==='after'?'After last scan · no further imaging':'');
+  (which==='A'?T3A:T3B).set({vols:{e:s.v.e,n:s.v.n,d:s.v.d,t:s.v.t},refV:refV(),fill:.34,scaleBar:!narrow});
+  return s}
+
+/* timeline, schedule */
+let R=range(),EV=events(),speed=4;
+const toS=v=>Math.round((v-R[0])/(R[1]-R[0])*1000),fromS=s=>R[0]+s/1000*(R[1]-R[0]);
+function buildTrack(){R=range();EV=events();
+  for(const w of ['A','B']){const el=$('dots'+w);el.innerHTML='';const p=w==='A'?PA():PB(),o=off(w);
+    p.scans.forEach(s=>{const i=document.createElement('i');i.style.left=((s.w-o-R[0])/(R[1]-R[0])*100)+'%';i.style.background=RCOL[RCLS(s.rano)];i.title=p.id+' '+s.week+' · '+rtxt(s.rano);el.appendChild(i)});
+    if(p.os){const i=document.createElement('i');i.className='os';i.style.left=((p.os-o-R[0])/(R[1]-R[0])*100)+'%';i.style.background=w==='A'?'var(--pa)':'var(--pb)';i.title=p.id+' overall survival ends';el.appendChild(i)}}
+  const tk=$('ticks');tk.innerHTML='';const step=(R[1]-R[0])>120?40:20;
+  for(let v=Math.ceil(R[0]/step)*step;v<=R[1];v+=step){const s=document.createElement('span');s.style.left=((v-R[0])/(R[1]-R[0])*100)+'%';s.textContent=mode==='align'?(v===0?'match':(v>0?'+':'')+v):v;const f=(v-R[0])/(R[1]-R[0]);if(f<.04)s.className='l';if(f>.96)s.className='r';tk.appendChild(s)}}
+function schedule(){const hold=2.6/speed,sch=[];let c=0,prev=null;const pts=[...new Set(EV.map(e=>+e.x.toFixed(2)))].sort((a,b)=>a-b);
+  for(const p of pts){if(prev!==null){const d=Math.max(.35,(p-prev)/speed);sch.push({type:'m',a:prev,b:p,c0:c,c1:c+d});c+=d}sch.push({type:'h',a:p,c0:c,c1:c+hold});c+=hold;prev=p}return {sch,total:c}}
+let SCH=schedule(),clock=0;
+function clockAt(xx){for(const s of SCH.sch){if(s.type==='h'&&Math.abs(s.a-xx)<.01)return s.c0;if(s.type==='m'&&xx>=s.a&&xx<=s.b)return s.c0+(xx-s.a)/(s.b-s.a)*(s.c1-s.c0)}return xx<=R[0]?0:SCH.total}
+function xAt(c){for(const s of SCH.sch)if(c<=s.c1)return s.type==='h'?s.a:s.a+(c-s.c0)/(s.c1-s.c0)*(s.b-s.a);return SCH.sch.length?SCH.sch[SCH.sch.length-1].a:0}
+
+/* chart */
+const chCS=fitCanvas($('chart'),()=>drawCh());
+let CURV=null;
+function curves(){CURV={};for(const w of ['A','B']){const p=w==='A'?PA():PB(),o=off(w),t=[],e=[];const n=200;for(let i=0;i<=n;i++){const wk=p.w0+(p.wl-p.w0)*i/n;t.push([wk-o,p.F.t(wk)]);e.push([wk-o,p.F.e(wk)])}CURV[w]={t,e,o,p}}}
+function drawCh(){if(!CURV)curves();const mk=[],ser=[];
+  for(const w of ['A','B']){const C=CURV[w],col=w==='A'?'#ff8fb1':'#8fd3ff';ser.push({pts:C.t,color:col,width:2.2},{pts:C.e,color:col,width:1.2,dash:[4,3],alpha:.8});
+    C.p.scans.forEach(s=>mk.push({x:s.w-C.o,y:s.t,color:RCOL[RCLS(s.rano)],r:3.6,ring:true}));
+    if(C.p.os){const ox=C.p.os-C.o;ser.push({pts:[[ox,0],[ox,refV()*1.05]],color:col,width:1,dash:[2,3],alpha:.7})}}
+  if(mode==='align')ser.push({pts:[[0,0],[0,refV()*1.05]],color:COL.edge,width:1.2,dash:[5,4]});
+  else for(const w of ['A','B']){const m=mw(w==='A'?PA():PB(),w==='A'?pair.wA:pair.wB).w;ser.push({pts:[[m,0],[m,refV()*1.05]],color:w==='A'?'#ff8fb1':'#8fd3ff',width:1.2,dash:[5,4]})}
+  const step=(R[1]-R[0])>120?40:20,xt=[];for(let v=Math.ceil(R[0]/step)*step;v<=R[1];v+=step)xt.push({x:v,label:mode==='align'?(v===0?'match':(v>0?'+':'')+v):String(v)});
+  drawChart(chCS,{x0:R[0],x1:R[1],ymax:refV(),xticks:xt,series:ser,markers:mk,cursor:x})}
+
+/* side panels */
+function whyResection(p){const po=p.scans.find(s=>s.rano==='POST-OP');return po&&po.why?(po.why==='CRET'?'complete resection of enhancing tumor':po.why==='PRET'?'partial resection of enhancing tumor':po.why):'not stated'}
+function nextAfter(p,w){const i=p.scans.findIndex(s=>s.week===w);return p.scans[i+1]}
+function matchBox(){const A=PA(),B=PB(),a=mw(A,pair.wA),b=mw(B,pair.wB),na=nextAfter(A,pair.wA),nb=nextAfter(B,pair.wB);
+  const pre=p=>{const s=p.scans.find(x=>x.rano==='PRE-OP');return s?fcc(s.t):'no pre-op scan'};
+  const row=(k,va,vb,cls)=>'<tr class="'+cls+'"><td>'+k+'</td><td>'+va+'</td><td>'+vb+'</td></tr>';
+  const ch=(n,m)=>pct(n.t/m.t-1);
+  setHTML($('matchBox'),'<p class="small" style="margin-bottom:8px">On imaging features, these two scans were closer than '+(100-pair.pct).toFixed(pair.pct<.1?2:1)+'% of all scan pairs in the dataset, and their total volumes differed by only '+(pair.voldiff*100).toFixed(1)+'%.</p>'+
+   '<table class="mt"><tr><th></th><th style="color:var(--pa)">'+short(A.id)+' · '+a.week.replace('week-','wk ')+'</th><th style="color:var(--pb)">'+short(B.id)+' · '+b.week.replace('week-','wk ')+'</th></tr>'+
+   row('Total volume',fcc(a.t),fcc(b.t),'same')+row('Enhancing',fcc(a.e),fcc(b.e),'')+row('Edema',fcc(a.d),fcc(b.d),'')+
+   row('Rating at the match',rtxt(a.rano),rtxt(b.rano),a.rano===b.rano?'same':'diff')+row('MGMT',A.mgmt.replace(' (na)',' (percentage not reported)'),B.mgmt.replace(' (na)',' (percentage not reported)'),'')+row('IDH',A.idh,B.idh,'')+
+   row('Age · sex',A.age+' · '+A.sex,B.age+' · '+B.sex,'diff')+row('Weeks since first scan',Math.round(a.w),Math.round(b.w),'diff')+
+   row('Tumor at diagnosis',pre(A),pre(B),'diff')+row('Surgery',whyResection(A),whyResection(B),'diff')+
+   '<tr><td colspan="3" style="text-align:left;color:var(--text);padding-top:10px"><b>What came next</b></td></tr>'+
+   row('Next scan',na?'+'+Math.round(na.w-a.w)+' wk · <b>'+rtxt(na.rano)+'</b>':'—',nb?'+'+Math.round(nb.w-b.w)+' wk · <b>'+rtxt(nb.rano)+'</b>':'—','diff')+
+   row('Volume change',na?ch(na,a):'—',nb?ch(nb,b):'—','')+
+   row('Overall survival after the match',A.os?Math.round(A.os-a.w)+' weeks':'—',B.os?Math.round(B.os-b.w)+' weeks':'—','diff')+'</table>')}
+function courses(){const html=w=>{const p=w==='A'?PA():PB(),mwk=w==='A'?pair.wA:pair.wB;return '<div class="course"><h3 style="color:var(--'+(w==='A'?'pa':'pb')+')">'+p.id+'</h3><ol id="list'+w+'">'+
+  p.scans.map((s,i)=>'<li data-i="'+i+'" class="'+(s.week===mwk?'match':'')+'"><span class="num">wk '+Math.round(s.w)+'</span><span class="chip '+RCLS(s.rano)+'" style="font-size:11px;padding:0 6px">'+(s.rano||'—')+'</span><span class="num">'+fcc(s.t)+(s.week===mwk?' · <b style="color:var(--edge)">match</b>':'')+'</span>'+(s.why?'<span class="why">'+s.why.replace(/</g,'&lt;')+'</span>':'')+'</li>').join('')+
+  (p.os?'<li class="os"><span class="num">wk '+Math.round(p.os)+'</span><span></span><span>Overall survival ends</span></li>':'')+'</ol></div>'};
+  setHTML($('courses'),html('A')+html('B'))}
+function markCourse(sA,sB){for(const [w,s] of [['A',sA],['B',sB]]){const L=$('list'+w);if(!L)continue;const cur=s&&s.st==='scan'?s.exact:-1;[...L.children].forEach(li=>li.classList.toggle('cur',+li.dataset.i===cur))}}
+function rates(){const C=D.ctx,bars=C.sens.map(r=>'<div class="rbar"><span>nearest '+r.distance_percentile+'%</span><span class="tr"><span class="fl" style="width:'+(r.opposed_future_fraction*100/0.5).toFixed(1)+'%"></span><span class="ref" style="left:'+(C.randomOpposed*100/0.5).toFixed(1)+'%"></span></span><span class="num">'+Math.round(r.opposed_future_fraction*100)+'%</span></div>').join('');
+  setHTML($('rates'),'<p class="small">Among the most similar scan pairs, how often did the next rating go opposite ways (progressive vs not)? The grey tick marks about '+Math.round(C.randomOpposed*100)+'%, the rate expected for two random scans, since '+Math.round(C.pProg*100)+'% of next ratings were progressive.</p>'+bars+
+  '<p class="small" style="margin-top:8px">Even among the closest 1% of pairs ('+C.sens[0].close_pairs+' pairs), '+C.sens[0].opposed_future_pairs+' went opposite ways. Being similar on these features narrowed the future only slightly. Small numbers; these are descriptive counts.</p>');
+  setText($('mN1'),String(C.nStates));setText($('mN2'),String(C.nPatients));setText($('mN3'),C.features.toLocaleString());setText($('mN4'),String(C.pcaDims))}
+
+/* guess */
+function answer(){const A=PA(),B=PB(),na=nextAfter(A,pair.wA),nb=nextAfter(B,pair.wB);return na&&na.rano==='PD'?'A':nb&&nb.rano==='PD'?'B':null}
+function drawGuess(){const g=$('guess'),A=PA(),B=PB(),k=pair.key;
+  if(!guessed[k]){g.className='guess';setHTML(g,'<b class="q">At the match, which tumor will be rated progressive at its next scan?</b><div class="gb"><button class="btn" data-g="A">'+A.id+'</button><button class="btn" data-g="B">'+B.id+'</button><button class="btn" data-g="X">Can\u2019t tell</button></div>');return}
+  const ans=answer(),gv=guessed[k],right=gv===ans,na=nextAfter(A,pair.wA),nb=nextAfter(B,pair.wB);
+  g.className='guess done';setHTML(g,'<b class="q">'+(gv==='X'?'Fair call.':right?'Correct.':'Not this time.')+' '+(ans==='A'?A.id:B.id)+' was rated progressive next.</b><p class="small" style="color:var(--text)">'+A.id+': '+rtxt(na&&na.rano)+(na&&na.why?' — '+na.why:'')+'<br>'+B.id+': '+rtxt(nb&&nb.rano)+(nb&&nb.why?' — '+nb.why:'')+'</p><p class="small">The matched scans did not give a reliable basis to tell. Press <b>Play forward</b> to follow both courses.</p>')}
+$('guess').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const k=pair.key;guessed[k]=b.dataset.g;const ans=answer();
+  Session.trial('div',k+'|guess',{pair:k,guess:b.dataset.g,answer:ans});Session.event('div','Guessed '+(b.dataset.g==='X'?'"can\u2019t tell"':(b.dataset.g==='A'?PA().id:PB().id))+' for '+pair.label+'; '+(ans==='A'?PA().id:PB().id)+' was rated progressive next');drawGuess();Session.snap('div',$('cA'))});
+
+/* inside view */
+const CVA=new CellView($('kA'),11),CVB=new CellView($('kB'),29);
+let inside=false,zone='rim';
+const ZNAME={rim:'Enhancing rim',core:'Core boundary',edge:'Infiltrating edge'};
+const ZTXT={rim:'Viable tumor cells dividing among new, leaky blood vessels. Division and death follow each patient\u2019s measured rate of change in <b>enhancing</b> volume.',
+  core:'Dead tissue on the left; living cells crowd its border and migrate away from it, as pseudopalisades do around glioblastoma necrosis. Cell death and migration follow the measured rate of change in <b>necrotic</b> volume.',
+  edge:'Single tumor cells moving along nerve-fiber tracts among normal brain cells, in fluid-swollen tissue. The influx of migrating cells follows the measured rate of change in <b>edema / FLAIR</b> volume.'};
+function rateOf(p,wk,k){const a=Math.max(p.w0,wk-.75),b=Math.min(p.wl,wk+.75);if(b-a<.2)return 0;const v=p.F[k](wk);if(v<.05)return 0;return (p.F[k](b)-p.F[k](a))/(b-a)/v}
+const fr=v=>(v>=0?'+':'\u2212')+Math.abs(v*100).toFixed(Math.abs(v)<.1?1:0)+'%/wk';
+function cellUpdate(){const out=[];
+  for(const [w,CV] of [['A',CVA],['B',CVB]]){const st=stateOf(w,x),p=st.p;let r={e:0,n:0,d:0},act=inside&&(st.st==='scan'||st.st==='between'||st.st==='after');
+    if(st.st==='scan'||st.st==='between')r={e:rateOf(p,st.wk,'e'),n:rateOf(p,st.wk,'n'),d:rateOf(p,st.wk,'d')};
+    CV.set(zone,r,act);
+    const key=zone==='rim'?'e':zone==='core'?'n':'d',lab=zone==='rim'?'enhancing':zone==='core'?'necrotic':'edema';
+    out.push('<div><b style="color:var(--'+(w==='A'?'pa':'pb')+')">'+short(p.id)+'</b> <span class="cnt" id="cnt'+w+'"></span><br>'+(st.st==='before'?'not yet scanned':st.st==='ended'?'survival ended':st.st==='after'?'no further scans (resting rate)':['e','n','d'].map(q=>{const t={e:'enhancing',n:'necrotic',d:'edema'}[q]+' '+fr(r[q]);return q===key?'<b>'+t+'</b>':'<span class="small">'+t+'</span>'}).join(' · '))+'</div>')}
+  if(inside)setHTML($('insideBody'),'<b>Inside the tumor · '+ZNAME[zone]+'.</b> '+ZTXT[zone]+'<div class="rates">'+out.join('')+'</div>'+
+    '<div class="cellkey"><span><i style="background:#ff8fc7"></i>tumor cell</span><span><i style="background:#6e96ff"></i>nucleus</span>'+(zone==='rim'?'<span><i style="background:#eb4646"></i>blood vessel</span>':'')+(zone==='core'?'<span><i style="background:#c8965a"></i>necrotic debris</span>':'')+(zone==='edge'?'<span><i style="background:#aab9d2"></i>normal brain cells</span>':'')+'</div>'+
+    '<p class="small">Illustrative cells: the MRI cannot see individual cells. The pace of division, death and migration comes from each patient\u2019s own measured volume changes at this point in the course; it is not a cell count.</p>')}
+function setInside(v,why){inside=v;$('vA').classList.toggle('inside',v);$('vB').classList.toggle('inside',v);const b=$('insideBtn');b.setAttribute('aria-pressed',String(v));b.textContent=v?'Back to the 3-D tumor':'Look inside';
+  $('insideNote').style.display=v?'':'none';cellUpdate();Session.event('div',v?'Looked inside the tumors ('+ZNAME[zone].toLowerCase()+')'+(why?' '+why:''):'Returned to the 3-D tumors')}
+$('insideBtn').onclick=()=>setInside(!inside);
+setInterval(()=>{if(!inside)return;for(const [w,CV] of [['A',CVA],['B',CVB]]){const el=$('cnt'+w);if(el)setText(el,zone==='edge'?'· '+CV.counts.mig+' invading · '+CV.counts.div+' divisions':'· '+CV.counts.div+' divisions · '+CV.counts.die+' deaths')}},400);
+$('zoneSel').onclick=e=>{const b=e.target.closest('button');if(!b)return;zone=b.dataset.z;pressSeg($('zoneSel'),b);cellUpdate();Session.event('div','Inside view: '+ZNAME[zone].toLowerCase())};
+for(const T of [T3A,T3B]){const orig=T.setZoom;T.setZoom=(...a)=>{orig(...a);if(T.zoom>=8&&!inside){setInside(true,'by zooming in');T.resetView()}}}
+
+/* render + transport */
+let lastUI='';
+function render(){const sA=panel('A'),sB=panel('B');if(!(document.activeElement===$('scrub')))$('scrub').value=toS(x);
+  const exact=EV.some(e=>Math.abs(e.x-x)<.05);
+  setText($('clk'),mode==='align'?(Math.abs(x)<.05?'At the match':(x>0?Math.round(x)+' weeks after the match':Math.round(-x)+' weeks before the match')):'Week '+Math.round(x)+' since first scan');
+  setText($('clkSub'),exact?'':'between scans');
+  const key=(sA.st==='scan'?sA.exact:'-')+'|'+(sB.st==='scan'?sB.exact:'-');if(key!==lastUI){lastUI=key;markCourse(sA,sB)}
+  cellUpdate();
+  drawCh()}
+function go(xx){x=clamp(xx,R[0],R[1]);clock=clockAt(x);render()}
+function setPlay(){setText($('pt'),playing?'Pause':x>=R[1]-.01?'Replay':'Play forward');$('pi').innerHTML=playing?'<path d="M2 1h2v8H2zM6 1h2v8H6z"/>':'<path d="M2 1l7 4-7 4z"/>'}
+let lt=0;function loop(ts){const dt=lt?Math.min(.05,(ts-lt)/1000):0;lt=ts;if(playing){clock+=dt;if(clock>=SCH.total){clock=SCH.total;playing=false;setPlay();Session.event('div','Watched both courses to the end ('+pair.label+')')}const nx=xAt(clock);if(nx!==x){x=nx;render()}}requestAnimationFrame(loop)}
+function play(){if(x>=R[1]-.01){go(mode==='align'?0:R[0])}playing=true;clock=clockAt(x);setPlay();Session.event('div','Played '+pair.label+' from '+$('clk').textContent.toLowerCase())}
+function pause(){if(playing)Session.event('div','Paused '+pair.label+' at '+$('clk').textContent.toLowerCase());playing=false;setPlay()}
+$('play').onclick=()=>playing?pause():play();
+const pts=()=>[...new Set(EV.map(e=>+e.x.toFixed(2)))].sort((a,b)=>a-b);
+$('next').onclick=()=>{pause();const n=pts().find(p=>p>x+.05);if(n!=null){go(n);logStop()}};
+$('prev').onclick=()=>{pause();const n=pts().reverse().find(p=>p<x-.05);if(n!=null){go(n);logStop()}};
+$('toMatch').onclick=()=>{pause();go(0);logStop()};
+$('toStart').onclick=()=>{pause();go(R[0]);Session.event('div','Jumped to the start of '+pair.label)};
+$('scrub').addEventListener('input',e=>{pause();let v=fromS(+e.target.value);const n=pts().find(p=>Math.abs(p-v)<(R[1]-R[0])*.006);go(n!=null?n:v);logStop()});
+const logStop=debounce(()=>{const sA=stateOf('A',x),sB=stateOf('B',x);const d=s=>s.st==='scan'?s.p.id+' '+s.p.scans[s.exact].week+' '+rtxt(s.p.scans[s.exact].rano)+' ('+fcc(s.p.scans[s.exact].t)+')':s.p.id+' '+(s.st==='before'?'not yet scanned':s.st==='ended'?'survival ended':s.st==='after'?'no further scans':'between scans');
+  Session.event('div',pair.label+' · '+$('clk').textContent+': '+d(sA)+'; '+d(sB));Session.snap('div',$('cA'))},700);
+function setPair(p){pair=p;pressSeg($('pairSel'),[...$('pairSel').children].find(b=>b.dataset.k===p.key));setText($('lgA'),PA().id);setText($('lgB'),PB().id);
+  const vA=$('vA'),vB=$('vB');vA.setAttribute('aria-label',PA().id);vB.setAttribute('aria-label',PB().id);
+  CURV=null;buildTrack();SCH=schedule();matchBox();courses();drawGuess();lastUI='';go(mode==='align'?0:mw(PA(),pair.wA).w)}
+D.pairs.forEach(p=>{const b=document.createElement('button');b.dataset.k=p.key;b.textContent=p.label;b.setAttribute('aria-pressed','false');$('pairSel').appendChild(b)});
+$('pairSel').onclick=e=>{const b=e.target.closest('button');if(!b)return;pause();setPair(D.pairs.find(p=>p.key===b.dataset.k));Session.event('div','Opened pair '+pair.label)};
+$('modeSel').onclick=e=>{const b=e.target.closest('button');if(!b)return;pause();const keepA=own('A',x);mode=b.dataset.m;pressSeg($('modeSel'),b);$('toMatch').style.display=mode==='align'?'':'none';CURV=null;buildTrack();SCH=schedule();go(keepA-off('A'));Session.event('div','Time axis: '+b.textContent.toLowerCase())};
+rates();setPair(D.pairs[0]);setPlay();Session.event('div','Opened demo 5 (two tumors that looked alike)');mountReport('div',$('cA'),()=>{T3A.draw();T3B.draw()});
+requestAnimationFrame(loop);
 </script></body></html>
