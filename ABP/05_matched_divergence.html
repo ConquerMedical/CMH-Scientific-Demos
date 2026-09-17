@@ -353,7 +353,7 @@ function pressSeg(seg,btn){[...seg.querySelectorAll('button')].forEach(b=>b.setA
 
 /* HiDPI canvas that only reallocates when its CSS size changes */
 function fitCanvas(cv,onResize){const st={W:0,H:0,D:1,ctx:cv.getContext('2d')};
-  function apply(silent){const r=cv.getBoundingClientRect(),D=Math.min(window.devicePixelRatio||1,st.maxD||2),W=Math.round(r.width),H=Math.round(r.height);
+  function apply(silent){const r=cv.getBoundingClientRect(),W=Math.round(r.width),H=Math.round(r.height),D=Math.max(1,Math.min(window.devicePixelRatio||1,st.maxD||2,Math.sqrt(2.2e6/Math.max(1,W*H))));
     if(W===st.W&&H===st.H&&D===st.D)return;Object.assign(st,{W,H,D});cv.width=Math.max(1,W*D);cv.height=Math.max(1,H*D);st.ctx.setTransform(D,0,0,D,0,0);if(!silent&&onResize)onResize()}
   st.refit=()=>apply(false);new ResizeObserver(()=>apply(false)).observe(cv);apply(true);return st}
 
@@ -476,7 +476,7 @@ function cellIcons(){if(cellIcons.c)return cellIcons.c;const o={};for(const k in
 
 function Tumor3D(cv,opts={}){
   const cs=fitCanvas(cv,()=>this.dirty=true);this.cs=cs;
-  this.yaw=opts.yaw??.6;this.pitch=opts.pitch??.38;this.auto=!REDUCED;this.dirty=true;this.state=null;this.onTap=null;
+  this.yaw=opts.yaw??.6;this.pitch=opts.pitch??.38;this.auto=true;this.dirty=true;this.state=null;this.onTap=null;
   this.zoom=1;this.panX=0;this.panY=0;this.cutaway=false;this.style=opts.style||'cells';this.time=0;
   // population of illustrative cells; positions are fractions of each compartment's radius, so they follow the measured volumes
   const CELLS=(()=>{const R=cellRand(opts.cellSeed||4242),L=[];const sphere=()=>{const u=R()*2-1,t=R()*TAU,r=Math.sqrt(1-u*u);return [r*Math.cos(t),u,r*Math.sin(t)]};
@@ -703,9 +703,9 @@ function Tumor3D(cv,opts={}){
   };
   let visible=true,lastTs=0;new IntersectionObserver(es=>{visible=es[0].isIntersecting}).observe(cv);
   const loop=ts=>{const raw=lastTs?ts-lastTs:0,dt=lastTs?Math.min(.05,raw/1000):0;lastTs=ts;
-    if(visible&&!document.hidden){this.time+=dt;const q=this._q||0,gap=q>=2?66:q>=1||cs.W<500?32:0;
+    if(visible&&!document.hidden){this.time+=dt;const q=this._q||0,gap=q>=2?66:q>=1?40:(ts-lastInteract<1200?0:32);
       if(this.style==='cells'&&!REDUCED&&q<2&&ts-(this._lastCellDraw||0)>=gap){this.dirty=true;this._lastCellDraw=ts}
-      if(this.auto&&!down&&ts-lastInteract>2500){this.yaw+=dt*.22;this.dirty=true}if(this.tick)this.tick(dt);
+      if(this.auto&&!down&&ts-lastInteract>2500){this.yaw+=dt*(REDUCED?.09:.22);this.dirty=true}if(this.tick)this.tick(dt);
       if(this.dirty&&ts-(this._lastDraw||0)>=gap){this.draw();this._lastDraw=ts}
       // quality governor: the time between animation frames includes drawing, painting and anything else blocking the page.
       // Slow frames step quality down (fewer dots and cells, lower frame rate, lower canvas resolution) so taps stay responsive.
@@ -1196,7 +1196,7 @@ const logStop=debounce(()=>{const sA=stateOf('A',x),sB=stateOf('B',x);const d=s=
 let GEOM='observed';const AFILES={},GROW={};
 const ALOAD={};
 function loadPairAnatomy(){for(const q of [PA(),PB()])if(!(q.id in AFILES)){AFILES[q.id]=null;ALOAD[q.id]='loading';
-  const fail=()=>{if(ALOAD[q.id]==='loading'){ALOAD[q.id]='failed';render()}};setTimeout(fail,8000);
+  const fail=()=>{if(ALOAD[q.id]==='loading'){ALOAD[q.id]='failed';render()}};setTimeout(fail,20000);
   loadAnatomy(q.id).then(f=>{if(!f)return fail();AFILES[q.id]=f;ALOAD[q.id]='ready';render()})}}
 function setPair(p){pair=p;loadPairAnatomy();pressSeg($('pairSel'),[...$('pairSel').children].find(b=>b.dataset.k===p.key));setText($('lgA'),PA().id);setText($('lgB'),PB().id);
   const vA=$('vA'),vB=$('vB');vA.setAttribute('aria-label',PA().id);vB.setAttribute('aria-label',PB().id);

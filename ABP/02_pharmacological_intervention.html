@@ -291,7 +291,7 @@ function pressSeg(seg,btn){[...seg.querySelectorAll('button')].forEach(b=>b.setA
 
 /* HiDPI canvas that only reallocates when its CSS size changes */
 function fitCanvas(cv,onResize){const st={W:0,H:0,D:1,ctx:cv.getContext('2d')};
-  function apply(silent){const r=cv.getBoundingClientRect(),D=Math.min(window.devicePixelRatio||1,st.maxD||2),W=Math.round(r.width),H=Math.round(r.height);
+  function apply(silent){const r=cv.getBoundingClientRect(),W=Math.round(r.width),H=Math.round(r.height),D=Math.max(1,Math.min(window.devicePixelRatio||1,st.maxD||2,Math.sqrt(2.2e6/Math.max(1,W*H))));
     if(W===st.W&&H===st.H&&D===st.D)return;Object.assign(st,{W,H,D});cv.width=Math.max(1,W*D);cv.height=Math.max(1,H*D);st.ctx.setTransform(D,0,0,D,0,0);if(!silent&&onResize)onResize()}
   st.refit=()=>apply(false);new ResizeObserver(()=>apply(false)).observe(cv);apply(true);return st}
 
@@ -414,7 +414,7 @@ function cellIcons(){if(cellIcons.c)return cellIcons.c;const o={};for(const k in
 
 function Tumor3D(cv,opts={}){
   const cs=fitCanvas(cv,()=>this.dirty=true);this.cs=cs;
-  this.yaw=opts.yaw??.6;this.pitch=opts.pitch??.38;this.auto=!REDUCED;this.dirty=true;this.state=null;this.onTap=null;
+  this.yaw=opts.yaw??.6;this.pitch=opts.pitch??.38;this.auto=true;this.dirty=true;this.state=null;this.onTap=null;
   this.zoom=1;this.panX=0;this.panY=0;this.cutaway=false;this.style=opts.style||'cells';this.time=0;
   // population of illustrative cells; positions are fractions of each compartment's radius, so they follow the measured volumes
   const CELLS=(()=>{const R=cellRand(opts.cellSeed||4242),L=[];const sphere=()=>{const u=R()*2-1,t=R()*TAU,r=Math.sqrt(1-u*u);return [r*Math.cos(t),u,r*Math.sin(t)]};
@@ -641,9 +641,9 @@ function Tumor3D(cv,opts={}){
   };
   let visible=true,lastTs=0;new IntersectionObserver(es=>{visible=es[0].isIntersecting}).observe(cv);
   const loop=ts=>{const raw=lastTs?ts-lastTs:0,dt=lastTs?Math.min(.05,raw/1000):0;lastTs=ts;
-    if(visible&&!document.hidden){this.time+=dt;const q=this._q||0,gap=q>=2?66:q>=1||cs.W<500?32:0;
+    if(visible&&!document.hidden){this.time+=dt;const q=this._q||0,gap=q>=2?66:q>=1?40:(ts-lastInteract<1200?0:32);
       if(this.style==='cells'&&!REDUCED&&q<2&&ts-(this._lastCellDraw||0)>=gap){this.dirty=true;this._lastCellDraw=ts}
-      if(this.auto&&!down&&ts-lastInteract>2500){this.yaw+=dt*.22;this.dirty=true}if(this.tick)this.tick(dt);
+      if(this.auto&&!down&&ts-lastInteract>2500){this.yaw+=dt*(REDUCED?.09:.22);this.dirty=true}if(this.tick)this.tick(dt);
       if(this.dirty&&ts-(this._lastDraw||0)>=gap){this.draw();this._lastDraw=ts}
       // quality governor: the time between animation frames includes drawing, painting and anything else blocking the page.
       // Slow frames step quality down (fewer dots and cells, lower frame rate, lower canvas resolution) so taps stay responsive.
@@ -977,10 +977,10 @@ let obj='enh',playing=false;
 const T3=new Tumor3D($('c'));
 function base(){return STATES[+startSel.value]}
 const grow=(f,a,b)=>{const out={};for(const [k,kk] of [['e','e'],['n','n'],['d','d']]){const x=f(a)[kk],y=f(b)[kk],m=f((a+b)/2)[kk];out[k]=m>.05?(y-x)/(b-a)/m:0}return out};
-let GEOM='observed',FILE067=null,ASTATE='loading';
-const anatFail=()=>{if(ASTATE!=='loading')return;ASTATE='failed';GEOM='model';if($('geom'))$('geom').style.display='none';update()};
-setTimeout(anatFail,8000);
-loadAnatomy('Patient-067').then(f=>{if(!f)return anatFail();FILE067=f;ASTATE='ready';update()});
+let GEOM='observed',FILE067=null,ASTATE='loading',USERGEOM=false;
+const setGeomUI=()=>{const g=$('geom');if(!g)return;g.style.display=ASTATE==='failed'?'none':'';const b=g.querySelector('[data-g="'+GEOM+'"]');if(b)pressSeg(g,b)};
+setTimeout(()=>{if(ASTATE==='loading'){ASTATE='slow';if(!USERGEOM)GEOM='model';setGeomUI();update()}},20000);
+loadAnatomy('Patient-067').then(f=>{if(!f){ASTATE='failed';GEOM='model';setGeomUI();update();return}FILE067=f;ASTATE='ready';if(!USERGEOM)GEOM='observed';setGeomUI();update()});
 function refV(b){let m=vols(b).t;for(let w=0;w<=24;w+=4)m=Math.max(m,response(b,0,0,w).t,response(b,+rt.value,+tz.value,w).t);return m}
 const SUP={supported:{cls:'ok',t:'Inside the model\u2019s range',d:'This regimen is within the region the model is built to evaluate.'},boundary:{cls:'edge',t:'At the edge of the model\u2019s range',d:''},outside:{cls:'out',t:'Outside the model\u2019s range',d:''}};
 function supReason(k,R,Z){if(k==='supported')return SUP.supported.d;const why=[];
@@ -1010,7 +1010,7 @@ function update(){const b=base(),bv=vols(b),R=+rt.value,Z=+tz.value,w=+wk.value,
   setText($('nr'),out?'—':Math.round(r.nec*100)+'%');setText($('iv'),out?'—':Math.round(r.inv*100)+'%');
   const an=GEOM==='observed'?anatFor(FILE067,b.week):null,rv=refV(b),gw=out?{e:0,n:0,d:0}:grow(x=>response(b,R,Z,x),Math.max(0,w-.25),w+.25);
   if($('cellact'))setText($('cellact'),cellActivityText(gw));
-  T3.set({loading:GEOM==='observed'&&ASTATE==='loading',vols:out?bv:r,refV:rv,scaleBar:true,fill:an?.38*Math.cbrt(rv)/Math.max(an.parts.ede.rmax,1):.30,anatomy:an,growth:gw,anatCenter:an?an.parts.enh.c:null,anatScale:an?anatScaleFor(an.vol,out?bv:r):null});
+  T3.set({loading:GEOM==='observed'&&(ASTATE==='loading'||ASTATE==='slow'),vols:out?bv:r,refV:rv,scaleBar:true,fill:an?.38*Math.cbrt(rv)/Math.max(an.parts.ede.rmax,1):.30,anatomy:an,growth:gw,anatCenter:an?an.parts.enh.c:null,anatScale:an?anatScaleFor(an.vol,out?bv:r):null});
   drawMap();drawCh()}
 function planKey(){return startSel.value+'|'+rt.value+'|'+(+tz.value).toFixed(2)}
 function recordPlan(why){const b=base(),R=+rt.value,Z=+tz.value,k=supp(R,Z),w=Math.max(+wk.value,12),r=response(b,R,Z,w),u=response(b,0,0,w);
@@ -1027,5 +1027,5 @@ $('obj').onclick=e=>{const b=e.target.closest('button');if(!b)return;obj=b.datas
 $('opt').onclick=()=>{const b=base(),w=Math.max(+wk.value,12);let best=null;for(let R=0;R<=84;R++)for(let j=0;j<=45;j++){const Z=j*.02;if(supp(R,Z)==='outside')continue;const s=response(b,R,Z,w),sc=obj==='enh'?s.e:s.d;if(!best||sc<best.sc-1e-9)best={R,Z,s,sc}}
   rt.value=best.R;tz.value=best.Z.toFixed(2);if(+wk.value<12)wk.value=12;update();const k=supp(best.R,best.Z);recordPlan('Ran the regimen search ('+(obj==='enh'?'enhancing volume':'edema volume')+') and applied it');
   $('optout').innerHTML='<div class="banner '+SUP[k].cls+'"><b>Optimal regimen within support: '+best.R+' Gy, exposure '+best.Z.toFixed(2)+'</b>Lowest modeled '+(obj==='enh'?'enhancing tumor':'edema')+' at week '+w.toFixed(0)+' ('+fcc(best.sc)+') among regimens the model can evaluate. '+(k==='boundary'?'This regimen is at the edge of the supported range. ':'')+'A modeled optimum, not a treatment recommendation.</div>'};
-update();$('cellkeywrap').innerHTML=cellLegendHTML();$('geomwrap').innerHTML=geomSegHTML('Observed anatomy (selected scan)');$('geom').onclick=e=>{const b=e.target.closest('button');if(!b)return;GEOM=b.dataset.g;pressSeg($('geom'),b);update();Session.event('pharm','Geometry: '+(GEOM==='observed'?'observed anatomy':'equivalent-volume model'))};Session.event('pharm','Opened demo 2');mountReport('pharm',$('c'),()=>T3.draw());
+update();$('cellkeywrap').innerHTML=cellLegendHTML();$('geomwrap').innerHTML=geomSegHTML('Observed anatomy (selected scan)');$('geom').onclick=e=>{const b=e.target.closest('button');if(!b)return;USERGEOM=true;GEOM=b.dataset.g;pressSeg($('geom'),b);update();Session.event('pharm','Geometry: '+(GEOM==='observed'?'observed anatomy':'equivalent-volume model'))};Session.event('pharm','Opened demo 2');mountReport('pharm',$('c'),()=>T3.draw());
 </script></body></html>
