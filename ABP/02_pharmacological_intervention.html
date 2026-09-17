@@ -190,7 +190,7 @@ details.method li{margin:4px 0}
   <div class="pin"><div class="viz tumor" id="vizwrap">
     <canvas id="c" aria-label="3-D tumor model"></canvas>
     <div class="ov tl"><div class="big num" id="ovw">Week 0 of treatment</div><div class="num" id="ovv">—</div></div>
-    <div class="ov tr"><span class="chip est" id="ovs">Modeled</span></div>
+    <div class="ov tr"><span class="chip obs" id="ovs">Observed scan</span></div>
     <div class="ov bl small ovhide-m">Drag to rotate</div>
     <div class="abstain" id="abstain"><div><b>Outside the model’s range</b>This dose combination is beyond what the model was built to evaluate, so ABP declines to predict.</div></div>
   </div></div>
@@ -1003,7 +1003,7 @@ function drawCh(){const b=base(),R=+rt.value,Z=+tz.value,tr={t:[],e:[]},un={t:[]
 function update(){const b=base(),bv=vols(b),R=+rt.value,Z=+tz.value,w=+wk.value,r=response(b,R,Z,w),u=response(b,0,0,w),k=supp(R,Z),out=k==='outside';
   setText($('vrt'),R+' Gy');setText($('vtz'),Z.toFixed(2));setText($('vw'),w.toFixed(1)+' wk');
   setText($('ovw'),'Week '+w.toFixed(1)+' of treatment');setText($('ovv'),out?'No prediction':'Total '+fcc(r.t)+' ('+pct(r.t/bv.t-1)+' vs start)');
-  const ch=$('ovs');setText(ch,out?'ABP abstains':'Modeled');ch.className='chip '+(out?'out':'est');
+  const ch=$('ovs'),atStart=w<.05;setText(ch,out?'ABP abstains':atStart?'Observed scan':'Modeled response');ch.className='chip '+(out?'out':atStart?'obs':'est');
   $('abstain').classList.toggle('on',out);
   const sp=SUP[k];$('support').className='banner '+sp.cls;setHTML($('support'),'<b>'+sp.t+'</b>'+R+' Gy with chemotherapy exposure '+Z.toFixed(2)+'. '+supReason(k,R,Z));
   for(const key of ['e','n','d','t']){setText($('b_'+key),fv(bv[key]));setText($('r_'+key),out?'—':fv(r[key]));setText($('u_'+key),fv(u[key]))}
