@@ -164,6 +164,20 @@ details.method li{margin:4px 0}
 .t3d-tools.compact button{width:26px;height:26px;font-size:14px}
 .t3d-tools.compact .hide-compact{display:none}
 .t3d-tools.compact button{width:24px;height:24px;font-size:13px}
+
+.side{min-width:0;max-width:100%}
+.seg button{white-space:normal;overflow-wrap:anywhere;min-width:0}
+.side table{max-width:100%}
+
+.bar{min-width:0;max-width:100%}
+.bar .brand{white-space:normal;min-width:0}
+.steps{max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.steps::-webkit-scrollbar{display:none}
+
+.cellkey3d{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:10px;font-size:12.5px;color:var(--dim)}
+.cellkey3d b{color:var(--text)}
+.cellkey3d img{width:30px;height:30px;vertical-align:middle;margin-right:5px;background:#03060b;border-radius:5px}
+.cellkey3d .cellact{flex-basis:100%;color:var(--text);opacity:.85}
 </style></head><body>
 <header class="bar"><a class="brand" href="index.html" style="text-decoration:none"><b>CMH Scientific</b> · ABP · LUMIERE Patient-067 <span style="opacity:.7">· all demos</span></a><nav class="steps" aria-label="Demos"><a href="01_tumor_dynamics.html"><span class="n">1</span><span class="l">Observed dynamics</span><span class="s">Observed</span></a><a href="02_pharmacological_intervention.html" aria-current="page"><span class="n">2</span><span class="l">Pharmacological exploration</span><span class="s">Pharmacological</span></a><a href="03_surgical_intervention.html"><span class="n">3</span><span class="l">Surgical exploration</span><span class="s">Surgical</span></a><a href="04_optimal_intervention.html"><span class="n">4</span><span class="l">Comparative analysis</span><span class="s">Comparative</span></a><a href="05_matched_divergence.html"><span class="n">5</span><span class="l">Matched states</span><span class="s">Matched</span></a></nav></header>
 <div class="layout">
@@ -177,10 +191,12 @@ details.method li{margin:4px 0}
     <canvas id="c" aria-label="3-D tumor model"></canvas>
     <div class="ov tl"><div class="big num" id="ovw">Week 0 of treatment</div><div class="num" id="ovv">—</div></div>
     <div class="ov tr"><span class="chip est" id="ovs">Modeled</span></div>
-    <div class="ov bl small ovhide-m">Drag sideways to rotate</div>
+    <div class="ov bl small ovhide-m">Drag to rotate</div>
     <div class="abstain" id="abstain"><div><b>Outside the model’s range</b>This dose combination is beyond what the model was built to evaluate, so ABP declines to predict.</div></div>
   </div></div>
   <div class="legend"><span><i class="sw enh"></i>Enhancing tumor</span><span><i class="sw nec"></i>Necrotic core</span><span><i class="sw ede"></i>Edema / FLAIR</span><span>Dashed circle: size reference</span></div>
+    <div id="geomwrap"></div>
+    <div id="cellkeywrap"></div>
   <div class="playbar">
     <button class="btn primary" id="play"><svg viewBox="0 0 10 10" id="pi"><path d="M2 1l7 4-7 4z"/></svg><span id="pt">Run modeled course</span></button>
     <label class="ctl grow"><span class="row"><span class="lab">Weeks since treatment start</span><span class="val" id="vw">0</span></span><input type="range" id="wk" min="0" max="24" step="0.1" value="0"></label>
@@ -231,10 +247,10 @@ details.method li{margin:4px 0}
     <details class="method">
       <summary>Method and provenance</summary>
       <ul>
-        <li><b>Zoom and cut-away</b> (pinch, the + and − buttons, or the mouse wheel after clicking the view; ◐ slices the tumor open) enlarge the equivalent-volume model to show how its compartments nest. They do not reveal detail finer than the MRI, whose resolution is on the millimetre scale.</li>
-        <li><b>Cells</b> (✺ switches between cells and the original measurement dots) are illustrative renderings in the style of fluorescence microscopy, not imaged cells. Each compartment's cells sit within its measured boundary, so they grow and shrink with the measured volumes, and the number shown in each compartment scales with its share of the tumor. Shapes, motion and colors are illustrative. At normal view the measured compartments and their outlines dominate; zooming in brings the cells forward. The outlines follow each compartment's measured shape and break where tissue is removed.</li>
+        <li><b>Zoom and cut-away</b> (pinch, the + and − buttons, or the mouse wheel after clicking the view; ◐ slices the tumor open) enlarge the current 3-D view to show how its compartments nest. They do not reveal detail finer than the MRI, whose resolution is on the millimetre scale.</li>
+        <li><b>Cells</b> (✺ switches between cells and measurement dots) are illustrative renderings in the style of fluorescence microscopy, not imaged cells. Magenta cells are tumor cells: rounded in the tumor body, elongated where they infiltrate the surrounding edema, and shown dividing at a rate that rises when the enhancing tumor is growing. Grey, fragmenting cells are dying; they increase when the enhancing tumor shrinks or the necrotic core grows. Pale blue cells with branching processes are healthy brain cells around and among the infiltrating tumor cells. Infiltrating cells spread outward faster when edema is growing. The rates come from the displayed volumes (observed between scans, or modeled in the explorations); the line under the legend states them. Zooming in brings the cells forward and fades the outlines.</li>
         <li>Starting volumes are the measured LUMIERE Patient-067 compartments at the chosen scan (Suter et al., <i>Scientific Data</i> 9:768, 2022).</li>
-        <li>The 3-D body is equivalent-volume geometry: each shell's radius is proportional to the cube root of its compartment volume, so size changes are shown in true proportion. Surface shape is a fixed stylization, not a voxel reconstruction.</li>
+        <li><b>Observed geometry.</b> By default the 3-D view shows Patient-067's own tumor compartments and brain surface at the selected starting scan, reconstructed from LUMIERE's atlas-space DeepBraTumIA segmentation (simplified for display). Modeled volume changes scale each compartment about its own centroid; the drug and radiation response itself is a declared demonstration model, because LUMIERE does not record treatment schedules. The Geometry control switches to equivalent-volume geometry, in which each shell's radius is proportional to the cube root of its compartment volume.</li>
         <li>Radiation effect uses a linear-quadratic kill term; chemotherapy uses a Hill exposure–response; the two combine with a synergy term. Untreated growth assumes a fixed doubling rate. Response parameters are illustrative and literature-informed, not fitted to this patient's treatment history.</li>
         <li>The support map is the declared validity region: ≤66 Gy and exposure ≤0.80 is supported; up to 72 Gy and 0.90 is boundary; beyond that ABP abstains.</li>
         <li>The regimen search scans a dose grid inside the supported and boundary regions. It is a modeled optimum, not a treatment recommendation.</li>
@@ -253,6 +269,7 @@ details.method li{margin:4px 0}
 
 <footer class="footer">ABP demonstration 2 of 5 · CMH Scientific. De-identified public data: LUMIERE dataset (Suter et al., Scientific Data 9:768, 2022). Research demonstration, not for clinical use.</footer>
 <script>const STATES=[{"patient":"Patient-067","week":"week-000-1","t_order":0.1,"volumes_mm3_from_native_mask":{"enhancing":36.000038623809814,"edema":13199.014160990715,"necrotic":529.0005675554276},"total_segmented_mm3_from_native_mask":13764.014767169952,"rano":{"RANO":"Pre-Op","rationale":null}},{"patient":"Patient-067","week":"week-000-2","t_order":0.2,"volumes_mm3_from_native_mask":{"necrotic":2586.0,"enhancing":1566.0,"edema":8968.0},"total_segmented_mm3_from_native_mask":13120.0,"rano":{"RANO":"Post-Op","rationale":null}},{"patient":"Patient-067","week":"week-013","t_order":13.0,"volumes_mm3_from_native_mask":{"edema":28747.0,"enhancing":2876.0,"necrotic":1151.0},"total_segmented_mm3_from_native_mask":32774.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-019-2","t_order":19.2,"volumes_mm3_from_native_mask":{"edema":77978.0,"necrotic":12835.0,"enhancing":7343.0},"total_segmented_mm3_from_native_mask":98156.0,"rano":{"RANO":"Post-Op","rationale":null}},{"patient":"Patient-067","week":"week-033","t_order":33.0,"volumes_mm3_from_native_mask":{"necrotic":20071.0,"edema":38163.0,"enhancing":694.0},"total_segmented_mm3_from_native_mask":58928.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-042","t_order":42.0,"volumes_mm3_from_native_mask":{"enhancing":63.0,"edema":16386.0,"necrotic":6151.0},"total_segmented_mm3_from_native_mask":22600.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-053","t_order":53.0,"volumes_mm3_from_native_mask":{"necrotic":5487.989532470703,"edema":19887.96206665039,"enhancing":495.9990539550781},"total_segmented_mm3_from_native_mask":25871.950653076172,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-059","t_order":59.0,"volumes_mm3_from_native_mask":{"edema":37469.0,"necrotic":44834.0,"enhancing":6531.0},"total_segmented_mm3_from_native_mask":88834.0,"rano":{"RANO":"Post-Op","rationale":null}},{"patient":"Patient-067","week":"week-068","t_order":68.0,"volumes_mm3_from_native_mask":{"necrotic":40700.0,"edema":43649.0,"enhancing":8932.0},"total_segmented_mm3_from_native_mask":93281.0,"rano":{"RANO":"SD","rationale":null}},{"patient":"Patient-067","week":"week-073","t_order":73.0,"volumes_mm3_from_native_mask":{"necrotic":32355.0,"edema":51843.0,"enhancing":10477.0},"total_segmented_mm3_from_native_mask":94675.0,"rano":{"RANO":"SD","rationale":null}},{"patient":"Patient-067","week":"week-077","t_order":77.0,"volumes_mm3_from_native_mask":{"necrotic":23324.0,"edema":49617.0,"enhancing":5131.0},"total_segmented_mm3_from_native_mask":78072.0,"rano":{"RANO":"SD","rationale":null}},{"patient":"Patient-067","week":"week-079","t_order":79.0,"volumes_mm3_from_native_mask":{"edema":51220.0,"necrotic":16034.0,"enhancing":2865.0},"total_segmented_mm3_from_native_mask":70119.0,"rano":{"RANO":"SD","rationale":null}},{"patient":"Patient-067","week":"week-092","t_order":92.0,"volumes_mm3_from_native_mask":{"necrotic":10470.0,"edema":37492.0,"enhancing":2372.0},"total_segmented_mm3_from_native_mask":50334.0,"rano":{"RANO":"SD","rationale":null}},{"patient":"Patient-067","week":"week-109","t_order":109.0,"volumes_mm3_from_native_mask":{"edema":45064.0,"necrotic":9012.0,"enhancing":896.0},"total_segmented_mm3_from_native_mask":54972.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-124","t_order":124.0,"volumes_mm3_from_native_mask":{"edema":45452.0,"necrotic":4079.0,"enhancing":444.0},"total_segmented_mm3_from_native_mask":49975.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-136","t_order":136.0,"volumes_mm3_from_native_mask":{"edema":49004.0,"necrotic":1329.0,"enhancing":21.0},"total_segmented_mm3_from_native_mask":50354.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-152","t_order":152.0,"volumes_mm3_from_native_mask":{"edema":84480.0,"enhancing":12905.0,"necrotic":2699.0},"total_segmented_mm3_from_native_mask":100084.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-156","t_order":156.0,"volumes_mm3_from_native_mask":{"enhancing":26572.0,"edema":104628.0,"necrotic":3191.0},"total_segmented_mm3_from_native_mask":134391.0,"rano":{"RANO":"PD","rationale":null}},{"patient":"Patient-067","week":"week-157","t_order":157.0,"volumes_mm3_from_native_mask":{"necrotic":24495.0,"edema":78099.0,"enhancing":893.0},"total_segmented_mm3_from_native_mask":103487.0,"rano":{"RANO":"Post-Op","rationale":null}},{"patient":"Patient-067","week":"week-167","t_order":167.0,"volumes_mm3_from_native_mask":{"edema":93466.0,"necrotic":16533.0,"enhancing":56820.0},"total_segmented_mm3_from_native_mask":166819.0,"rano":{"RANO":"PD","rationale":null}}];
+const HIST={"ops":[{"index":1,"post_op_week":"week-000-2","regrowth":0.0474,"next_scan":"week-013"},{"index":2,"post_op_week":"week-019-2","regrowth":-0.1716,"next_scan":"week-033"},{"index":3,"post_op_week":"week-059","regrowth":0.0346,"next_scan":"week-068"},{"index":4,"post_op_week":"week-157","regrowth":0.4148,"next_scan":"week-167"}],"preop_rate_before_op4":0.1804,"obs157":{"enh":0.897,"nec":24.49,"ede":78.076},"obs167":{"enh":56.809,"nec":16.53,"ede":93.475}};
 const TAU=Math.PI*2,clamp=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)),hill=(d,ec,h)=>Math.pow(d,h)/(Math.pow(ec,h)+Math.pow(d,h));
 const COL={enh:'#2fe3d6',nec:'#ffb03a',ede:'#b07cff',tot:'#eaf4f8',ok:'#6fe08c',edge:'#f2dc4e',out:'#ff6363',na:'#8198a5',grid:'#1a2a39',dim:'#93aab7'};
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -289,6 +306,7 @@ function drawChart(cs,o){const c=cs.ctx,W=cs.W,H=cs.H;c.clearRect(0,0,W,H);if(W<
   c.textAlign='center';c.textBaseline='top';for(const t of o.xticks){c.fillText(t.label??t,X(t.x??t),T+ph+7)}
   if(o.ylabel){c.save();c.translate(10,T+ph/2);c.rotate(-Math.PI/2);c.textBaseline='middle';c.fillText(o.ylabel,0,0);c.restore()}
   if(o.band){c.fillStyle='rgba(234,244,248,.05)';c.fillRect(X(o.band[0]),T,X(o.band[1])-X(o.band[0]),ph)}
+  for(const A of o.areas||[]){c.beginPath();A.hi.forEach((p,i)=>i?c.lineTo(X(p[0]),Y(p[1])):c.moveTo(X(p[0]),Y(p[1])));for(let i=A.lo.length-1;i>=0;i--)c.lineTo(X(A.lo[i][0]),Y(A.lo[i][1]));c.closePath();c.fillStyle=A.color;c.fill()}
   for(const s of o.series){c.beginPath();s.pts.forEach((p,i)=>i?c.lineTo(X(p[0]),Y(p[1])):c.moveTo(X(p[0]),Y(p[1])));c.strokeStyle=s.color;c.globalAlpha=s.alpha??1;c.lineWidth=s.width||1.8;c.setLineDash(s.dash||[]);c.stroke();c.setLineDash([]);c.globalAlpha=1}
   for(const m of o.markers||[]){c.beginPath();if(m.shape==='diamond'){const x=X(m.x),y=Y(m.y),r=5;c.moveTo(x,y-r);c.lineTo(x+r,y);c.lineTo(x,y+r);c.lineTo(x-r,y);c.closePath()}else c.arc(X(m.x),Y(m.y),m.r||3,0,TAU);c.fillStyle=m.color;c.fill();if(m.ring){c.strokeStyle='#03060b';c.lineWidth=1;c.stroke()}}
   if(o.cursor!=null){const x=Math.round(X(o.cursor))+.5;c.strokeStyle='rgba(234,244,248,.75)';c.lineWidth=1;c.beginPath();c.moveTo(x,T);c.lineTo(x,T+ph);c.stroke()}
@@ -301,14 +319,33 @@ function drawChart(cs,o){const c=cs.ctx,W=cs.W,H=cs.H;c.clearRect(0,0,W,H);if(W<
    a fixed, smooth stylization (not a voxel reconstruction). */
 function shapeNoise(x,y,z,seed){return .085*Math.sin(2.1*x+1.3*y+.7*z+seed)+.06*Math.sin(-1.2*x+2.6*z+.4*y+seed*1.9)+.045*Math.sin(3.4*y-1.7*x+seed*2.7)+.03*Math.sin(4.3*z+2.2*x-1.1*y+seed*.6)}
 
+/* ---------- observed anatomy files (per patient, loaded on demand) ---------- */
+const ANAT_FILES={};
+function loadAnatomy(pid){if(!ANAT_FILES[pid])ANAT_FILES[pid]=fetch('anatomy/'+pid+'.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json()}).catch(()=>null);return ANAT_FILES[pid]}
+function anatFor(file,week){if(!file||!week||!file.scans[week])return null;file._cache=file._cache||{};if(file._cache[week])return file._cache[week];
+  const S=file.scans[week],parts={brain:file.brain};for(const k of ['ede','enh','nec'])if(S[k])parts[k]=S[k];if(!parts.ede||!parts.enh)return null;
+  return file._cache[week]={q:file.q,parts,vol:S.vol}}
+function anatScaleFor(vol,v){const r=(x,y)=>y>0?Math.cbrt(Math.max(x,0)/y):1;return {ede:r(v.d,vol.ede),enh:r(v.e,vol.enh),nec:r(v.n,vol.nec)}}
+function cellLegendHTML(){const A=buildCellAtlas(64),it=[['div','Tumor cell, dividing'],['enh','Tumor cell'],['ede','Tumor cell, infiltrating'],['nec','Dying cell'],['hea','Healthy brain cell']];
+  return '<div class="cellkey3d"><b>Cells</b><span class="small">illustrative · ✺ switches to dots</span>'+it.map(([k,l])=>'<span><img alt="" src="'+A[k][0][k==='div'?5:0].toDataURL()+'">'+l+'</span>').join('')+'<div class="small cellact" id="cellact"></div></div>'}
+function cellActivityText(g,who){if(!g)return '';const f=v=>(v>=0?'+':'\u2212')+Math.abs(v*100).toFixed(Math.abs(v)<.1?1:0)+'%/wk';
+  const e=g.e||0,n=g.n||0,d=g.d||0,p=[];
+  p.push('enhancing tumor '+f(e)+(e>.005?' (more cells dividing)':e<-.005?' (more cells dying)':' (little net change)'));
+  if(Math.abs(n)>.005)p.push('necrotic core '+f(n)+(n>0?' (more dying cells)':''));
+  if(Math.abs(d)>.005)p.push('edema '+f(d)+(d>0?' (infiltrating cells spread faster)':''));
+  return (who?who+': ':'Activity now: ')+p.join(' · ')}
+function geomSegHTML(label){return '<div class="seg" id="geom" role="group" aria-label="Geometry" style="margin-top:8px"><button data-g="observed" aria-pressed="true">'+(label||'Observed anatomy')+'</button><button data-g="model" aria-pressed="false">Equivalent-volume model</button></div>'}
+
 /* ---------- fluorescence-style cell sprites (illustrative) ---------- */
 const CELL_ATLAS={};
 function cellRand(seed){let x=seed>>>0||1;return()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return ((x>>>0)%100000)/100000}}
 function buildCellAtlas(px){
   if(CELL_ATLAS[px])return CELL_ATLAS[px];
-  const KINDS={enh:{mem:'64,236,222',fil:'255,122,40',hot:'255,226,140',elong:1.0},
-               ede:{mem:'176,122,255',fil:'255,140,70',hot:'255,210,170',elong:2.1},
-               nec:{mem:'255,170,70',fil:'170,90,40',hot:'255,200,120',elong:1.0}};
+  const KINDS={enh:{mem:'255,95,170',fil:'255,150,70',hot:'255,220,170',elong:1.0},      // tumor cell
+               ede:{mem:'255,95,170',fil:'255,150,70',hot:'255,215,190',elong:2.1},      // infiltrating tumor cell
+               nec:{mem:'165,155,150',fil:'120,105,95',hot:'210,200,190',elong:1.0},     // dying cell
+               hea:{mem:'160,205,255',fil:'120,175,235',hot:'225,242,255',elong:1.0},    // healthy brain cell
+               div:{mem:'255,95,170',fil:'255,150,70',hot:'255,235,200',elong:1.25}};    // dividing tumor cell
   const V=6,F=8,out={};
   for(const k in KINDS){const K=KINDS[k];out[k]=[];
     for(let v=0;v<V;v++){const R=cellRand(97+v*131+k.length*977),frames=[];
@@ -318,13 +355,20 @@ function buildCellAtlas(px){
       const nuc={x:(R()-.5)*.25,y:(R()-.5)*.25,r:.28+R()*.08};
       for(let f=0;f<F;f++){
         const ph=f/F*TAU,cv=document.createElement('canvas');cv.width=cv.height=px;const g=cv.getContext('2d');
-        const C=px/2,base=px*(k==='ede'?.19:.29);g.translate(C,C);g.globalCompositeOperation='lighter';
+        const C=px/2,base=px*(k==='ede'?.19:k==='hea'?.16:k==='div'?.22:.29);g.translate(C,C);g.globalCompositeOperation='lighter';
+        const pinch=k==='div'?.5-.5*Math.cos(ph):0,EL=k==='div'?1.25+.5*pinch:K.elong;
+        if(k==='hea'){   // branching processes of a healthy astrocyte / neuron
+          g.strokeStyle=`rgba(${K.mem},.55)`;g.lineCap='round';
+          for(let b=0;b<6;b++){const a0=b/6*TAU+v*.4+Math.sin(ph+b)*.06,L1=px*(.30+.08*((b*.37+v*.2)%1));
+            const x1=Math.cos(a0)*L1,y1=Math.sin(a0)*L1;g.lineWidth=Math.max(.8,px/55);g.beginPath();g.moveTo(Math.cos(a0)*base*.8,Math.sin(a0)*base*.8);g.quadraticCurveTo(Math.cos(a0+.2)*L1*.55,Math.sin(a0+.2)*L1*.55,x1,y1);g.stroke();
+            for(const s2 of [-.5,.5]){const a1=a0+s2+Math.sin(ph*.7+b)*.05;g.lineWidth=Math.max(.5,px/90);g.beginPath();g.moveTo(x1*.7,y1*.7);g.lineTo(x1*.7+Math.cos(a1)*px*.12,y1*.7+Math.sin(a1)*px*.12);g.stroke()}}}
         const rad=a=>{let r=1;for(const h of harm)r+=h.a*Math.sin(h.f*a+h.p+ph);
           for(const L of lam){const d=Math.atan2(Math.sin(a-L.a),Math.cos(a-L.a));r+=(.18+.12*Math.sin(ph+L.w*3))*Math.exp(-d*d/(.12*L.w))}
           if(k==='nec')r*=1-.25*Math.max(0,Math.sin(7*a+ph*2));
+          if(k==='div')r*=1-.62*pinch*Math.pow(Math.abs(Math.sin(a)),6);
           return r};
         const pts=[];const N=40;
-        for(let i=0;i<=N;i++){const a=i/N*TAU,r=rad(a)*base;pts.push([Math.cos(a)*r*K.elong,Math.sin(a)*r/Math.sqrt(K.elong)])}
+        for(let i=0;i<=N;i++){const a=i/N*TAU,r=rad(a)*base;pts.push([Math.cos(a)*r*EL,Math.sin(a)*r/Math.sqrt(EL)])}
         const path=()=>{g.beginPath();pts.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.closePath()};
         // cytoplasm
         path();const fillA=k==='nec'?.07:.12;g.fillStyle=`rgba(${K.mem},${fillA})`;g.fill();
@@ -335,7 +379,7 @@ function buildCellAtlas(px){
         // actin meshwork: many short random filaments, plus stress fibres along the long axis
         const nm=k==='nec'?14:k==='ede'?34:52;
         for(let m=0;m<nm;m++){const t=(m*0.618+v*.13)%1,a=t*TAU+Math.sin(ph+m)*.08,rr=Math.sqrt((m*0.377+.11)%1)*base*.85,
-            x=Math.cos(a)*rr*K.elong,y=Math.sin(a)*rr,o=((m*2.39)%TAU)+Math.sin(ph*.5+m)*.2,L=base*(.10+.18*((m*0.71)%1));
+            x=Math.cos(a)*rr*EL,y=Math.sin(a)*rr,o=((m*2.39)%TAU)+Math.sin(ph*.5+m)*.2,L=base*(.10+.18*((m*0.71)%1));
           g.strokeStyle=`rgba(${K.fil},${k==='nec'?.22:.45})`;g.lineWidth=Math.max(.5,px/100);g.beginPath();g.moveTo(x-Math.cos(o)*L,y-Math.sin(o)*L);g.lineTo(x+Math.cos(o)*L,y+Math.sin(o)*L);g.stroke()}
         if(k==='ede')for(let m=0;m<5;m++){const y=(m/4-.5)*base*.5+Math.sin(ph+m)*base*.03;g.strokeStyle=`rgba(${K.hot},.35)`;g.lineWidth=Math.max(.6,px/80);g.beginPath();g.moveTo(-base*K.elong*.9,y*.6);g.quadraticCurveTo(0,y+Math.sin(ph+m)*base*.08,base*K.elong*.9,y*.6);g.stroke()}
         // bright cortical hot spots (ruffles)
@@ -348,8 +392,10 @@ function buildCellAtlas(px){
         if(k==='nec'){g.fillStyle=`rgba(${K.mem},.3)`;for(let i=0;i<N;i++){if(((i*7+v*3)%11)>2)continue;const q=pts[i],bl=px*(.018+.03*((i*0.37+v*.21)%1))*(1+.3*Math.sin(i+ph*2));g.beginPath();g.arc(q[0]*1.06,q[1]*1.06,bl,0,TAU);g.fill()}}
         // nucleus: darker hollow
         g.globalCompositeOperation='destination-out';g.fillStyle='rgba(0,0,0,.55)';g.beginPath();
-        g.ellipse(nuc.x*base,nuc.y*base,nuc.r*base*(k==='ede'?1.4:1),nuc.r*base*(k==='ede'?.7:.9),0,0,TAU);g.fill();
+        const nucs=k==='div'&&pinch>.35?[[-.5*base*EL,0],[.5*base*EL,0]]:[[nuc.x*base,nuc.y*base]];
+        for(const [nx,ny] of nucs)g.ellipse(nx,ny,nuc.r*base*(k==='ede'?1.4:k==='div'?.75:1),nuc.r*base*(k==='ede'?.7:k==='div'?.7:.9),0,0,TAU);g.fill();
         g.globalCompositeOperation='lighter';g.strokeStyle=`rgba(${K.mem},.35)`;g.lineWidth=Math.max(.6,px*.015);g.stroke();
+        if(k==='div'){g.fillStyle=`rgba(${K.hot},.85)`;if(pinch<=.35){g.fillRect(-base*.08,-base*.32,base*.16,base*.64)}else{for(const [nx] of nucs)g.fillRect(nx-base*.06,-base*.18,base*.12,base*.36)}}
         if(k==='nec'){g.fillStyle=`rgba(${K.hot},.35)`;for(let d=0;d<5;d++){const a=d*1.3+ph*.3,r=base*(1.05+.12*Math.sin(ph+d));g.beginPath();g.arc(Math.cos(a)*r,Math.sin(a)*r,px*.02,0,TAU);g.fill()}}
         frames.push(cv)}
       out[k].push(frames)}}
@@ -362,7 +408,14 @@ function Tumor3D(cv,opts={}){
   // population of illustrative cells; positions are fractions of each compartment's radius, so they follow the measured volumes
   const CELLS=(()=>{const R=cellRand(opts.cellSeed||4242),L=[];const sphere=()=>{const u=R()*2-1,t=R()*TAU,r=Math.sqrt(1-u*u);return [r*Math.cos(t),u,r*Math.sin(t)]};
     const add=(kind,n,fr)=>{for(let i=0;i<n;i++)L.push({kind,h:R(),dir:sphere(),frac:fr(),v:Math.floor(R()*6),off:R()*8,spd:3+R()*4,size:.75+R()*.5,spin:R()*TAU,spinV:(R()-.5)*.4,wob:R()*TAU,wobV:.3+R()*.5})};
-    add('enh',340,()=>.25+.75*Math.sqrt(R()));add('ede',300,()=>Math.pow(R(),.8));add('nec',130,()=>.2+.75*Math.cbrt(R()));return L})();
+    add('enh',340,()=>.25+.75*Math.sqrt(R()));add('ede',300,()=>Math.pow(R(),.8));add('nec',130,()=>.2+.75*Math.cbrt(R()));add('hea',200,()=>.55+.8*R());return L})();
+  // which cell type a cell shows right now: activity follows the tumor's modeled or observed change
+  const cellState=(C,i,T,G)=>{if(C.kind==='hea'||C.kind==='nec')return C.kind;
+    const ep=Math.floor(T*.35+C.off),x=Math.sin(i*12.9898+ep*78.233)*43758.5453,hsh=x-Math.floor(x);
+    const ge=(G&&G.e)||0,gn=(G&&G.n)||0,pDiv=clamp(.04+2.5*Math.max(0,ge),0,.6),pDie=clamp(.03+2.5*Math.max(0,-ge)+1.2*Math.max(0,gn),0,.6);
+    if(C.kind==='enh')return hsh<pDiv?'div':hsh>1-pDie?'nec':'enh';
+    return hsh<pDiv*.4?'div':hsh>1-pDie*.5?'nec':'ede'};
+  const cellFrame=(sk,C,T,n)=>{if(sk==='div'){const x=T*.35+C.off;return Math.floor((x-Math.floor(x))*n)%n}return Math.floor(((REDUCED?0:T*C.spd)+C.off)%n)};
   function fib(n){const P=[],g=Math.PI*(3-Math.sqrt(5));for(let i=0;i<n;i++){const y=1-2*(i+.5)/n,r=Math.sqrt(1-y*y),t=g*i;P.push([Math.cos(t)*r,y,Math.sin(t)*r])}return P}
   const SHELL={ede:fib(1500),enh:fib(1300),nec:fib(900)};let DENSE=null;const shells=z=>{if(z<2.2)return SHELL;if(!DENSE)DENSE={ede:fib(6000),enh:fib(5200),nec:fib(3600)};return DENSE};
   const LAT=[];for(let i=0;i<5;i++){const phi=-1.0+2.0*i/4,ring=[];for(let j=0;j<=72;j++){const th=j/72*TAU;ring.push([Math.cos(phi)*Math.cos(th),Math.sin(phi),Math.cos(phi)*Math.sin(th)])}LAT.push(ring)}
@@ -383,6 +436,7 @@ function Tumor3D(cv,opts={}){
     let cut=st.cut?{ax:st.cut.ax,cos:Math.cos(st.cut.h)}:null,dep=st.cut?st.cut.depth:0;
     if(this.cutaway){const cp=Math.cos(this.pitch),sp=Math.sin(this.pitch);cut={ax:[-cp*Math.sin(this.yaw),sp,cp*Math.cos(this.yaw)],cos:0.12};dep=0.5}
     const sz=clamp(Math.min(W,H)/320,1.1,2.2)*Math.min(1.8,Math.pow(Z,.35));
+    if(st.anatomy){this._drawAnatomy(c,st,W,H,Z,cx,cy,s,cut,dep,sz)}else{
     c.globalCompositeOperation='lighter';
     const CM=this.style==='cells',inside=clamp((Z-1.2)/1.8,0,1),DA=CM?1-.72*inside:1,GA=CM?1-.5*inside:1;const SHD=CM?SHELL:SH;
     glow(c,cx,cy,Rt*s*1.1,'150,100,255',.13*GA);
@@ -394,22 +448,22 @@ function Tumor3D(cv,opts={}){
       const D=cs.D||1,small=W<500,keepEvery=small?3:1;
       const cellPx=clamp(Rt*s*(.085+.055*inside),2,520),cellA=.5+.5*inside,px=cellPx*D>90?160:64,ATL=buildCellAtlas(px);
       const T=this.time,list=[];
-      const bounds={enh:[Rn,Re],ede:[Re,Rt],nec:[0,Rn]},seeds={enh:[2.4,.9],ede:[1.3,1],nec:[3.7,.7]},amp={enh:.5,ede:.62,nec:.4};
-      const cutOK={ede:true,enh:dep>=.35,nec:dep>=.65};const VT=Math.max(v.t,1e-6),share={enh:clamp(3.2*v.e/VT,.08,1),nec:clamp(3*v.n/VT,.08,1),ede:clamp(1.6*Math.max(v.t-v.e-v.n,0)/VT,.15,1)};
-      for(let i=0;i<CELLS.length;i+=keepEvery){const C=CELLS[i],[r0,r1]=bounds[C.kind];if(r1-r0<=.005&&C.kind!=='ede')continue;if(C.kind==='enh'&&v.e<=.02)continue;if(C.kind==='nec'&&Rn<=.02)continue;
+      const G=st.growth||{},bounds={enh:[Rn,Re],ede:[Re,Rt],nec:[0,Rn],hea:[Re,Rt]},seeds={enh:[2.4,.9],ede:[1.3,1],nec:[3.7,.7],hea:[1.3,1]},amp={enh:.5,ede:.62,nec:.45,hea:.5,div:.65};
+      const cutOK={ede:true,hea:true,enh:dep>=.35,nec:dep>=.65};const VT=Math.max(v.t,1e-6),share={enh:clamp(3.2*v.e/VT,.08,1),nec:clamp(3*v.n/VT,.08,1),ede:clamp(1.6*Math.max(v.t-v.e-v.n,0)/VT,.15,1),hea:1};
+      for(let i=0;i<CELLS.length;i+=keepEvery){const C=CELLS[i],[r0,r1]=bounds[C.kind];if(r1-r0<=.005&&C.kind!=='ede'&&C.kind!=='hea')continue;if(C.kind==='enh'&&v.e<=.02)continue;if(C.kind==='nec'&&Rn<=.02)continue;
         if(C.h>share[C.kind])continue;const d=C.dir;if(cut&&cutOK[C.kind]&&d[0]*cut.ax[0]+d[1]*cut.ax[1]+d[2]*cut.ax[2]>cut.cos)continue;
-        const drift=C.kind==='ede'?.06*Math.sin(T*.25*C.wobV+C.wob):.025*Math.sin(T*C.wobV+C.wob);
-        const fr=clamp(C.frac+drift,0,1),[sd,rg]=seeds[C.kind],R=(r0+(r1-r0)*fr)*disp(d,sd,rg)*(C.kind==='ede'?1:.985);
+        const mig=C.kind==='ede'?(()=>{const x=T*.03*(1+8*Math.max(0,G.d||0))+C.off;return .25*(x-Math.floor(x))})():0,drift=C.kind==='ede'?.04*Math.sin(T*.25*C.wobV+C.wob)+mig:.025*Math.sin(T*C.wobV+C.wob);
+        const fr=clamp(C.frac+drift,0,C.kind==='hea'?1.4:1),[sd,rg]=seeds[C.kind],R=(r0+(r1-r0)*fr)*disp(d,sd,rg)*(C.kind==='ede'?1:.985);
         const w=.012*Math.sin(T*C.wobV*1.3+C.wob*2);
         const q=this.project([d[0]*R+w,d[1]*R-w,d[2]*R+w*.5],s,cx,cy);
         if(q[0]<-cellPx||q[1]<-cellPx||q[0]>W+cellPx||q[1]>H+cellPx)continue;
-        list.push([q,C,R])}
+        list.push([q,C,R,i])}
       list.sort((a,b)=>a[0][2]-b[0][2]);
-      for(const [q,C,R] of list){const depth=clamp((q[2]/Math.max(R,1e-3)+1)/2),k=1/(1-q[2]*.05);
+      for(const [q,C,R,ci] of list){const sk=cellState(C,ci,T,G);const depth=clamp((q[2]/Math.max(R,1e-3)+1)/2),k=1/(1-q[2]*.05);
         const size=cellPx*C.size*k*(C.kind==='nec'?.8:1)*(.8+.35*depth);if(size<1.5)continue;
-        const frames=ATL[C.kind][C.v],fi=Math.floor(((REDUCED?0:T*C.spd)+C.off)%frames.length);
+        const frames=ATL[sk][C.v],fi=cellFrame(sk,C,T,frames.length);
         const ang=C.spin+(REDUCED?0:T*C.spinV),co=Math.cos(ang),si=Math.sin(ang);
-        c.globalAlpha=cellA*amp[C.kind]*(.25+.75*depth*depth);
+        c.globalAlpha=cellA*amp[sk]*(.25+.75*depth*depth);
         c.setTransform(D*co,D*si,-D*si,D*co,D*q[0],D*q[1]);
         c.drawImage(frames[fi],-size/2,-size/2,size,size)}
       c.setTransform(D,0,0,D,0,0);c.globalAlpha=1}
@@ -427,7 +481,8 @@ function Tumor3D(cv,opts={}){
       if(v.e>.02)outline(Re,2.4,.9,'90,245,232',.95*OL,2.2,dep>=.35);
       if(Rn>.02)outline(Rn,3.7,.7,'255,190,90',.7*OL,1.4,dep>=.65)}
     c.globalCompositeOperation='source-over';
-    if(this.cutaway&&Rt>.02){const face=(R,rgb,a)=>{if(R<=.01)return;c.fillStyle=`rgba(${rgb},${a})`;c.beginPath();c.arc(cx,cy,R*s*.97,0,TAU);c.fill()};
+    }
+    if(this.cutaway&&Rt>.02&&!st.anatomy){const face=(R,rgb,a)=>{if(R<=.01)return;c.fillStyle=`rgba(${rgb},${a})`;c.beginPath();c.arc(cx,cy,R*s*.97,0,TAU);c.fill()};
       const FA=this.style==='cells'?.45:1;face(Rt,'168,107,255',.10*FA);if(v.e>.02)face(Re,'47,227,214',.16*FA);if(Rn>.02)face(Rn,'255,176,58',.22*FA);
       const small=W<420,fs=small?10:11.5,RM=tools?52:6;c.font=`600 ${fs}px system-ui,sans-serif`;c.textBaseline='middle';
       const lab=(txt,r0,r1,ang,col)=>{if(W<260||r1<=.01||(r1-r0)*s<3)return;const rm=((r0+r1)/2)*s,x=cx+Math.cos(ang)*rm,y=cy-Math.sin(ang)*rm,lx=cx+Math.cos(ang)*(Rt*s*1.08+10),ly=cy-Math.sin(ang)*(Rt*s*1.08+10);
@@ -449,16 +504,16 @@ function Tumor3D(cv,opts={}){
       c.fillStyle=COL.dim;c.font='11px system-ui,sans-serif';c.textAlign='right';c.textBaseline='bottom';c.fillText(vref+' cm³ sphere',W-12,y-r-4);this.scaleV=vref}
     this.dirty=false};
   this.set=function(state){this.state=state;this.dirty=true};
-  this.ringAngleAt=function(x,y){if(this._ringR==null)return null;let best=null,bd=1e9;for(let A=0;A<360;A+=2){const a=A*Math.PI/180,p=this.project([Math.cos(a)*this._ringR,0,Math.sin(a)*this._ringR],this._s,this._cx,this._cy),d=Math.hypot(p[0]-x,p[1]-y)-(p[2]>=0?6:0);if(d<bd){bd=d;best=A}}return bd<48?best:null};
+  this.ringAngleAt=function(x,y,maxD=48){if(this._ringR==null)return null;let best=null,bd=1e9;for(let A=0;A<360;A+=2){const a=A*Math.PI/180,p=this.project([Math.cos(a)*this._ringR,0,Math.sin(a)*this._ringR],this._s,this._cx,this._cy),d=Math.hypot(p[0]-x,p[1]-y)-(p[2]>=0?6:0);if(d<bd){bd=d;best=A}}return bd<maxD?best:null};
   // interaction: drag rotates; pinch / wheel / buttons zoom about the pointer; two fingers or shift-drag pan; tap reports position
-  cv.style.touchAction='pan-y';let down=null,moved=false,lastInteract=-1e9,armed=false;const ptrs=new Map();let pinch=null;
+  cv.style.touchAction='none';let down=null,moved=false,lastInteract=-1e9,armed=false;const ptrs=new Map();let pinch=null;
   const ZMAX=10,wrap=cv.parentElement;
   const clampPan=()=>{const W=cs.W,H=cs.H,lim=Math.max(0,(this.zoom-1))*.5;this.panX=clamp(this.panX,-W*lim-W*.25*(this.zoom>1),W*lim+W*.25*(this.zoom>1));this.panY=clamp(this.panY,-H*lim-H*.25*(this.zoom>1),H*lim+H*.25*(this.zoom>1));if(this.zoom<=1.0001){this.panX=0;this.panY=0}};
   let zlog=null;const logView=()=>{clearTimeout(zlog);zlog=setTimeout(()=>{try{if(typeof Session!=='undefined'&&window.__demoKey)Session.event(window.__demoKey,'3-D view: zoom '+this.zoom.toFixed(1)+'×'+(this.cutaway?', cut-away on':'')+(this.style==='cells'?', cells':', dots'))}catch(_){}},900)};
   this.setZoom=(z,px,py)=>{const W=cs.W,H=cs.H,st=this.state||{};z=clamp(z,1,ZMAX);if(px==null){px=W/2;py=H*(st.cyFrac??.5)}
     const cx=W/2+this.panX,cy=H*(st.cyFrac??.5)+this.panY,k=z/this.zoom;this.panX+=(px-cx)*(1-k);this.panY+=(py-cy)*(1-k);this.zoom=z;clampPan();
-    cv.style.touchAction=z>1.001?'none':'pan-y';this.dirty=true;lastInteract=performance.now();syncTools();logView()};
-  this.resetView=()=>{this.zoom=1;this.panX=0;this.panY=0;cv.style.touchAction='pan-y';this.dirty=true;syncTools();logView()};
+    this.dirty=true;lastInteract=performance.now();syncTools();logView()};
+  this.resetView=()=>{this.zoom=1;this.panX=0;this.panY=0;this.dirty=true;syncTools();logView()};
   this.setCutaway=v=>{this.cutaway=!!v;this.dirty=true;syncTools();logView()};
   // toolbar
   let tools=null;
@@ -474,20 +529,101 @@ function Tumor3D(cv,opts={}){
   const local=e=>{const r=cv.getBoundingClientRect();return [e.clientX-r.left,e.clientY-r.top]};
   cv.addEventListener('pointerdown',e=>{ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});armed=true;lastInteract=performance.now();try{cv.setPointerCapture(e.pointerId)}catch(_){}
     if(ptrs.size===2){const [p1,p2]=[...ptrs.values()],r=cv.getBoundingClientRect();pinch={d:Math.hypot(p1.x-p2.x,p1.y-p2.y)||1,z:this.zoom,mx:(p1.x+p2.x)/2-r.left,my:(p1.y+p2.y)/2-r.top};down=null;moved=true;return}
-    down={x:e.clientX,y:e.clientY,yaw:this.yaw,pitch:this.pitch,px:this.panX,py:this.panY,pan:e.shiftKey||e.button===1||e.button===2};moved=false});
+    down={x:e.clientX,y:e.clientY,yaw:this.yaw,pitch:this.pitch,px:this.panX,py:this.panY,pan:e.shiftKey||e.button===1||e.button===2};moved=false;
+    if(this.onDragStart){const [lx,ly]=local(e);if(this.onDragStart(lx,ly))down.aim=true}});
   cv.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
     if(pinch&&ptrs.size>=2){const [p1,p2]=[...ptrs.values()],r=cv.getBoundingClientRect(),d=Math.hypot(p1.x-p2.x,p1.y-p2.y)||1,mx=(p1.x+p2.x)/2-r.left,my=(p1.y+p2.y)/2-r.top;
       this.setZoom(pinch.z*d/pinch.d,mx,my);this.panX+=mx-pinch.mx;this.panY+=my-pinch.my;pinch.mx=mx;pinch.my=my;clampPan();this.dirty=true;return}
     if(!down)return;const dx=e.clientX-down.x,dy=e.clientY-down.y;if(Math.abs(dx)+Math.abs(dy)>6)moved=true;
-    if(moved){if(down.pan&&this.zoom>1.001){this.panX=down.px+dx;this.panY=down.py+dy;clampPan()}else{this.yaw=down.yaw+dx*.009;if(e.pointerType==='mouse'||this.zoom>1.001)this.pitch=clamp(down.pitch+dy*.006,-1.1,1.1)}this.dirty=true;lastInteract=performance.now()}});
+    if(moved&&down.aim){const [lx,ly]=local(e);this.onDragMove&&this.onDragMove(lx,ly);lastInteract=performance.now();return}
+    if(moved){if(down.pan&&this.zoom>1.001){this.panX=down.px+dx;this.panY=down.py+dy;clampPan()}else{this.yaw=down.yaw+dx*.009;this.pitch=clamp(down.pitch+dy*.006,-1.1,1.1)}this.dirty=true;lastInteract=performance.now()}});
   const end=e=>{const had=ptrs.has(e.pointerId);ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;
-    if(had&&down&&!moved&&this.onTap&&ptrs.size===0){const [x,y]=local(e);this.onTap(x,y)}if(ptrs.size===0)down=null};
-  cv.addEventListener('pointerup',end);cv.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;if(ptrs.size===0)down=null});
+    if(had&&down&&!moved&&this.onTap&&ptrs.size===0){const [x,y]=local(e);this.onTap(x,y)}
+    if(had&&down&&down.aim&&moved&&this.onDragEnd&&ptrs.size===0)this.onDragEnd();
+    if(ptrs.size===0)down=null};
+  cv.addEventListener('pointerup',end);
+  // safety net: if the browser takes over a gesture (scroll, system swipe) the finger-lift event can be lost; clear the
+  // interaction state so automatic rotation always resumes
+  const release=()=>{ptrs.clear();pinch=null;if(down)lastInteract=performance.now();down=null};
+  cv.addEventListener('lostpointercapture',e=>{if(ptrs.has(e.pointerId)){ptrs.delete(e.pointerId);if(ptrs.size===0){if(down)lastInteract=performance.now();down=null;pinch=null}}});
+  addEventListener('pointerup',e=>{if(ptrs.has(e.pointerId))end(e)},true);
+  addEventListener('touchend',e=>{if(e.touches.length===0&&ptrs.size)release()},{passive:true,capture:true});
+  addEventListener('touchcancel',()=>{if(ptrs.size)release()},{passive:true,capture:true});
+  addEventListener('blur',()=>{if(ptrs.size)release()});cv.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;if(ptrs.size===0)down=null});
   cv.addEventListener('contextmenu',e=>{if(this.zoom>1.001)e.preventDefault()});
   cv.addEventListener('pointerleave',()=>{if(ptrs.size===0)armed=false});
   cv.addEventListener('wheel',e=>{if(!(e.ctrlKey||e.metaKey||armed||this.zoom>1.001))return;e.preventDefault();const [x,y]=local(e);const f=Math.exp(-e.deltaY*(e.ctrlKey?0.012:0.0022));this.setZoom(this.zoom*f,x,y)},{passive:false});
   cv.addEventListener('dblclick',e=>{e.preventDefault();const [x,y]=local(e);this.setZoom(this.zoom>=ZMAX-.01?1:this.zoom*2,x,y)});
   new ResizeObserver(()=>{clampPan();syncTools();this.dirty=true}).observe(cv);
+
+  /* ---------- observed anatomy (real segmentation surfaces) ---------- */
+  const ANAT_PARTS={};
+  const decodeAnat=(A)=>{if(A._decoded)return A._decoded;const out={};
+    for(const k in A.parts){const p=A.parts[k];if(p._dec){out[k]=p._dec;continue}const vb=atob(p.v),fb=atob(p.f);
+      const vi=new Int16Array(p.n*3);for(let i=0;i<p.n*3;i++){const lo=vb.charCodeAt(2*i),hi=vb.charCodeAt(2*i+1);let x=lo|(hi<<8);if(x>32767)x-=65536;vi[i]=x}
+      const V=new Float32Array(p.n*3);for(let i=0;i<p.n*3;i++)V[i]=vi[i]*A.q;
+      const F=new Uint16Array(p.nf*3);for(let i=0;i<p.nf*3;i++)F[i]=fb.charCodeAt(2*i)|(fb.charCodeAt(2*i+1)<<8);
+      const E=new Map();for(let f=0;f<p.nf;f++)for(let e=0;e<3;e++){const a=F[3*f+e],b=F[3*f+(e+1)%3],key=a<b?a*65536+b:b*65536+a;const x=E.get(key);if(x)x.push(f);else E.set(key,[f])}
+      const edges=[];for(const [key,fs] of E)if(fs.length===2)edges.push(Math.floor(key/65536),key%65536,fs[0],fs[1]);
+      // neighbours, then Taubin smoothing (lambda/mu) so outlines follow the anatomy without voxel noise
+      const nb=Array.from({length:p.n},()=>[]);for(const key of E.keys()){const a=Math.floor(key/65536),b=key%65536;nb[a].push(b);nb[b].push(a)}
+      const iters=k==='brain'?4:k==='ede'?8:6,tmp=new Float32Array(p.n*3);
+      for(let it=0;it<iters*2;it++){const lam=it%2===0?.5:-.53;
+        for(let i=0;i<p.n;i++){const N=nb[i];if(!N.length){tmp[3*i]=V[3*i];tmp[3*i+1]=V[3*i+1];tmp[3*i+2]=V[3*i+2];continue}let x=0,y=0,z=0;for(const j of N){x+=V[3*j];y+=V[3*j+1];z+=V[3*j+2]}x/=N.length;y/=N.length;z/=N.length;
+          tmp[3*i]=V[3*i]+lam*(x-V[3*i]);tmp[3*i+1]=V[3*i+1]+lam*(y-V[3*i+1]);tmp[3*i+2]=V[3*i+2]+lam*(z-V[3*i+2])}
+        V.set(tmp)}
+      const FC=new Float32Array(p.nf*3);for(let t=0;t<p.nf;t++)for(let a=0;a<3;a++)FC[3*t+a]=(V[3*F[3*t]+a]+V[3*F[3*t+1]+a]+V[3*F[3*t+2]+a])/3;
+      out[k]=p._dec={V,F,FC,n:p.n,nf:p.nf,c:p.c,rmax:p.rmax,edges:Int32Array.from(edges),fx:new Float32Array(p.nf),fy:new Float32Array(p.nf),fz:new Float32Array(p.nf),fh:new Uint8Array(p.nf),sx:new Float32Array(p.n),sy:new Float32Array(p.n),sz:new Float32Array(p.n),hid:new Uint8Array(p.n),fs:new Int8Array(p.nf)}}
+    return A._decoded=out};
+  this._drawAnatomy=function(c,st,W,H,Z,cx,cy,s,cut,dep,sz){
+    const A=decodeAnat(st.anatomy),scale=st.anatScale||{},T=this.time,CM=this.style==='cells',inside=clamp((Z-1.2)/1.8,0,1),OF=st.anatCenter||[0,0,0];
+    const DA=CM?1-.6*inside:1;
+    const cutFor={ede:true,enh:dep>=.35,nec:dep>=.65,brain:false};
+    const COLS={ede:['190,150,255',COL.ede],enh:['90,245,232',COL.enh],nec:['255,190,90',COL.nec],brain:['150,170,190','#8ea0b4']};
+    const order=['brain','ede','enh','nec'];
+    for(const k of order){const P=A[k];if(!P)continue;const f=k==='brain'?1:(scale[k]??1);if(f<=0.02)continue;
+      const cxk=P.c[0],cyk=P.c[1],czk=P.c[2],useCut=cut&&cutFor[k];
+      const cyw=Math.cos(this.yaw),syw=Math.sin(this.yaw),cpw=Math.cos(this.pitch),spw=Math.sin(this.pitch);
+      const projAll=(SRC,n,OX,OY,OZ,OH)=>{for(let i=0;i<n;i++){let x=SRC[3*i],y=SRC[3*i+1],z=SRC[3*i+2];
+        if(f!==1){x=cxk+(x-cxk)*f;y=cyk+(y-cyk)*f;z=czk+(z-czk)*f}
+        x-=OF[0];y-=OF[1];z-=OF[2];
+        let hid=0;if(useCut){const L=Math.sqrt(x*x+y*y+z*z)||1;if((x*cut.ax[0]+y*cut.ax[1]+z*cut.ax[2])/L>cut.cos)hid=1}
+        const rx=x*cyw+z*syw,rz0=-x*syw+z*cyw,ry=y*cpw-rz0*spw,rz=y*spw+rz0*cpw,kk=1/(1-rz*.05);
+        OX[i]=cx+rx*s*kk;OY[i]=cy-ry*s*kk;OZ[i]=rz;OH[i]=hid}};
+      projAll(P.V,P.n,P.sx,P.sy,P.sz,P.hid);projAll(P.FC,P.nf,P.fx,P.fy,P.fz,P.fh);
+      // faces: screen-space winding gives front/back; silhouette edges separate them
+      for(let t=0;t<P.nf;t++){const a=P.F[3*t],b=P.F[3*t+1],d=P.F[3*t+2];
+        P.fs[t]=((P.sx[b]-P.sx[a])*(P.sy[d]-P.sy[a])-(P.sy[b]-P.sy[a])*(P.sx[d]-P.sx[a]))>=0?1:-1}
+      const [rgb,col]=COLS[k],R=Math.max(P.rmax*f,.01);
+      // surface dots
+      const small=W<500,dotA=(k==='brain'?.22:k==='ede'?.55:.8)*DA,step=(k==='brain'?2:1)*(small?2:1),dz=clamp(sz*(k==='brain'?.8:1)*(small?1.2:1),.8,3);
+      c.globalCompositeOperation='lighter';c.fillStyle=col;
+      const dotsOf=(SX,SY,SZ,SH,n,st2)=>{for(let i=0;i<n;i+=st2){if(SH[i])continue;const X=SX[i],Y=SY[i];if(X<-8||Y<-8||X>W+8||Y>H+8)continue;
+        const depth=clamp((SZ[i]/R+1)/2);c.globalAlpha=dotA*(.15+.85*depth*depth);const zz=dz*(.7+.6*depth);c.fillRect(X-zz/2,Y-zz/2,zz,zz)}};
+      dotsOf(P.sx,P.sy,P.sz,P.hid,P.n,step);if(!small)dotsOf(P.fx,P.fy,P.fz,P.fh,P.nf,step*2);
+      c.globalAlpha=1;
+      // silhouette
+      c.beginPath();const E=P.edges;
+      for(let e=0;e<E.length;e+=4){if(P.fs[E[e+2]]===P.fs[E[e+3]])continue;const a=E[e],b=E[e+1];if(P.hid[a]||P.hid[b])continue;c.moveTo(P.sx[a],P.sy[a]);c.lineTo(P.sx[b],P.sy[b])}
+      c.globalCompositeOperation='source-over';
+      const fadeIn=CM?1-.72*inside:1,la=(k==='brain'?.25:k==='ede'?.5:.95)*fadeIn,lw=(k==='brain'?1:k==='enh'?1.8:k==='ede'?1:1.4)*(CM?1-.35*inside:1);
+      if(!small){c.strokeStyle=`rgba(${rgb},${la*.22})`;c.lineWidth=lw*4;c.stroke()}c.strokeStyle=`rgba(${rgb},${la})`;c.lineWidth=lw;c.stroke()}
+    // illustrative cells placed on the real compartments
+    if(CM&&A.enh){const D=cs.D||1,small=W<500,keepEvery=small?3:1,list=[];
+      const G=st.growth||{},cellPx=clamp(A.enh.rmax*s*(.05+.13*inside),2,Math.min(W,H)*.11),cellA=.5+.5*inside,px=cellPx*D>90?160:64,ATL=buildCellAtlas(px),amp={enh:.42,ede:.5,nec:.42,hea:.5,div:.55};
+      for(let i=0;i<CELLS.length;i+=keepEvery){const C=CELLS[i],P=A[C.kind==='hea'?'ede':C.kind];if(!P)continue;const f=scale[C.kind==='hea'?'ede':C.kind]??1;if(f<=.05||C.h>(f>1?1:Math.max(.15,f)))continue;
+        const vi=Math.floor(C.dir[0]*1e6+C.dir[1]*7e5+C.dir[2]*3e5)>>>0;const j=vi%P.n;if(P.hid[j])continue;
+        const mg=C.kind==='ede'?(()=>{const x=T*.03*(1+8*Math.max(0,G.d||0))+C.off;return .2*(x-Math.floor(x))})():0;
+        const pull=C.kind==='nec'?C.frac:C.kind==='enh'?.8+.2*C.frac:C.kind==='hea'?.75+.45*C.frac:.7+.3*C.frac+mg;
+        const w=.012*Math.sin(T*C.wobV*1.3+C.wob*2)*A.enh.rmax;
+        const x=P.c[0]+(P.c[0]+(P.V[3*j]-P.c[0])*f-P.c[0])*pull+w,y=P.c[1]+(P.c[1]+(P.V[3*j+1]-P.c[1])*f-P.c[1])*pull-w,z=P.c[2]+(P.c[2]+(P.V[3*j+2]-P.c[2])*f-P.c[2])*pull;
+        const q=this.project([x-OF[0],y-OF[1],z-OF[2]],s,cx,cy);if(q[0]<-cellPx||q[1]<-cellPx||q[0]>W+cellPx||q[1]>H+cellPx)continue;list.push([q,C,P.rmax,i])}
+      list.sort((a,b)=>a[0][2]-b[0][2]);c.globalCompositeOperation='lighter';
+      for(const [q,C,R,ci] of list){const sk=cellState(C,ci,T,G),depth=clamp((q[2]/Math.max(R,1e-3)+1)/2),size=cellPx*C.size*(sk==='nec'?.8:sk==='hea'?.9:1)*(.8+.35*depth);if(size<1.5)continue;
+        const frames=ATL[sk][C.v],fi=cellFrame(sk,C,T,frames.length),ang=C.spin+(REDUCED?0:T*C.spinV),co=Math.cos(ang),si=Math.sin(ang);
+        c.globalAlpha=cellA*amp[sk]*(.25+.75*depth*depth);c.setTransform(D*co,D*si,-D*si,D*co,D*q[0],D*q[1]);c.drawImage(frames[fi],-size/2,-size/2,size,size)}
+      c.setTransform(cs.D||1,0,0,cs.D||1,0,0);c.globalAlpha=1;c.globalCompositeOperation='source-over'}
+  };
   let visible=true,lastTs=0;new IntersectionObserver(es=>{visible=es[0].isIntersecting}).observe(cv);
   const loop=ts=>{const dt=lastTs?Math.min(.05,(ts-lastTs)/1000):0;lastTs=ts;
     if(visible&&!document.hidden){this.time+=dt;if(this.style==='cells'&&!REDUCED&&(cs.W>=500||ts-(this._lastCellDraw||0)>=32)){this.dirty=true;this._lastCellDraw=ts}if(this.auto&&!down&&ts-lastInteract>2500){this.yaw+=dt*.22;this.dirty=true}if(this.tick)this.tick(dt);if(this.dirty)this.draw()}
@@ -501,7 +637,21 @@ function supp(rt,tz){const conventional=rt<=66,tmod=tz<=.80;if(rt>72||tz>.90)ret
 const APP={partial:{f:.45,w:.30,name:'Subtotal'},gtr:{f:.82,w:.52,name:'Near-total'},supra:{f:.93,w:.78,name:'Supramarginal'}};
 function burden(th){const g=(c,w)=>Math.exp(-Math.pow(Math.atan2(Math.sin(th-c),Math.cos(th-c))/w,2));return clamp(.88*g(.70,.55)+.76*g(3.52,.62))}
 function guardState(th,a,d){const b=burden(th),width=APP[a].w*(.55+.45*d),cyt=APP[a].f*d,activation=.42*width*d,score=.58*activation+.42*b*width;return {b,width,cyt,activation,score,k:score<.22?'clear':score<.36?'limit':'breach'}}
-function surgeryVols(base,g,t){const v=vols(base),on=1-Math.exp(-t/3),remote=1-Math.exp(-t/8);const e=v.e*(1-g.cyt)*(1+.42*g.activation*on),n=v.n*(1-.55*g.cyt)*(1+.10*on),d=v.d*(1-.20*g.cyt)*(1+.25*g.activation*on+.08*g.cyt*remote);return {e:Math.max(.01,e),n:Math.max(.01,n),d:Math.max(.01,d),t:Math.max(.03,e+n+d)}}
+/* Residual enhancing tumor regrows at the patient's own pre-operative growth rate (enhancing volume, week 152 -> week 156),
+   with a declared ceiling. The week-167 scan is never used here, so it remains an out-of-sample comparison. */
+let _preopRate=null;
+function preopGrowthRate(){if(_preopRate!=null)return _preopRate;let r=.12;
+  try{const P=(typeof STATES!=='undefined'?STATES:[]).filter(x=>x.patient==='Patient-067'),a=P.find(x=>x.week==='week-152'),b=P.find(x=>x.week==='week-156');
+    if(a&&b){const ea=a.volumes_mm3_from_native_mask.enhancing,eb=b.volumes_mm3_from_native_mask.enhancing;if(ea>0&&eb>0)r=Math.log(eb/ea)/(b.t_order-a.t_order)}}catch(e){}
+  return _preopRate=Math.max(.02,Math.min(.35,r))}
+function surgeryVols(base,g,t,rate){const v=vols(base),on=1-Math.exp(-t/3),remote=1-Math.exp(-t/8);
+  const cyt=g.cyt*(1-.35*g.b);                       // resection is stopped short where the trajectory crosses high-risk tissue
+  const e0=v.e*(1-cyt),K=Math.max(v.e*2.5,e0*1.5),k=rate==null?preopGrowthRate()*(1+.4*g.activation):rate+.05*g.activation;
+  const gr=Math.exp(k*t),e=K*e0*gr/(K+e0*(gr-1));     // logistic regrowth from the residual, patient's own rate
+  const grow=Math.max(0,e-e0);
+  const n=v.n*(1-.55*cyt)*(1+.10*on)+.12*grow;
+  const d=v.d*(1-.20*cyt)*(1+.25*g.activation*on+.30*g.b*g.width*on+.08*cyt*remote)+.6*grow;   // surgical injury edema; edema follows regrowth
+  return {e:Math.max(.01,e),n:Math.max(.01,n),d:Math.max(.01,d),t:Math.max(.03,e+n+d)}}
 function clearestAngle(a,d){let best=0,bb=1e9;for(let A=0;A<360;A++){const b=burden(A*Math.PI/180);if(b<bb){bb=b;best=A}}return best}
 /* Demo 4 families: medical = demo-2 channel at 60 Gy / 0.70; surgical = demo-3 channel, near-total at depth 0.90 through the clearest corridor */
 const FAMILY_RT=60,FAMILY_TZ=.70,FAMILY_APP='gtr',FAMILY_DEPTH=.90;
@@ -510,6 +660,12 @@ function famSurgical(base,h){const A=clearestAngle(FAMILY_APP,FAMILY_DEPTH),g=gu
 function famCombined(base,h){const s=famSurgical(base,h),m=famMedical(base,h);const e=Math.min(s.e,m.e)*.84,d=Math.min(s.d,m.d)*.94,n=Math.max(s.n,m.n)*.92;return {e,n,d,t:e+n+d,harm:clamp(Math.max(s.harm,m.harm)+.08),support:.64,label:'Combined'}}
 function scoreFam(x,objective){if(objective==='enh')return x.e;if(objective==='total')return x.t;return x.t*(1+.65*x.harm)}
 function compareFamilies(base,h,objective){const A=[famMedical(base,h),famSurgical(base,h),famCombined(base,h)];A.forEach(x=>x.score=scoreFam(x,objective));const sorted=[...A].sort((a,b)=>a.score-b.score),best=sorted[0],second=sorted[1],sep=(second.score-best.score)/Math.max(second.score,1e-6),supported=best.support>=.60&&sep>=.06;return {A,best,second,sep,supported,winner:supported?best.label:null}}
+
+/* Patient-067's recorded responses to her own earlier operations (ledger built from LUMIERE masks).
+   Only operations 1-3 inform the exploration from week 156; operation 4 is held out as the check. */
+function responseRates(){if(typeof HIST==='undefined')return null;const prior=HIST.ops.filter(o=>o.index<4&&o.regrowth!=null);
+  const r=prior.map(o=>o.regrowth),w=prior.map(o=>o.index),sw=w.reduce((a,b)=>a+b,0);
+  return {lo:Math.min(...r),hi:Math.max(...r),mid:r.reduce((a,x,i)=>a+x*w[i],0)/sw,prior,preop:HIST.preop_rate_before_op4}}
 
 const DIV_DATA={"patients":{"Patient-071":{"id":"Patient-071","age":66,"sex":"male","mgmt":"methylated (45.00%)","idh":"WT","os":69.0,"scans":[{"week":"week-000-1","w":0.0,"wk":0,"rano":"PRE-OP","why":null,"e":25.382,"n":16.327,"d":186.477,"t":228.186},{"week":"week-000-2","w":0.1,"wk":0,"rano":"POST-OP","why":"CRET","e":3.689,"n":29.978,"d":139.715,"t":173.382},{"week":"week-024","w":24.0,"wk":24,"rano":"PD","why":"Non-Target L.: 1","e":4.207,"n":6.863,"d":54.161,"t":65.231},{"week":"week-027","w":27.0,"wk":27,"rano":"PD","why":"Non-Target L.: 1","e":3.749,"n":6.476,"d":46.868,"t":57.093},{"week":"week-052","w":52.0,"wk":52,"rano":"PD","why":"Target L.: 14mm x 23mm (static), new 16mm x 26mm","e":10.579,"n":5.049,"d":70.673,"t":86.301},{"week":"week-058","w":58.0,"wk":58,"rano":"PD","why":"Four target L.: stable 15mm x 24mm, progressing 18mm x 30mm and 16mm x 31mm and 14mm x 30mm","e":11.131,"n":24.789,"d":99.897,"t":135.817},{"week":"week-062","w":62.0,"wk":62,"rano":"PD","why":"Confluent target L. approx. 45mm x 80mm","e":22.101,"n":36.798,"d":64.5,"t":123.399}]},"Patient-072":{"id":"Patient-072","age":59,"sex":"female","mgmt":"methylated (100.00%)","idh":"WT","os":125.0,"scans":[{"week":"week-000-1","w":0.0,"wk":0,"rano":"PRE-OP","why":null,"e":38.71,"n":14.248,"d":50.841,"t":103.799},{"week":"week-000-2","w":0.1,"wk":0,"rano":"POST-OP","why":"PRET","e":6.659,"n":42.928,"d":55.823,"t":105.41},{"week":"week-013","w":13.0,"wk":13,"rano":"SD","why":"Less than 3 months, new target L. 19mm x 12mm, new non-measurable L., T2-Progr.","e":10.98,"n":16.682,"d":16.954,"t":44.616},{"week":"week-021","w":21.0,"wk":21,"rano":"PD","why":"T2-Progr., target L.  26mm x 19mm, new non-target L.","e":17.004,"n":17.114,"d":40.095,"t":74.213},{"week":"week-029","w":29.0,"wk":29,"rano":"PD","why":"T2-Progr., target L. 36.5mm x 18.5mm","e":16.191,"n":9.401,"d":58.221,"t":83.813},{"week":"week-037","w":37.0,"wk":37,"rano":"PR","why":"Target L. to non-target L. (>50%), T2w stable compared to previous","e":12.11,"n":4.156,"d":55.954,"t":72.22},{"week":"week-046","w":46.0,"wk":46,"rano":"PD","why":"T2-Progr., target L. to non-target L. (>50%), new non-target L.","e":6.154,"n":6.317,"d":47.807,"t":60.278},{"week":"week-055","w":55.0,"wk":55,"rano":"PD","why":"T2-Progr., new non-target L.","e":4.124,"n":6.996,"d":51.693,"t":62.813},{"week":"week-064","w":64.0,"wk":64,"rano":"PD","why":"T2-Progr., new non-target L.","e":2.432,"n":13.152,"d":47.043,"t":62.627},{"week":"week-073","w":73.0,"wk":73,"rano":"PD","why":"T2-Progr., new target L. 13mm x 11.5mm, new non-target L.","e":3.483,"n":8.428,"d":53.189,"t":65.1},{"week":"week-078","w":78.0,"wk":78,"rano":"PD","why":"T2-Progr., target L.: 14mm x 13mm, new non-target L.","e":4.447,"n":3.977,"d":58.374,"t":66.798},{"week":"week-090","w":90.0,"wk":90,"rano":"PD","why":"T2-Progr., target L. 13mm x 11mm, new non-target L.","e":3.22,"n":7.484,"d":61.093,"t":71.797},{"week":"week-105","w":105.0,"wk":105,"rano":"PD","why":"T2-Progr., target L. 13mm x 11mm, new non-target L.","e":3.187,"n":12.062,"d":57.971,"t":73.22},{"week":"week-120","w":120.0,"wk":120,"rano":null,"why":null,"e":86.387,"n":21.949,"d":123.757,"t":232.093}]},"Patient-019":{"id":"Patient-019","age":53,"sex":"male","mgmt":"methylated (na)","idh":"IDH1 neg, Sequencing required","os":186.0,"scans":[{"week":"week-005","w":5.0,"wk":5,"rano":"POST-OP","why":"PRET","e":12.194,"n":10.154,"d":33.093,"t":55.441},{"week":"week-015","w":15.0,"wk":15,"rano":"SD","why":"Less than 3 months, target L. 60mm x 26mm, T2-Progr. in the high-dose feld","e":25.998,"n":7.885,"d":23.136,"t":57.019},{"week":"week-022","w":22.0,"wk":22,"rano":"SD","why":"Less than 3 months, target L. 71mm x 41mm, T2-Progr.","e":46.781,"n":8.679,"d":104.785,"t":160.245},{"week":"week-031","w":31.0,"wk":31,"rano":"PD","why":"Target L. 57mm x 33mm","e":12.969,"n":14.37,"d":29.256,"t":56.595},{"week":"week-055","w":55.0,"wk":55,"rano":"PD","why":"T2-Progr, target L. 61mm x 35mm","e":33.714,"n":10.41,"d":70.061,"t":114.185},{"week":"week-061","w":61.0,"wk":61,"rano":"PD","why":"Target L.: 57mm x 31mm","e":24.992,"n":7.524,"d":64.969,"t":97.485},{"week":"week-075","w":75.0,"wk":75,"rano":"PR","why":"T2-Progr. stable wrt. Previous, target L. 45mm x 17mm (64% wrt. 20100824)","e":13.686,"n":3.462,"d":56.724,"t":73.872},{"week":"week-090","w":90.0,"wk":90,"rano":"PR","why":"Target L. 23mm x 13mm, T2-Progr. Stable to previous","e":6.13,"n":2.788,"d":54.097,"t":63.015},{"week":"week-117","w":117.0,"wk":117,"rano":"PR","why":"T2-Regression, target L. to non-measurable L.","e":0.695,"n":28.866,"d":31.451,"t":61.012},{"week":"week-137","w":137.0,"wk":137,"rano":"PR","why":"T2-Progr., new measurable target L. 55mm x 32mm","e":24.607,"n":5.523,"d":163.072,"t":193.202},{"week":"week-138","w":138.0,"wk":138,"rano":"PD","why":"T2-Progr., target L. 51mm x 22mm","e":13.82,"n":3.911,"d":134.531,"t":152.262},{"week":"week-141","w":141.0,"wk":141,"rano":null,"why":null,"e":2.739,"n":31.369,"d":56.099,"t":90.207},{"week":"week-150","w":150.0,"wk":150,"rano":null,"why":null,"e":4.071,"n":1.954,"d":49.297,"t":55.322}]}},"pairs":[{"key":"p71","label":"071 vs 072","A":"Patient-071","wA":"week-052","B":"Patient-072","wB":"week-029","pct":0.631911532385466,"voldiff":0.0288293299034773},{"key":"p19","label":"019 vs 072","A":"Patient-019","wA":"week-075","B":"Patient-072","wB":"week-037","pct":0.0116160208159093,"voldiff":0.0223630062811349}],"ctx":{"sens":[{"distance_percentile":1.0,"close_pairs":30,"opposed_future_pairs":9,"opposed_future_fraction":0.3,"strict_PD_vs_PRCR_pairs":5},{"distance_percentile":2.5,"close_pairs":85,"opposed_future_pairs":22,"opposed_future_fraction":0.2588235294117647,"strict_PD_vs_PRCR_pairs":11},{"distance_percentile":5.0,"close_pairs":193,"opposed_future_pairs":46,"opposed_future_fraction":0.238341968911917,"strict_PD_vs_PRCR_pairs":25},{"distance_percentile":10.0,"close_pairs":376,"opposed_future_pairs":86,"opposed_future_fraction":0.2287234042553191,"strict_PD_vs_PRCR_pairs":44},{"distance_percentile":20.0,"close_pairs":708,"opposed_future_pairs":175,"opposed_future_fraction":0.2471751412429378,"strict_PD_vs_PRCR_pairs":89},{"distance_percentile":30.0,"close_pairs":1052,"opposed_future_pairs":265,"opposed_future_fraction":0.2519011406844106,"strict_PD_vs_PRCR_pairs":135}],"pProg":0.7306397306397306,"randomOpposed":0.393610629300865,"nTransitions":297,"nStates":588,"nPatients":91,"nStrict":111,"nPairs":195,"features":1429,"pcaDims":30}};
 
@@ -520,7 +676,7 @@ function CellView(cv,seed){
   const rr=(a,b)=>a+(b-a)*R();
   this.zone='rim';this.rates={e:0,n:0,d:0};this.active=false;this.counts={div:0,die:0,mig:0};this.needLayout=true;
   let cells=[],vessels=[],debris=[],fibers=[],neurons=[],fluid=[],acc={div:0,die:0,spawn:0},time=0;
-  const TUM={mem:'255,143,199',cyt:'255,120,190'},NUC='110,150,255',NORM='150,170,200';
+  const TUM={mem:'255,95,170',cyt:'255,95,170'},NUC='110,150,255',NORM='160,205,255';
   function U(){return Math.min(cs.W,cs.H)}
   function shape(){const k=[];for(let i=0;i<4;i++)k.push({f:2+i+Math.floor(R()*2),a:rr(.03,.10)/(1+i*.4),p:rr(0,TAU),w:rr(.3,1.1)});return k}
   function procs(n){const a=[];for(let i=0;i<n;i++)a.push({ang:rr(0,TAU),len:rr(1.1,2.6),w:rr(.22,.4),bend:rr(-.5,.5)});return a}
@@ -709,10 +865,10 @@ function secPharm(d){let h='';const W=12;
   return h}
 
 function secSurg(d){const B=stateByWeek('week-156'),P=stateByWeek('week-157'),BV=vols(B),PV=vols(P),best=bestSurg(),W=12;
-  const bo=surgeryVols(B,best.g,0),b12=surgeryVols(B,best.g,W);let h='';
+  const RRr=(typeof responseRates==='function')?responseRates():null,svr=(g,t)=>surgeryVols(B,g,t,RRr?RRr.mid:null);const bo=svr(best.g,0),b12=svr(best.g,W);let h='';
   if(d&&d.trials.length){
     h+='<h3>What you did</h3>'+eventsList(d)+'<h3>Evaluation of your settings</h3><p>Starting state: week 156, progressive disease, '+fcc(BV.t)+'. Each configuration you settled on:</p>';
-    const rows=d.trials.map(t=>{const g=guardState(t.ang*Math.PI/180,t.app,t.dep);return {t,g,r0:surgeryVols(B,g,0),r12:surgeryVols(B,g,W)}});
+    const rows=d.trials.map(t=>{const g=guardState(t.ang*Math.PI/180,t.app,t.dep);return {t,g,r0:svr(g,0),r12:svr(g,W)}});
     h+=table(['Time','Extent','Depth','Approach','Path','Removed','Enhancing after','Total after','Total wk '+W],rows.map(x=>[tm(x.t.t),APP[x.t.app].name,x.t.dep.toFixed(2),x.t.ang+'°',kLab[x.g.k],Math.round(x.g.cyt*100)+'%',fv(x.r0.e),fv(x.r0.t),fv(x.r12.t)]));
     const safe=rows.filter(x=>x.g.k==='clear'),risky=rows.length-safe.length;
     if(safe.length){const my=safe.reduce((a,x)=>x.g.cyt>a.g.cyt?x:a);h+='<p><b>Your largest configuration outside high-risk zones</b> was '+APP[my.t.app].name.toLowerCase()+' at depth '+my.t.dep.toFixed(2)+' via '+my.t.ang+'°: '+Math.round(my.g.cyt*100)+'% removed. '+(my.g.cyt>=best.g.cyt-.005?'That matches the model\u2019s maximal configuration.':'The model\u2019s maximal configuration is '+Math.round(best.g.cyt*100)+'%.')+'</p>'}
@@ -755,7 +911,7 @@ function secDiv(d){if(typeof DIV_DATA==='undefined')return '<p class="muted">Dat
 function buildReport(){const S=Session.data(),now=new Date(),vis=Object.keys(DEMOS).filter(k=>S.demos[k]);
   const sec=(k,body)=>'<section><h2>'+DEMOS[k].n+'. '+DEMOS[k].title+'</h2>'+body+'</section>';
   const summary=vis.length?'Demos explored: '+vis.map(k=>DEMOS[k].n+'. '+DEMOS[k].title).join('; ')+'.':'No interactions recorded yet; reference analyses are shown.';
-  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ABP session report · Patient-067</title>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ABP session report · LUMIERE suite</title>
 <style>body{margin:0;background:#f6f8f9;color:#14212b;font:15px/1.55 "Avenir Next","Segoe UI",system-ui,sans-serif}main{max-width:900px;margin:0 auto;padding:28px 20px 60px}
 h1{font-size:26px;margin:0 0 4px;line-height:1.2}h2{font-size:20px;margin:0 0 10px;padding-top:6px}h3{font-size:15.5px;margin:22px 0 8px}
 section{background:#fff;border:1px solid #dde5ea;border-radius:12px;padding:18px 20px;margin:18px 0;break-inside:auto}
@@ -766,12 +922,12 @@ ol.log{padding-left:22px;margin:6px 0;font-size:13.5px}ol.log li{margin:3px 0}.t
 figure{margin:12px 0 0}figure img{max-width:100%;width:420px;border-radius:10px;display:block}figcaption{font-size:12px;color:#6b808c;margin-top:4px}
 .note{background:#fff8e1;border-color:#f0dfa0}.print{margin-top:10px}button{font:inherit;padding:8px 14px;border-radius:8px;border:1px solid #b9c7cf;background:#fff;cursor:pointer}
 @media print{body{background:#fff}section{border:0;padding:0;margin:14px 0}.print{display:none}.tw{overflow:visible}tr{break-inside:avoid}}</style></head><body><main>
-<h1>ABP session report · LUMIERE Patient-067</h1>
+<h1>ABP session report · LUMIERE suite</h1>
 <div class="meta">CMH Scientific · AI as a Biological Primitive demonstration<br>Session started ${esc(new Date(S.started).toLocaleString())} · report generated ${esc(now.toLocaleString())}</div>
 <p>${esc(summary)}</p><div class="print"><button onclick="print()">Print or save as PDF</button></div>
 <section class="note"><b>How to read this report.</b> Sections 1 and 5 are observed data. Sections 2–4 are modeled counterfactuals from a demonstrator with declared, literature-informed response functions and support limits; they are not fitted to this patient's treatment history and are not treatment recommendations. "Optimal" means best within the declared model, objective and support region.</section>
 ${sec('dyn',secObserved(S.demos.dyn))}${sec('pharm',secPharm(S.demos.pharm))}${sec('surg',secSurg(S.demos.surg))}${sec('opt',secOpt(S.demos.opt))}${sec('div',secDiv(S.demos.div))}
-<section><h2>Provenance</h2><p class="muted">Data: LUMIERE longitudinal glioblastoma dataset (Suter et al., Scientific Data 9:768, 2022), Patient-067; DeepBraTumIA segmentation; expert RANO ratings. 3-D views use equivalent-volume geometry (radii proportional to the cube root of each compartment volume). Research demonstration, not for clinical use.</p></section>
+<section><h2>Provenance</h2><p class="muted">Data: LUMIERE longitudinal glioblastoma dataset (Suter et al., Scientific Data 9:768, 2022). Demos 1–4 use Patient-067; Demo 5 uses observed records from Patients 071 and 072, with Patient-019 available as the second matched pair. DeepBraTumIA segmentation and expert RANO ratings are used where available. The 3-D views default to patient-specific tumor anatomy reconstructed from atlas-space segmentations and simplified for display; equivalent-volume geometry is an explicitly selectable comparison mode. Counterfactual response functions in Demos 2–4 are labeled separately from observed patient data. Research demonstration, not for clinical use.</p></section>
 </main></body></html>`}
 
 function csvReport(){const S=Session.data(),rows=[['time','demo','kind','description']];
@@ -780,10 +936,10 @@ function csvReport(){const S=Session.data(),rows=[['time','demo','kind','descrip
 function saveFile(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
 function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())}
 function mountReport(demo,canvas,beforeSnap){window.__demoKey=demo;const box=$('report');if(!box)return;
-  box.innerHTML='<h2>Session report</h2><p class="small">Everything you try in the four demos is recorded in this browser. The report explains what the data shows, what you did, how each change worked, and what the model rates as optimal.</p><button class="btn primary block" id="rep_html" style="margin-top:10px">Download report</button><div class="reprow"><button class="btn" id="rep_csv">Download data (CSV)</button><button class="btn" id="rep_new">Start new session</button></div><p class="small" id="rep_count" style="margin-top:8px"></p>';
+  box.innerHTML='<h2>Session report</h2><p class="small">Actions and settings across the five modules are recorded in this browser. The report separates observed patient data from counterfactual exploration and summarizes the controls used, support status, and comparative results.</p><button class="btn primary block" id="rep_html" style="margin-top:10px">Download report</button><div class="reprow"><button class="btn" id="rep_csv">Download data (CSV)</button><button class="btn" id="rep_new">Start new session</button></div><p class="small" id="rep_count" style="margin-top:8px"></p>';
   const count=()=>{const S=Session.data();let a=0,t=0;for(const k in S.demos){a+=S.demos[k].events.length;t+=S.demos[k].trials.length}setText($('rep_count'),a+t?a+(a===1?' action':' actions')+' and '+t+(t===1?' setting':' settings')+' recorded so far.':'Nothing recorded yet.')};
-  $('rep_html').onclick=()=>{if(beforeSnap)beforeSnap();if(canvas)Session.snap(demo,canvas);saveFile('ABP_Patient-067_report_'+stamp()+'.html',buildReport(),'text/html')};
-  $('rep_csv').onclick=()=>saveFile('ABP_Patient-067_session_'+stamp()+'.csv',csvReport(),'text/csv');
+  $('rep_html').onclick=()=>{if(beforeSnap)beforeSnap();if(canvas)Session.snap(demo,canvas);saveFile('ABP_LUMIERE_report_'+stamp()+'.html',buildReport(),'text/html')};
+  $('rep_csv').onclick=()=>saveFile('ABP_LUMIERE_session_'+stamp()+'.csv',csvReport(),'text/csv');
   $('rep_new').onclick=()=>{if(confirm('Clear everything recorded so far and start a new session?')){Session.reset();count()}};
   count();setInterval(count,2000)}
 
@@ -793,6 +949,9 @@ STATES.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.text
 let obj='enh',playing=false;
 const T3=new Tumor3D($('c'));
 function base(){return STATES[+startSel.value]}
+const grow=(f,a,b)=>{const out={};for(const [k,kk] of [['e','e'],['n','n'],['d','d']]){const x=f(a)[kk],y=f(b)[kk],m=f((a+b)/2)[kk];out[k]=m>.05?(y-x)/(b-a)/m:0}return out};
+let GEOM='observed',FILE067=null;
+loadAnatomy('Patient-067').then(f=>{FILE067=f;if(!f){GEOM='model';$('geom').style.display='none'}update()});
 function refV(b){let m=vols(b).t;for(let w=0;w<=24;w+=4)m=Math.max(m,response(b,0,0,w).t,response(b,+rt.value,+tz.value,w).t);return m}
 const SUP={supported:{cls:'ok',t:'Inside the model\u2019s range',d:'This regimen is within the region the model is built to evaluate.'},boundary:{cls:'edge',t:'At the edge of the model\u2019s range',d:''},outside:{cls:'out',t:'Outside the model\u2019s range',d:''}};
 function supReason(k,R,Z){if(k==='supported')return SUP.supported.d;const why=[];
@@ -820,7 +979,9 @@ function update(){const b=base(),bv=vols(b),R=+rt.value,Z=+tz.value,w=+wk.value,
   const sp=SUP[k];$('support').className='banner '+sp.cls;setHTML($('support'),'<b>'+sp.t+'</b>'+R+' Gy with chemotherapy exposure '+Z.toFixed(2)+'. '+supReason(k,R,Z));
   for(const key of ['e','n','d','t']){setText($('b_'+key),fv(bv[key]));setText($('r_'+key),out?'—':fv(r[key]));setText($('u_'+key),fv(u[key]))}
   setText($('nr'),out?'—':Math.round(r.nec*100)+'%');setText($('iv'),out?'—':Math.round(r.inv*100)+'%');
-  T3.set({vols:out?bv:r,refV:refV(b),scaleBar:true,fill:.30});
+  const an=GEOM==='observed'?anatFor(FILE067,b.week):null,rv=refV(b),gw=out?{e:0,n:0,d:0}:grow(x=>response(b,R,Z,x),Math.max(0,w-.25),w+.25);
+  if($('cellact'))setText($('cellact'),cellActivityText(gw));
+  T3.set({vols:out?bv:r,refV:rv,scaleBar:true,fill:an?.38*Math.cbrt(rv)/Math.max(an.parts.ede.rmax,1):.30,anatomy:an,growth:gw,anatCenter:an?an.parts.enh.c:null,anatScale:an?anatScaleFor(an.vol,out?bv:r):null});
   drawMap();drawCh()}
 function planKey(){return startSel.value+'|'+rt.value+'|'+(+tz.value).toFixed(2)}
 function recordPlan(why){const b=base(),R=+rt.value,Z=+tz.value,k=supp(R,Z),w=Math.max(+wk.value,12),r=response(b,R,Z,w),u=response(b,0,0,w);
@@ -837,5 +998,5 @@ $('obj').onclick=e=>{const b=e.target.closest('button');if(!b)return;obj=b.datas
 $('opt').onclick=()=>{const b=base(),w=Math.max(+wk.value,12);let best=null;for(let R=0;R<=84;R++)for(let j=0;j<=45;j++){const Z=j*.02;if(supp(R,Z)==='outside')continue;const s=response(b,R,Z,w),sc=obj==='enh'?s.e:s.d;if(!best||sc<best.sc-1e-9)best={R,Z,s,sc}}
   rt.value=best.R;tz.value=best.Z.toFixed(2);if(+wk.value<12)wk.value=12;update();const k=supp(best.R,best.Z);recordPlan('Ran the regimen search ('+(obj==='enh'?'enhancing volume':'edema volume')+') and applied it');
   $('optout').innerHTML='<div class="banner '+SUP[k].cls+'"><b>Optimal regimen within support: '+best.R+' Gy, exposure '+best.Z.toFixed(2)+'</b>Lowest modeled '+(obj==='enh'?'enhancing tumor':'edema')+' at week '+w.toFixed(0)+' ('+fcc(best.sc)+') among regimens the model can evaluate. '+(k==='boundary'?'This regimen is at the edge of the supported range. ':'')+'A modeled optimum, not a treatment recommendation.</div>'};
-update();Session.event('pharm','Opened demo 2');mountReport('pharm',$('c'),()=>T3.draw());
+update();$('cellkeywrap').innerHTML=cellLegendHTML();$('geomwrap').innerHTML=geomSegHTML('Observed anatomy (selected scan)');$('geom').onclick=e=>{const b=e.target.closest('button');if(!b)return;GEOM=b.dataset.g;pressSeg($('geom'),b);update();Session.event('pharm','Geometry: '+(GEOM==='observed'?'observed anatomy':'equivalent-volume model'))};Session.event('pharm','Opened demo 2');mountReport('pharm',$('c'),()=>T3.draw());
 </script></body></html>
