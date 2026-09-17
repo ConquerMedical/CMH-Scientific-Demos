@@ -303,9 +303,9 @@ function pressSeg(seg,btn){[...seg.querySelectorAll('button')].forEach(b=>b.setA
 
 /* HiDPI canvas that only reallocates when its CSS size changes */
 function fitCanvas(cv,onResize){const st={W:0,H:0,D:1,ctx:cv.getContext('2d')};
-  function apply(silent){const r=cv.getBoundingClientRect(),D=Math.min(window.devicePixelRatio||1,2),W=Math.round(r.width),H=Math.round(r.height);
+  function apply(silent){const r=cv.getBoundingClientRect(),D=Math.min(window.devicePixelRatio||1,st.maxD||2),W=Math.round(r.width),H=Math.round(r.height);
     if(W===st.W&&H===st.H&&D===st.D)return;Object.assign(st,{W,H,D});cv.width=Math.max(1,W*D);cv.height=Math.max(1,H*D);st.ctx.setTransform(D,0,0,D,0,0);if(!silent&&onResize)onResize()}
-  new ResizeObserver(()=>apply(false)).observe(cv);apply(true);return st}
+  st.refit=()=>apply(false);new ResizeObserver(()=>apply(false)).observe(cv);apply(true);return st}
 
 /* Simple line chart */
 function niceMax(v){if(v<=0)return 1;const p=Math.pow(10,Math.floor(Math.log10(v))),m=v/p;return (m<=1?1:m<=2?2:m<=2.5?2.5:m<=5?5:10)*p}
@@ -338,8 +338,8 @@ function anatFor(file,week){if(!file||!week||!file.scans[week])return null;file.
   const S=file.scans[week],parts={brain:file.brain};for(const k of ['ede','enh','nec'])if(S[k])parts[k]=S[k];if(!parts.ede||!parts.enh)return null;
   return file._cache[week]={q:file.q,parts,vol:S.vol}}
 function anatScaleFor(vol,v){const r=(x,y)=>y>0?Math.cbrt(Math.max(x,0)/y):1;return {ede:r(v.d,vol.ede),enh:r(v.e,vol.enh),nec:r(v.n,vol.nec)}}
-function cellLegendHTML(){const A=buildCellAtlas(64),it=[['div','Tumor cell, dividing'],['enh','Tumor cell'],['ede','Tumor cell, infiltrating'],['nec','Dying cell'],['hea','Healthy brain cell']];
-  return '<div class="cellkey3d"><b>Cells</b><span class="small">illustrative · ✺ switches to dots</span>'+it.map(([k,l])=>'<span><img alt="" src="'+A[k][0][k==='div'?5:0].toDataURL()+'">'+l+'</span>').join('')+'<div class="small cellact" id="cellact"></div></div>'}
+function cellLegendHTML(){const A=cellIcons(),it=[['div','Tumor cell, dividing'],['enh','Tumor cell'],['ede','Tumor cell, infiltrating'],['nec','Dying cell'],['hea','Healthy brain cell']];
+  return '<div class="cellkey3d"><b>Cells</b><span class="small">illustrative · ✺ switches to dots</span>'+it.map(([k,l])=>'<span><img alt="" src="'+A[k][k==='div'?5:0].toDataURL()+'">'+l+'</span>').join('')+'<div class="small cellact" id="cellact"></div></div>'}
 function cellActivityText(g,who){if(!g)return '';const f=v=>(v>=0?'+':'\u2212')+Math.abs(v*100).toFixed(Math.abs(v)<.1?1:0)+'%/wk';
   const e=g.e||0,n=g.n||0,d=g.d||0,p=[];
   p.push('enhancing tumor '+f(e)+(e>.005?' (more cells dividing)':e<-.005?' (more cells dying)':' (little net change)'));
@@ -351,22 +351,20 @@ function geomSegHTML(label){return '<div class="seg" id="geom" role="group" aria
 /* ---------- fluorescence-style cell sprites (illustrative) ---------- */
 const CELL_ATLAS={};
 function cellRand(seed){let x=seed>>>0||1;return()=>{x^=x<<13;x^=x>>>17;x^=x<<5;return ((x>>>0)%100000)/100000}}
-function buildCellAtlas(px){
-  if(CELL_ATLAS[px])return CELL_ATLAS[px];
-  const KINDS={enh:{mem:'255,95,170',fil:'255,150,70',hot:'255,220,170',elong:1.0},      // tumor cell
+const SPRITE_CANVASES=[];
+const CELL_KINDS={enh:{mem:'255,95,170',fil:'255,150,70',hot:'255,220,170',elong:1.0},      // tumor cell
                ede:{mem:'255,95,170',fil:'255,150,70',hot:'255,215,190',elong:2.1},      // infiltrating tumor cell
                nec:{mem:'165,155,150',fil:'120,105,95',hot:'210,200,190',elong:1.0},     // dying cell
                hea:{mem:'160,205,255',fil:'120,175,235',hot:'225,242,255',elong:1.0},    // healthy brain cell
                div:{mem:'255,95,170',fil:'255,150,70',hot:'255,235,200',elong:1.25}};    // dividing tumor cell
-  const V=6,F=8,out={};
-  for(const k in KINDS){const K=KINDS[k];out[k]=[];
-    for(let v=0;v<V;v++){const R=cellRand(97+v*131+k.length*977),frames=[];
+function cellVariant(px,k,v,F){const K=CELL_KINDS[k];
+    {const R=cellRand(97+v*131+k.length*977),frames=[];
       const harm=[0,0,0,0].map((_,i)=>({f:2+i+Math.floor(R()*2),a:(.05+R()*.08)/(1+i*.5),p:R()*TAU}));
       const fils=Array.from({length:k==='nec'?7:18},()=>({a:R()*TAU,r0:R()*.35,len:.35+R()*.55,bend:(R()-.5)*1.4,w:.6+R()*1.2}));
       const lam=Array.from({length:k==='ede'?1:2+Math.floor(R()*2)},()=>({a:R()*TAU,w:.5+R()*.5}));
       const nuc={x:(R()-.5)*.25,y:(R()-.5)*.25,r:.28+R()*.08};
       for(let f=0;f<F;f++){
-        const ph=f/F*TAU,cv=document.createElement('canvas');cv.width=cv.height=px;const g=cv.getContext('2d');
+        const ph=f/F*TAU,cv=document.createElement('canvas');cv.width=cv.height=px;SPRITE_CANVASES.push(cv);const g=cv.getContext('2d');
         const C=px/2,base=px*(k==='ede'?.19:k==='hea'?.16:k==='div'?.22:.29);g.translate(C,C);g.globalCompositeOperation='lighter';
         const pinch=k==='div'?.5-.5*Math.cos(ph):0,EL=k==='div'?1.25+.5*pinch:K.elong;
         if(k==='hea'){   // branching processes of a healthy astrocyte / neuron
@@ -410,8 +408,21 @@ function buildCellAtlas(px){
         if(k==='div'){g.fillStyle=`rgba(${K.hot},.85)`;if(pinch<=.35){g.fillRect(-base*.08,-base*.32,base*.16,base*.64)}else{for(const [nx] of nucs)g.fillRect(nx-base*.06,-base*.18,base*.12,base*.36)}}
         if(k==='nec'){g.fillStyle=`rgba(${K.hot},.35)`;for(let d=0;d<5;d++){const a=d*1.3+ph*.3,r=base*(1.05+.12*Math.sin(ph+d));g.beginPath();g.arc(Math.cos(a)*r,Math.sin(a)*r,px*.02,0,TAU);g.fill()}}
         frames.push(cv)}
-      out[k].push(frames)}}
-  CELL_ATLAS[px]=out;return out}
+      return frames}}
+function buildCellAtlas(px){if(CELL_ATLAS[px])return CELL_ATLAS[px];const out={};for(const k in CELL_KINDS){out[k]=[];for(let v=0;v<6;v++)out[k].push(cellVariant(px,k,v,8))}return CELL_ATLAS[px]=out}
+// built a few sprites at a time so the page stays responsive; the renderer draws dots until the sprites are ready
+// phones: smaller sprites, and release canvas memory when leaving a page (iOS Safari limits total canvas memory)
+const SMALL_DEVICE=(window.matchMedia&&matchMedia('(pointer:coarse)').matches)||Math.min(screen.width,screen.height)<700;
+addEventListener('pagehide',()=>{for(const c of SPRITE_CANVASES){c.width=c.height=0}SPRITE_CANVASES.length=0;for(const k in CELL_ATLAS)delete CELL_ATLAS[k];
+  for(const c of document.querySelectorAll('canvas')){c.width=c.height=0}});
+addEventListener('pageshow',e=>{if(e.persisted)location.reload()});
+const ATLAS_PENDING={},EMPTY_ATLAS={enh:[],ede:[],nec:[],hea:[],div:[]};
+function cellAtlasReady(px){if(CELL_ATLAS[px])return CELL_ATLAS[px];
+  if(!ATLAS_PENDING[px]){const P=ATLAS_PENDING[px]={out:{},q:[]};for(const k in CELL_KINDS){P.out[k]=[];for(let v=0;v<6;v++)P.q.push([k,v])}
+    const step=()=>{const t0=performance.now();do{const [k,v]=P.q.shift();P.out[k][v]=cellVariant(px,k,v,8)}while(P.q.length&&performance.now()-t0<6);
+      if(P.q.length)setTimeout(step,24);else CELL_ATLAS[px]=P.out};setTimeout(step,30)}
+  return null}
+function cellIcons(){if(cellIcons.c)return cellIcons.c;const o={};for(const k in CELL_KINDS)o[k]=cellVariant(64,k,0,8);return cellIcons.c=o}
 
 function Tumor3D(cv,opts={}){
   const cs=fitCanvas(cv,()=>this.dirty=true);this.cs=cs;
@@ -443,6 +454,7 @@ function Tumor3D(cv,opts={}){
     c.strokeStyle=color;c.lineWidth=1;c.globalAlpha=alpha*.3;c.stroke(b);c.globalAlpha=alpha;c.stroke(f);c.globalAlpha=1}
   function glow(c,cx,cy,r,rgb,a){if(r<1)return;const g=c.createRadialGradient(cx,cy,r*.05,cx,cy,r);g.addColorStop(0,`rgba(${rgb},${a})`);g.addColorStop(.6,`rgba(${rgb},${a*.5})`);g.addColorStop(1,`rgba(${rgb},0)`);c.fillStyle=g;c.beginPath();c.arc(cx,cy,r,0,TAU);c.fill()}
   this.draw=function(){const st=this.state;if(!st)return;const c=cs.ctx,W=cs.W,H=cs.H;c.clearRect(0,0,W,H);if(W<10)return;
+    if(st.loading){c.fillStyle=COL.dim;c.font='13px system-ui,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText('Loading patient anatomy\u2026',W/2,H/2);this.dirty=false;return}
     const Z=this.zoom,shiftX=(tools&&W<560&&W>=260)?-Math.min(22,W*.055):0,cx=W/2+this.panX+shiftX,cy=H*(st.cyFrac??.5)+this.panY,s=Z*Math.min(W,H)*(st.fill??.30)*(st.boost??(W<560?1.22:1.12))/Math.cbrt(Math.max(st.refV,.01));const SH=shells(Z);
     const v=st.vols,Rn=Math.cbrt(Math.max(v.n,0)),Re=Math.cbrt(Math.max(v.n+v.e,0)),Rt=Math.cbrt(Math.max(v.t,0));
     let cut=st.cut?{ax:st.cut.ax,cos:Math.cos(st.cut.h)}:null,dep=st.cut?st.cut.depth:0;
@@ -457,8 +469,8 @@ function Tumor3D(cv,opts={}){
     if(v.e>.02){glow(c,cx,cy,Re*s*1.02,'47,227,214',.10*GA);dots(c,SHD.enh,Re,s,cx,cy,COL.enh,.95*DA,sz*1.05,2.4,.9,dep>=.35?cut:null)}
     if(Rn>.02){glow(c,cx,cy,Rn*s*1.1,'255,176,58',.40*GA);dots(c,SHD.nec,Rn,s,cx,cy,COL.nec,.9*DA,sz,3.7,.7,dep>=.65?cut:null)}
     if(CM&&Rt>.02){
-      const D=cs.D||1,small=W<500,keepEvery=small?3:1;
-      const cellPx=clamp(Rt*s*(.085+.055*inside),2,520),cellA=.5+.5*inside,px=cellPx*D>90?160:64,ATL=buildCellAtlas(px);
+      const D=cs.D||1,small=W<500,keepEvery=(small?3:1)*((self._q||0)>=1?2:1);
+      const cellPx=clamp(Rt*s*(.085+.055*inside),2,520),cellA=.5+.5*inside,px=cellPx*D>130?(SMALL_DEVICE?96:160):cellPx*D>70?96:64,ATL=cellAtlasReady(px)||cellAtlasReady(64)||EMPTY_ATLAS;
       const T=this.time,list=[];
       const G=st.growth||{},bounds={enh:[Rn,Re],ede:[Re,Rt],nec:[0,Rn],hea:[Re,Rt]},seeds={enh:[2.4,.9],ede:[1.3,1],nec:[3.7,.7],hea:[1.3,1]},amp={enh:.5,ede:.62,nec:.45,hea:.5,div:.65};
       const cutOK={ede:true,hea:true,enh:dep>=.35,nec:dep>=.65};const VT=Math.max(v.t,1e-6),share={enh:clamp(3.2*v.e/VT,.08,1),nec:clamp(3*v.n/VT,.08,1),ede:clamp(1.6*Math.max(v.t-v.e-v.n,0)/VT,.15,1),hea:1};
@@ -470,10 +482,10 @@ function Tumor3D(cv,opts={}){
         const q=this.project([d[0]*R+w,d[1]*R-w,d[2]*R+w*.5],s,cx,cy);
         if(q[0]<-cellPx||q[1]<-cellPx||q[0]>W+cellPx||q[1]>H+cellPx)continue;
         list.push([q,C,R,i])}
-      list.sort((a,b)=>a[0][2]-b[0][2]);
+      list.sort((a,b)=>a[0][2]-b[0][2]);c.beginPath();
       for(const [q,C,R,ci] of list){const sk=cellState(C,ci,T,G);const depth=clamp((q[2]/Math.max(R,1e-3)+1)/2),k=1/(1-q[2]*.05);
         const size=cellPx*C.size*k*(C.kind==='nec'?.8:1)*(.8+.35*depth);if(size<1.5)continue;
-        const frames=ATL[sk][C.v],fi=cellFrame(sk,C,T,frames.length);
+        const frames=ATL[sk][C.v];if(!frames)continue;const _f=0,fi=cellFrame(sk,C,T,frames.length);
         const ang=C.spin+(REDUCED?0:T*C.spinV),co=Math.cos(ang),si=Math.sin(ang);
         c.globalAlpha=cellA*amp[sk]*(.25+.75*depth*depth);
         c.setTransform(D*co,D*si,-D*si,D*co,D*q[0],D*q[1]);
@@ -571,21 +583,24 @@ function Tumor3D(cv,opts={}){
   /* ---------- observed anatomy (real segmentation surfaces) ---------- */
   const ANAT_PARTS={};
   const decodeAnat=(A)=>{if(A._decoded)return A._decoded;const out={};
-    for(const k in A.parts){const p=A.parts[k];if(p._dec){out[k]=p._dec;continue}const vb=atob(p.v),fb=atob(p.f);
-      const vi=new Int16Array(p.n*3);for(let i=0;i<p.n*3;i++){const lo=vb.charCodeAt(2*i),hi=vb.charCodeAt(2*i+1);let x=lo|(hi<<8);if(x>32767)x-=65536;vi[i]=x}
+    for(const k in A.parts){const p=A.parts[k];if(p._dec){out[k]=p._dec;continue}
+      const vbuf=Uint8Array.from(atob(p.v),ch=>ch.charCodeAt(0)),fbuf=Uint8Array.from(atob(p.f),ch=>ch.charCodeAt(0));
+      const vi=new Int16Array(vbuf.buffer,0,p.n*3),F=new Uint16Array(fbuf.buffer,0,p.nf*3);   // little-endian, as written
       const V=new Float32Array(p.n*3);for(let i=0;i<p.n*3;i++)V[i]=vi[i]*A.q;
-      const F=new Uint16Array(p.nf*3);for(let i=0;i<p.nf*3;i++)F[i]=fb.charCodeAt(2*i)|(fb.charCodeAt(2*i+1)<<8);
-      const E=new Map();for(let f=0;f<p.nf;f++)for(let e=0;e<3;e++){const a=F[3*f+e],b=F[3*f+(e+1)%3],key=a<b?a*65536+b:b*65536+a;const x=E.get(key);if(x)x.push(f);else E.set(key,[f])}
-      const edges=[];for(const [key,fs] of E)if(fs.length===2)edges.push(Math.floor(key/65536),key%65536,fs[0],fs[1]);
-      // neighbours, then Taubin smoothing (lambda/mu) so outlines follow the anatomy without voxel noise
-      const nb=Array.from({length:p.n},()=>[]);for(const key of E.keys()){const a=Math.floor(key/65536),b=key%65536;nb[a].push(b);nb[b].push(a)}
-      const iters=k==='brain'?4:k==='ede'?8:6,tmp=new Float32Array(p.n*3);
-      for(let it=0;it<iters*2;it++){const lam=it%2===0?.5:-.53;
-        for(let i=0;i<p.n;i++){const N=nb[i];if(!N.length){tmp[3*i]=V[3*i];tmp[3*i+1]=V[3*i+1];tmp[3*i+2]=V[3*i+2];continue}let x=0,y=0,z=0;for(const j of N){x+=V[3*j];y+=V[3*j+1];z+=V[3*j+2]}x/=N.length;y/=N.length;z/=N.length;
-          tmp[3*i]=V[3*i]+lam*(x-V[3*i]);tmp[3*i+1]=V[3*i+1]+lam*(y-V[3*i+1]);tmp[3*i+2]=V[3*i+2]+lam*(z-V[3*i+2])}
-        V.set(tmp)}
+      // shared edges via a numeric sort (fast): key = lo*65536+hi, paired with its face
+      const m=p.nf*3,keys=new Float64Array(m);
+      for(let f=0;f<p.nf;f++)for(let e=0;e<3;e++){const a=F[3*f+e],b=F[3*f+(e+1)%3];keys[3*f+e]=(a<b?a*65536+b:b*65536+a)*1048576+f}
+      keys.sort();const E=[];
+      for(let q=0;q+1<m;q++){const k1=Math.floor(keys[q]/1048576),k2=Math.floor(keys[q+1]/1048576);
+        if(k1===k2){E.push(Math.floor(k1/65536),k1%65536,keys[q]%1048576,keys[q+1]%1048576);q++}}
+      if(!p.sm){   // older files: smooth here (current files are smoothed when they are built)
+        const deg=new Uint16Array(p.n),acc=new Float32Array(p.n*3);
+        const iters=k==='brain'?4:k==='ede'?8:6;
+        for(let it=0;it<iters*2;it++){const lam=it%2===0?.5:-.53;acc.fill(0);deg.fill(0);
+          for(let e=0;e<E.length;e+=4){const a=E[e],b=E[e+1];deg[a]++;deg[b]++;for(let d=0;d<3;d++){acc[3*a+d]+=V[3*b+d];acc[3*b+d]+=V[3*a+d]}}
+          for(let v=0;v<p.n;v++){if(!deg[v])continue;for(let d=0;d<3;d++)V[3*v+d]+=lam*(acc[3*v+d]/deg[v]-V[3*v+d])}}}
       const FC=new Float32Array(p.nf*3);for(let t=0;t<p.nf;t++)for(let a=0;a<3;a++)FC[3*t+a]=(V[3*F[3*t]+a]+V[3*F[3*t+1]+a]+V[3*F[3*t+2]+a])/3;
-      out[k]=p._dec={V,F,FC,n:p.n,nf:p.nf,c:p.c,rmax:p.rmax,edges:Int32Array.from(edges),fx:new Float32Array(p.nf),fy:new Float32Array(p.nf),fz:new Float32Array(p.nf),fh:new Uint8Array(p.nf),sx:new Float32Array(p.n),sy:new Float32Array(p.n),sz:new Float32Array(p.n),hid:new Uint8Array(p.n),fs:new Int8Array(p.nf)}}
+      out[k]=p._dec={V,F,FC,n:p.n,nf:p.nf,c:p.c,rmax:p.rmax,edges:Int32Array.from(E),fx:new Float32Array(p.nf),fy:new Float32Array(p.nf),fz:new Float32Array(p.nf),fh:new Uint8Array(p.nf),sx:new Float32Array(p.n),sy:new Float32Array(p.n),sz:new Float32Array(p.n),hid:new Uint8Array(p.n),fs:new Int8Array(p.nf)}}
     return A._decoded=out};
   this._drawAnatomy=function(c,st,W,H,Z,cx,cy,s,cut,dep,sz){
     const A=decodeAnat(st.anatomy),scale=st.anatScale||{},T=this.time,CM=this.style==='cells',inside=clamp((Z-1.2)/1.8,0,1),OF=st.anatCenter||[0,0,0];
@@ -593,7 +608,7 @@ function Tumor3D(cv,opts={}){
     const cutFor={ede:true,enh:dep>=.35,nec:dep>=.65,brain:false};
     const COLS={ede:['190,150,255',COL.ede],enh:['90,245,232',COL.enh],nec:['255,190,90',COL.nec],brain:['150,170,190','#8ea0b4']};
     const order=['brain','ede','enh','nec'];
-    for(const k of order){const P=A[k];if(!P)continue;const f=k==='brain'?1:(scale[k]??1);if(f<=0.02)continue;
+    for(const k of order){const P=A[k];if(!P||(k==='brain'&&(this._q||0)>=2))continue;const f=k==='brain'?1:(scale[k]??1);if(f<=0.02)continue;
       const cxk=P.c[0],cyk=P.c[1],czk=P.c[2],useCut=cut&&cutFor[k];
       const cyw=Math.cos(this.yaw),syw=Math.sin(this.yaw),cpw=Math.cos(this.pitch),spw=Math.sin(this.pitch);
       const projAll=(SRC,n,OX,OY,OZ,OH)=>{for(let i=0;i<n;i++){let x=SRC[3*i],y=SRC[3*i+1],z=SRC[3*i+2];
@@ -608,7 +623,7 @@ function Tumor3D(cv,opts={}){
         P.fs[t]=((P.sx[b]-P.sx[a])*(P.sy[d]-P.sy[a])-(P.sy[b]-P.sy[a])*(P.sx[d]-P.sx[a]))>=0?1:-1}
       const [rgb,col]=COLS[k],R=Math.max(P.rmax*f,.01);
       // surface dots
-      const small=W<500,dotA=(k==='brain'?.22:k==='ede'?.55:.8)*DA,step=(k==='brain'?2:1)*(small?2:1),dz=clamp(sz*(k==='brain'?.8:1)*(small?1.2:1),.8,3);
+      const QL=this._q||0,small=W<500||QL>=1,dotA=(k==='brain'?.22:k==='ede'?.55:.8)*DA,step=(k==='brain'?2:1)*(small?2:1)*(QL>=2?2:1),dz=clamp(sz*(k==='brain'?.8:1)*(small?1.2:1),.8,3);
       c.globalCompositeOperation='lighter';c.fillStyle=col;
       const dotsOf=(SX,SY,SZ,SH,n,st2)=>{for(let i=0;i<n;i+=st2){if(SH[i])continue;const X=SX[i],Y=SY[i];if(X<-8||Y<-8||X>W+8||Y>H+8)continue;
         const depth=clamp((SZ[i]/R+1)/2);c.globalAlpha=dotA*(.15+.85*depth*depth);const zz=dz*(.7+.6*depth);c.fillRect(X-zz/2,Y-zz/2,zz,zz)}};
@@ -621,8 +636,8 @@ function Tumor3D(cv,opts={}){
       const fadeIn=CM?1-.72*inside:1,la=(k==='brain'?.25:k==='ede'?.5:.95)*fadeIn,lw=(k==='brain'?1:k==='enh'?1.8:k==='ede'?1:1.4)*(CM?1-.35*inside:1);
       if(!small){c.strokeStyle=`rgba(${rgb},${la*.22})`;c.lineWidth=lw*4;c.stroke()}c.strokeStyle=`rgba(${rgb},${la})`;c.lineWidth=lw;c.stroke()}
     // illustrative cells placed on the real compartments
-    if(CM&&A.enh){const D=cs.D||1,small=W<500,keepEvery=small?3:1,list=[];
-      const G=st.growth||{},cellPx=clamp(A.enh.rmax*s*(.05+.13*inside),2,Math.min(W,H)*.11),cellA=.5+.5*inside,px=cellPx*D>90?160:64,ATL=buildCellAtlas(px),amp={enh:.42,ede:.5,nec:.42,hea:.5,div:.55};
+    if(CM&&A.enh){const D=cs.D||1,small=W<500,keepEvery=(small?3:1)*((self._q||0)>=1?2:1),list=[];
+      const G=st.growth||{},cellPx=clamp(A.enh.rmax*s*(.05+.13*inside),2,Math.min(W,H)*.11),cellA=.5+.5*inside,px=cellPx*D>130?(SMALL_DEVICE?96:160):cellPx*D>70?96:64,ATL=cellAtlasReady(px)||cellAtlasReady(64)||EMPTY_ATLAS,amp={enh:.42,ede:.5,nec:.42,hea:.5,div:.55};
       for(let i=0;i<CELLS.length;i+=keepEvery){const C=CELLS[i],P=A[C.kind==='hea'?'ede':C.kind];if(!P)continue;const f=scale[C.kind==='hea'?'ede':C.kind]??1;if(f<=.05||C.h>(f>1?1:Math.max(.15,f)))continue;
         const vi=Math.floor(C.dir[0]*1e6+C.dir[1]*7e5+C.dir[2]*3e5)>>>0;const j=vi%P.n;if(P.hid[j])continue;
         const mg=C.kind==='ede'?(()=>{const x=T*.03*(1+8*Math.max(0,G.d||0))+C.off;return .2*(x-Math.floor(x))})():0;
@@ -630,15 +645,27 @@ function Tumor3D(cv,opts={}){
         const w=.012*Math.sin(T*C.wobV*1.3+C.wob*2)*A.enh.rmax;
         const x=P.c[0]+(P.c[0]+(P.V[3*j]-P.c[0])*f-P.c[0])*pull+w,y=P.c[1]+(P.c[1]+(P.V[3*j+1]-P.c[1])*f-P.c[1])*pull-w,z=P.c[2]+(P.c[2]+(P.V[3*j+2]-P.c[2])*f-P.c[2])*pull;
         const q=this.project([x-OF[0],y-OF[1],z-OF[2]],s,cx,cy);if(q[0]<-cellPx||q[1]<-cellPx||q[0]>W+cellPx||q[1]>H+cellPx)continue;list.push([q,C,P.rmax,i])}
-      list.sort((a,b)=>a[0][2]-b[0][2]);c.globalCompositeOperation='lighter';
+      list.sort((a,b)=>a[0][2]-b[0][2]);c.beginPath();c.globalCompositeOperation='lighter';
       for(const [q,C,R,ci] of list){const sk=cellState(C,ci,T,G),depth=clamp((q[2]/Math.max(R,1e-3)+1)/2),size=cellPx*C.size*(sk==='nec'?.8:sk==='hea'?.9:1)*(.8+.35*depth);if(size<1.5)continue;
-        const frames=ATL[sk][C.v],fi=cellFrame(sk,C,T,frames.length),ang=C.spin+(REDUCED?0:T*C.spinV),co=Math.cos(ang),si=Math.sin(ang);
+        const frames=ATL[sk][C.v];if(!frames)continue;const _f=0,fi=cellFrame(sk,C,T,frames.length),ang=C.spin+(REDUCED?0:T*C.spinV),co=Math.cos(ang),si=Math.sin(ang);
         c.globalAlpha=cellA*amp[sk]*(.25+.75*depth*depth);c.setTransform(D*co,D*si,-D*si,D*co,D*q[0],D*q[1]);c.drawImage(frames[fi],-size/2,-size/2,size,size)}
       c.setTransform(cs.D||1,0,0,cs.D||1,0,0);c.globalAlpha=1;c.globalCompositeOperation='source-over'}
   };
   let visible=true,lastTs=0;new IntersectionObserver(es=>{visible=es[0].isIntersecting}).observe(cv);
-  const loop=ts=>{const dt=lastTs?Math.min(.05,(ts-lastTs)/1000):0;lastTs=ts;
-    if(visible&&!document.hidden){this.time+=dt;if(this.style==='cells'&&!REDUCED&&(cs.W>=500||ts-(this._lastCellDraw||0)>=32)){this.dirty=true;this._lastCellDraw=ts}if(this.auto&&!down&&ts-lastInteract>2500){this.yaw+=dt*.22;this.dirty=true}if(this.tick)this.tick(dt);if(this.dirty)this.draw()}
+  const loop=ts=>{const raw=lastTs?ts-lastTs:0,dt=lastTs?Math.min(.05,raw/1000):0;lastTs=ts;
+    if(visible&&!document.hidden){this.time+=dt;const q=this._q||0,gap=q>=2?66:q>=1||cs.W<500?32:0;
+      if(this.style==='cells'&&!REDUCED&&q<2&&ts-(this._lastCellDraw||0)>=gap){this.dirty=true;this._lastCellDraw=ts}
+      if(this.auto&&!down&&ts-lastInteract>2500){this.yaw+=dt*.22;this.dirty=true}if(this.tick)this.tick(dt);
+      if(this.dirty&&ts-(this._lastDraw||0)>=gap){this.draw();this._lastDraw=ts}
+      // quality governor: the time between animation frames includes drawing, painting and anything else blocking the page.
+      // Slow frames step quality down (fewer dots and cells, lower frame rate, lower canvas resolution) so taps stay responsive.
+      const Hs=this._dts||(this._dts=[]);
+      if(raw>0&&raw<1000&&performance.now()>2500){Hs.push(raw);if(Hs.length>30)Hs.shift()}
+      if(Hs.length>=24){const med=[...Hs].sort((a,b)=>a-b)[Hs.length>>1];this._cost=med;
+        if(med>q*20+45&&q<2){this._q=q+1;Hs.length=0;this._ok=0;const soon=ts-(this._up||-1e9)<20000;this._fails=soon?(this._fails||0)+1:0;this._cool=ts+8000*Math.pow(2,Math.min(this._fails,5))}
+        else if(q>0&&ts>(this._cool||0)&&med<(q>=2?72:38)){this._ok=(this._ok||0)+1;if(this._ok>120){this._q=q-1;this._ok=0;Hs.length=0;this._up=ts;this._cool=ts+8000}}
+        else this._ok=0;
+        if((this._q||0)!==q){cs.maxD=[2,1.5,1.25][this._q||0];cs.refit();this.dirty=true}}}
     requestAnimationFrame(loop)};
   requestAnimationFrame(loop);
 }
@@ -937,9 +964,9 @@ figure{margin:12px 0 0}figure img{max-width:100%;width:420px;border-radius:10px;
 <h1>ABP session report · LUMIERE suite</h1>
 <div class="meta">CMH Scientific · AI as a Biological Primitive demonstration<br>Session started ${esc(new Date(S.started).toLocaleString())} · report generated ${esc(now.toLocaleString())}</div>
 <p>${esc(summary)}</p><div class="print"><button onclick="print()">Print or save as PDF</button></div>
-<section class="note"><b>How to read this report.</b> Sections 1 and 5 are observed data. Sections 2–4 are modeled counterfactuals from a demonstrator with declared, literature-informed response functions and support limits; they are not fitted to this patient's treatment history and are not treatment recommendations. "Optimal" means best within the declared model, objective and support region.</section>
+<section class="note"><b>How to read this report.</b> Sections 1 and 5 are observed data. Sections 2–4 are modeled explorations from a demonstrator with declared, literature-informed response functions and support limits; they are not fitted to this patient's treatment history and are not treatment recommendations. "Optimal" means best within the declared model, objective and support region.</section>
 ${sec('dyn',secObserved(S.demos.dyn))}${sec('pharm',secPharm(S.demos.pharm))}${sec('surg',secSurg(S.demos.surg))}${sec('opt',secOpt(S.demos.opt))}${sec('div',secDiv(S.demos.div))}
-<section><h2>Provenance</h2><p class="muted">Data: LUMIERE longitudinal glioblastoma dataset (Suter et al., Scientific Data 9:768, 2022). Demos 1–4 use Patient-067; Demo 5 uses observed records from Patients 071 and 072, with Patient-019 available as the second matched pair. DeepBraTumIA segmentation and expert RANO ratings are used where available. The 3-D views default to patient-specific tumor anatomy reconstructed from atlas-space segmentations and simplified for display; equivalent-volume geometry is an explicitly selectable comparison mode. Counterfactual response functions in Demos 2–4 are labeled separately from observed patient data. Research demonstration, not for clinical use.</p></section>
+<section><h2>Provenance</h2><p class="muted">Data: LUMIERE longitudinal glioblastoma dataset (Suter et al., Scientific Data 9:768, 2022). Demos 1–4 use Patient-067; Demo 5 uses observed records from Patients 071 and 072, with Patient-019 available as the second matched pair. DeepBraTumIA segmentation and expert RANO ratings are used where available. The 3-D views default to patient-specific tumor anatomy reconstructed from atlas-space segmentations and simplified for display; equivalent-volume geometry is an explicitly selectable comparison mode. Modeled exploratory response functions in Demos 2–4 are labeled separately from observed patient data. Research demonstration, not for clinical use.</p></section>
 </main></body></html>`}
 
 function csvReport(){const S=Session.data(),rows=[['time','demo','kind','description']];
@@ -948,7 +975,7 @@ function csvReport(){const S=Session.data(),rows=[['time','demo','kind','descrip
 function saveFile(name,text,type){const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
 function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())}
 function mountReport(demo,canvas,beforeSnap){window.__demoKey=demo;const box=$('report');if(!box)return;
-  box.innerHTML='<h2>Session report</h2><p class="small">Actions and settings across the five modules are recorded in this browser. The report separates observed patient data from counterfactual exploration and summarizes the controls used, support status, and comparative results.</p><button class="btn primary block" id="rep_html" style="margin-top:10px">Download report</button><div class="reprow"><button class="btn" id="rep_csv">Download data (CSV)</button><button class="btn" id="rep_new">Start new session</button></div><p class="small" id="rep_count" style="margin-top:8px"></p>';
+  box.innerHTML='<h2>Session report</h2><p class="small">Actions and settings across the five modules are recorded in this browser. The report separates observed patient data from modeled exploration and summarizes the controls used, support status, and comparative results.</p><button class="btn primary block" id="rep_html" style="margin-top:10px">Download report</button><div class="reprow"><button class="btn" id="rep_csv">Download data (CSV)</button><button class="btn" id="rep_new">Start new session</button></div><p class="small" id="rep_count" style="margin-top:8px"></p>';
   const count=()=>{const S=Session.data();let a=0,t=0;for(const k in S.demos){a+=S.demos[k].events.length;t+=S.demos[k].trials.length}setText($('rep_count'),a+t?a+(a===1?' action':' actions')+' and '+t+(t===1?' setting':' settings')+' recorded so far.':'Nothing recorded yet.')};
   $('rep_html').onclick=()=>{if(beforeSnap)beforeSnap();if(canvas)Session.snap(demo,canvas);saveFile('ABP_LUMIERE_report_'+stamp()+'.html',buildReport(),'text/html')};
   $('rep_csv').onclick=()=>saveFile('ABP_LUMIERE_session_'+stamp()+'.csv',csvReport(),'text/csv');
