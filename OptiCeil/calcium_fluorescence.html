@@ -124,7 +124,7 @@ details.method ul{margin:8px 0 0;padding-left:18px}details.method li{margin:4px 
 }
 @media (prefers-reduced-motion:reduce){.caption{transition:none}}
 </style>
-</head>
+<link rel="stylesheet" href="../cmh-main-menu-v1.css"></head>
 <body>
 <header class="bar">
   <div class="brand"><b>CMH Scientific</b> · OptiCeil · calcium imaging</div>
@@ -439,7 +439,7 @@ figure{margin:12px 0 0}figure img{max-width:100%;width:420px;border-radius:10px;
 <section class="note"><b>How to read this report.</b> OptiCeil asks how long to keep imaging after a spike to reach a stated share of the best attainable performance, and flags when imaging longer makes the answer worse. Demo 2 uses the reported stop points; demo 1 is a parametric sandbox. The recoverability index is comparative, not an absolute physical ceiling (CEILING_UNRESOLVED).</section>
 ${sec('design',ocSecDesign(S.demos.design))}${sec('firing',ocSecFiring(S.demos.firing))}
 <section><h2>Provenance and related work</h2><p class="muted">Published values: Ewing, "Information arrival sets the minimum acquisition time in calcium imaging," Research Square, 2026, doi:10.21203/rs.3.rs-10898326/v1 — CASCADE paired fluorescence/electrophysiology ground truth (Rupprecht et al., Nature Neuroscience 2021), 914 segments, 312 neurons, neuron-disjoint discovery and held-out validation, 30 Hz. The study is retrospective: no microscope was reconfigured. Related observations: spike inference can approach its best performance with only a few frames after an event, and GCaMP8's fast rise supports real-time detection (Rupprecht et al., Nature Methods 2026). GFP: Nobel Prize in Chemistry 2008; GCaMP: Nakai, Ohkura &amp; Imoto, 2001. Research demonstration.</p></section>
-</main></body></html>`}
+</main><script src="../cmh-main-menu-v1.js"></script></body></html>`}
 function ocCSV(){const S=OCSession.data(),rows=[['time','demo','kind','description']];
   for(const k of Object.keys(OC_DEMOS)){const d=S.demos[k];if(!d)continue;for(const e of d.events)rows.push([e.t,OC_DEMOS[k].title,'action',e.text]);for(const t of d.trials){const {t:tt,key,...r}=t;rows.push([tt,OC_DEMOS[k].title,'setting',JSON.stringify(r)])}for(const o of d.opts){const {t:tt,...r}=o;rows.push([tt,OC_DEMOS[k].title,'optimization',JSON.stringify(r)])}}
   const hd=rows.shift();rows.sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0);rows.unshift(hd);return rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n')}
